@@ -338,6 +338,8 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 .head{max-width:560px;margin:0 auto;padding:8px 16px 10px;display:flex;flex-direction:column;gap:8px}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px}
 .brand h1{margin:0;font-size:1.05rem;font-weight:700;display:flex;align-items:baseline;gap:8px;white-space:nowrap;min-width:0}
+.brandbtn{display:flex;align-items:baseline;gap:8px;padding:2px 6px;margin:0 -6px;border-radius:8px;font-weight:inherit;color:inherit;min-width:0}
+.brandbtn:hover{background:var(--head-soft)}
 .brand h1 span{font-family:var(--f-fidel);font-size:1.35rem;color:var(--head-ink)}
 .brand h1 em{font-style:normal;color:var(--head-muted);font-weight:600}
 .tools{display:flex;align-items:center;gap:6px;min-width:0}
