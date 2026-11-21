@@ -187,6 +187,7 @@ const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filt
 const S = {bs:{mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
   fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
   kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
+S.ls=JSON.parse(JSON.stringify(LS_DEF));
 S.pf={add:"",ren:null,del:false,code:"",msg:"",inText:"",inErr:"",incoming:null};
 /* Saved progress lives in the current profile (see profiles.js). */
 const BS_DEF=JSON.stringify(S.bs);
@@ -200,10 +201,11 @@ function applyData(d){
   S.day=typeof d.day==="string"?d.day:"";
   S.kb.hints=d.kbhints!==false;
   sayRate=SAY_RATES.includes(+d.rate)?+d.rate:1;
+  S.ls=Object.assign({},LS_DEF,d.listen&&typeof d.listen==="object"?d.listen:{});
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -425,6 +427,7 @@ function qFidType(){
   return {type:"type",kind:"Fidel · type it",big:f.snd,sub:"Type the letter for this sound",answer:f.ch};
 }
 function topic(id){
+  if(id.startsWith("lis-")) return lsTopic(id);
   if(id==="fid-rec") return {name:"Recognise letters",desc:"See a letter, pick its sound, and the reverse",gen:qFidRec};
   if(id==="fid-type") return {name:"Type letters",desc:"Read a sound, type the letter",gen:qFidType};
   if(id==="fid-words") return {name:"Type words",desc:`Spell words from units 1–${LASTF} in fidel`,gen:()=>qTypeWord(lessonWords(FULL),"Type the word")};
@@ -499,7 +502,8 @@ function dailyQs(){
   const N=upto(), done=FULL.filter(n=>n<=N), recent=done.slice(-5), sp=SENT.filter(x=>x.l<=N), vp=verbPool(N);
   const lessonQ=ns=>()=>qLesson(ns), verbQ=typed=>()=>{ if(!vp.length) return qLesson(recent); const x=pick(vp); return typed?qVerbType(x[0],x[1]):qVerb(x[0],x[1]); };
   const sentQ=order=>()=>sp.length?(order?qOrder(sp):qSentMean(sp)):qLesson(done);
-  const gens=[()=>qNumWord(N<11?10:100),qFidRec,qFidType,qFidRec,lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(done),lessonQ(done),lessonQ(done),verbQ(0),verbQ(0),verbQ(1),sentQ(1),()=>N>=8?qBuildVerb(N):qLesson(done),sentQ(0)];
+  const lis=g=>()=>g(N)||qLesson(recent);
+  const gens=[lis(qListenMean),lis(qListenWord),()=>qNumWord(N<11?10:100),qFidRec,qFidType,qFidRec,lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(done),lessonQ(done),lessonQ(done),verbQ(0),verbQ(0),verbQ(1),sentQ(1),()=>N>=8?qBuildVerb(N):qLesson(done),sentQ(0)];
   const qs=shuffle(S.miss).slice(0,4).map(m=>fresh(m.q)), seen=new Set(qs.map(qKey));
   gens.push(...Array(20).fill(lessonQ(done)));
   for(const g of gens){ if(qs.length>=20) break; let n=0; while(n++<30){const q=g(), k=qKey(q); if(!seen.has(k)){seen.add(k);qs.push(q);break;}} }
@@ -516,7 +520,7 @@ function startQuiz(id){
   if(id==="miss") qs=shuffle(S.miss).slice(0,QN).map(m=>fresh(m.q));
   else if(id==="daily") qs=dailyQs();
   else{ const seen=new Set(), t=topic(id); let guard=0;
-    while(qs.length<QN&&guard++<300){const q=t.gen(), key=qKey(q); if(!seen.has(key)){seen.add(key);qs.push(q);}} }
+    while(qs.length<QN&&guard++<300){const q=t.gen(); if(!q) break; const key=qKey(q); if(!seen.has(key)){seen.add(key);qs.push(q);}} }
   if(!qs.length) return;
   S.quiz={id,qs,n:qs.length,i:0,score:0,picked:null,typed:"",built:[],result:null,misses:[],done:false,slot:null};
   S.kb.cons=null;
@@ -525,6 +529,7 @@ function testMenu(){
   const item=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
   let h=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
    <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button></div>
+   ${lsMenu()}
    <h3>Fidel</h3><div class="stack">${["fid-rec","fid-type","fid-words"].map(item).join("")}</div>
    <h3>Units</h3><div class="stack">${LESSONS.map(l=>item((l.review?"R":"L")+l.n)).join("")}${item("Lall")}</div>
    <h3>Numbers</h3><div class="stack">${NTESTS.map(item).join("")}</div>
@@ -581,6 +586,8 @@ function renderTest(){
     let h=`<div class="score"><div class="count">${esc(tp.name)}</div><div class="n">${Q.score}/${QN}</div><p style="margin:6px auto">${msg}</p></div>`;
     if(Q.misses.length){h+=`<h3>To review</h3><div class="tbl">`;
       Q.misses.forEach(m=>{const q=m.q, am=q.type!=="mc"||q.optAm, rom=q.type!=="mc"?q.rom:q.opts[q.ans].r;
+        if(q.listen){ h+=`<div class="miss">🔊 <span class="am">${esc(q.listen)}</span>`+(q.heardRom?` <span class="rom">${esc(q.heardRom)}</span>`:"")+(q.heardEn?` · ${esc(q.heardEn)}`:"")+
+          `<br><span class="count">You ${q.type==="type"?"typed":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`; return; }
         h+=`<div class="miss"><span class="${q.bigAm?"am":""}">${esc(q.big)}</span> → <b class="${am?"am":""}">${esc(qAns(q))}</b>`+(rom?` <span class="rom">${esc(rom)}</span>`:"")+
            `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"?"built":q.type==="slot"?"also tried":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
       h+=`</div>`;}
@@ -589,7 +596,7 @@ function renderTest(){
   const q=Q.qs[Q.i], answered=q.type==="mc"?Q.picked!==null:Q.result!==null;
   let h=`<div class="prog"><i style="width:${(Q.i+(answered?1:0))/QN*100}%"></i></div>
    <div class="bar" style="margin:0"><span class="count">Question ${Q.i+1} of ${QN}</span><button class="link" data-act="quit">End test</button></div>
-   <div class="q ${q.type==="type"?"slim":""}"><div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered?"nosay":""}">${esc(q.big)}</div><div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div></div>`;
+   <div class="q ${q.type==="type"&&!q.listen?"slim":""} ${q.listen?"lsq":""}">`+(q.listen?lsHead(q,answered):`<div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered?"nosay":""}">${esc(q.big)}</div><div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div>`)+`</div>`;
   let ok;
   if(q.type==="type"){
     h+=kbHTML(Q); ok=Q.result==="ok";
@@ -679,6 +686,8 @@ function render(){
   const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#app").innerHTML = S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():renderTest();
   addSayButtons($("#app"));
+  // listening questions play by themselves, once, when they first appear
+  const Q=S.quiz; if(S.mode==="test"&&Q&&!Q.done){const q=Q.qs[Q.i]; if(q.listen&&Q.heard!==Q.i){Q.heard=Q.i; playAm(q.listen);}}
 }
 const typing = () => (S.mode==="test"&&S.quiz&&!S.quiz.done&&S.quiz.qs[S.quiz.i].type==="type") ? S.quiz : (S.mode==="fidel"&&S.ftab==="type") ? S.prac : null;
 function check(){
@@ -703,6 +712,7 @@ document.addEventListener("change",e=>{
   else if(id==="vsearch"){render();}
   else if(id==="upto"){S.upto=+val;save();render();}
   else if(id==="pf-infile"&&e.target.files[0]){const f=e.target.files[0]; f.text().then(readIncoming,()=>{S.pf.inErr="Couldn't read that file.";render();});}
+  else if(id==="ls-upto"){S.ls.upto=+val;save();render();}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();}
@@ -711,6 +721,7 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
+  if(a==="say-slow"){playAm(v,lsSlow());return;}
   if(a==="rom"){S.rom=!S.rom;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
   else if(a==="mode"){S.mode=v;top=true; if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
@@ -769,6 +780,8 @@ document.addEventListener("click",e=>{
   else if(a==="o-rem"&&Q&&Q.result===null){Q.built.splice(+v,1);}
   else if(a==="o-check"&&Q&&Q.result===null){const q=Q.qs[Q.i], said=Q.built.map(j=>q.tiles[j]).join(" "); Q.result=canon(said)===canon(q.answer)?"ok":"no"; if(Q.result==="ok")Q.score++; else Q.misses.push({q,p:said}); record(q,Q.result==="ok");}
   else if(a==="s-pick"&&Q&&Q.result===null&&Q.slot){slotPick(Q,+v);}
+  else if(a==="ls-hint"&&Q){Q.hint=Q.i;}
+  else if(a==="ls-what"){S.ls.what=v;save();}
   else if(a==="bs-open"){S.bsOpen=!S.bsOpen;}
   else if(a==="bs-mode"){S.bs.mode=v;bsChanged();}
   else if(a==="bs-n"){S.bs.n=+v;bsChanged();}
