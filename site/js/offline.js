@@ -29,7 +29,8 @@ const OFF = {ok: false, ready: false, have: null, total: 0, busy: false, done: 0
 const offInstalled = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 const offIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const offAndroid = () => /Android/i.test(navigator.userAgent);
-const offClipURLs = () => Object.values(AUDIO_FILES).map(c => new URL("audio/" + c.split("/").map(encodeURIComponent).join("/"), location.href).href);
+// Women's voice clips, plus men's voice clips (dialogues) when the app has them.
+const offClipURLs = () => [...new Set([...Object.values(AUDIO_FILES), ...Object.values(window.AUDIO_MALE || {})])].map(c => new URL("audio/" + c.split("/").map(encodeURIComponent).join("/"), location.href).href);
 const offMB = n => Math.max(1, Math.round(n * 12.5 / 1024));   // clips average about 12.5 KB
 const offStore = {get(){ try { return localStorage.getItem(OFF_TIP_KEY); } catch (e) { return "x"; } }, set(){ try { localStorage.setItem(OFF_TIP_KEY, "1"); } catch (e) {} }};
 function offRefresh(){ if (typeof render === "function" && typeof S !== "undefined" && S.mode === "me") render(); }
@@ -89,7 +90,7 @@ function offlineHTML(){
   let h = `<h3 id="offline">Use it as a phone app, without signal</h3><div class="note">` + offInstallSteps();
   if (!OFF.ok) return h + `<p class="count">Saving for offline needs the app opened from its web address (not from a file) in an up to date browser.</p></div>`;
   h += `<p style="margin-top:12px"><b>${OFF.ready ? "✓ The app is saved on this device" : "Saving the app on this device…"}</b>${OFF.ready ? ". It will open and work with no signal." : ""}</p>`;
-  const n = OFF.total || Object.keys(AUDIO_FILES).length;
+  const n = OFF.total || offClipURLs().length;
   if (!n) return h + `</div>`;
   const left = OFF.have == null ? n : n - OFF.have;
   h += `<p style="margin-top:12px"><b>Audio:</b> `;
