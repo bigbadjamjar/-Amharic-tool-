@@ -72,10 +72,22 @@ PUNCT_COUNT = re.compile(r"[።፣፤፥፦፧?!.,;:]")
 GENERATED = AUDIO / "generated.json"
 
 
+# A few rare Fidel letters make the voice return an empty clip. On their own they are sent
+# as a common spelling of the same sound instead (the clip keeps the letter's own name).
+TTS_LETTER = {
+    "ቈ": "ቅወ", "ቊ": "ቅዊ", "ቌ": "ቅዌ", "ቍ": "ቅው",
+    "ኈ": "ህወ", "ኊ": "ህዊ", "ኌ": "ህዌ", "ኍ": "ህው",
+    "ኰ": "ክወ", "ኲ": "ክዊ", "ኴ": "ክዌ", "ኵ": "ክው",
+    "ጐ": "ግወ", "ጒ": "ግዊ", "ጔ": "ግዌ", "ጕ": "ግው",
+    "ሢ": "ሲ", "ኆ": "ሆ",
+}
+
+
 def to_tts(text: str) -> str:
     """The exact text sent to the voice."""
-    t = "".join(TTS_PUNCT.get(c, c) for c in text)
-    if len(t) == 1:
+    lone = len(text) == 1
+    t = "".join(TTS_PUNCT.get(c, c) for c in TTS_LETTER.get(text, text))
+    if lone:
         t += "."   # a lone syllable, said on its own rather than run into silence
     t = re.sub(r"\s*([.,;:?!])\s*", r"\1 ", t)   # no space before a mark, one after
     return re.sub(r"\s+", " ", t).strip()

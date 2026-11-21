@@ -23,6 +23,7 @@ function renderWelcome(){
   const c = wlCounts(), back = PROF.list().length > 0 && wlStore.get();
   const feat = (icon, title, text) => `<div class="wlfeat"><span class="wlicon nosay" aria-hidden="true">${icon}</span><div><b>${title}</b><small>${text}</small></div></div>`;
   return `<section class="wlhero">
+      <p class="wlname">Amharic App</p>
       <p class="wlhi"><span class="am">ሰላም!</span> <span class="rom">selam</span></p>
       <h2>Learn everyday Amharic, one small step at a time</h2>
       <p class="lead">A free practice app for reading, hearing and speaking Amharic, the main language of Ethiopia. It works on your phone or computer, needs no account, and keeps your progress on your own device.</p>

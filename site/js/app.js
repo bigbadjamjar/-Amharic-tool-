@@ -290,8 +290,8 @@ function renderLesson(l){
 function fidelChart(){
   const p=FID.find(f=>f.ch===S.pick)||FID[0], r=FR[p.row];
   const ordName=p.ord<7?["1st","2nd","3rd","4th","5th","6th","7th"][p.ord]+" order":p.ord===7?"“wa” form":"rounded form";
-  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter${Object.keys(AUDIO_FILES).length?" to hear it":""}.</p>
-   <div class="peek"><span class="am">${p.ch}</span><div><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}${p.ord===5?" · also the bare consonant":""}</small></div></div>
+  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter to see it up close${Object.keys(AUDIO_FILES).length?", then press ▶ to hear it":""}.</p>
+   <div class="peek"><span class="am nosay">${p.ch}</span><div><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}${p.ord===5?" · also the bare consonant":""}</small></div>${sayBtn(p.ch,"pk")}</div>
    <div class="chartbox"><table class="chart"><tr><th></th>${VOW.map(v=>`<th>${v}</th>`).join("")}<th>wa</th></tr>`;
   FR.forEach(r=>{
     h+=`<tr><td>${r[1]||"–"}</td>`+r.forms.map(f=>`<td><button data-act="pick" data-v="${f.ch}" aria-pressed="${f.ch===S.pick}">${f.ch}</button></td>`).join("");
@@ -730,7 +730,7 @@ function render(){
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
-  const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
+  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
   $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest());
   addSayButtons($("#app"));
@@ -805,7 +805,7 @@ document.addEventListener("click",e=>{
   else if(a==="lesson-go"){S.mode="course";S.lesson=+v;S.lview="notes";top=true;}
   else if(a==="lview"){S.lview=v;}
   else if(a==="ftab"){S.ftab=v;top=true;}
-  else if(a==="pick"){S.pick=v; if(clipFor(v)) playAm(v);}
+  else if(a==="pick"){S.pick=v;}   // just shows the letter; its ▶ button plays it
   else if(a==="rtab"){S.rtab=v;top=true;}
   else if(a==="cat"){S.cat=v;}
   else if(a==="eview"){S.eview=v;}
