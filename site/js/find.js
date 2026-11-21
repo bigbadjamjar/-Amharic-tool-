@@ -102,7 +102,7 @@ function renderFind(){
     <input id="findq" class="sel findq" type="search" placeholder="English, Amharic or transcription" value="${esc(S.find.q)}" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Search">
     <div id="findres">${findResultsHTML()}</div>`;
 }
-function findRefresh(){ const r = document.getElementById("findres"); if(r){ r.innerHTML = findResultsHTML(); addSayButtons(r); } }
+function findRefresh(){ const r = document.getElementById("findres"); if(r){ r.innerHTML = findResultsHTML(); autoRom(r); addSayButtons(r); } }
 // Go to where a result is taught, and point it out.
 function findGo(v){
   const [j, k] = String(v).split(".").map(Number), e = FIND_LAST[j]; if(!e) return;
