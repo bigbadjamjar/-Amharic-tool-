@@ -126,5 +126,55 @@ const DIALOGUES = [
   ["A","ቅዳሜ መሥራት አለብኝ። እሑድ እችላለሁ።","qidamé mesrat allebbign. ihud ichilallehu","On Saturday I have to work. On Sunday I can."],
   ["B","እሺ፣ እሑድ እንሂድ። ቡናም እንጠጣ!","ishi, ihud innihid. bunnam innit'et'a!","OK, let's go on Sunday. And let's have coffee too!"],
   ["A","በእርግጥ! ጠዋት እንገናኝ።","be'irgit'! t'ewat innigenagn","Of course! Let's meet in the morning."],
-  ["B","እሺ፣ እሑድ ጠዋት እንገናኝ። ቻው!","ishi, ihud t'ewat innigenagn. chaw!","OK, see you on Sunday morning. Bye!"]]}
+  ["B","እሺ፣ እሑድ ጠዋት እንገናኝ። ቻው!","ishi, ihud t'ewat innigenagn. chaw!","OK, see you on Sunday morning. Bye!"]]},
+
+{"l":16,"title":"What did you do yesterday?","scene":"Hanna asks Tom how he spent his day.",
+ "who":{"A":{"name":"Hanna","am":"ሃና","g":"f"},"B":{"name":"Tom","am":"ቶም","g":"m"}},
+ "lines":[
+  ["A","ትናንት ምን አደረግህ?","tinant min aderregih?","What did you do yesterday?"],
+  ["B","ጠዋት ተነሥቼ ቡና ጠጣሁ። ከዚያ ወደ ገበያ ሄጄ ሙዝ ገዛሁ።","t'ewat tenesché bunna t'et'ahu. keziya wede gebeya héjé muz gezzahu","In the morning I got up and drank coffee. Then I went to the market and bought bananas."],
+  ["A","ማታስ?","matas?","And in the evening?"],
+  ["B","ማታ ሲኒማ ሄጄ ፊልም አየሁ።","mata sinima héjé film ayyehu","In the evening I went to the cinema and saw a film."],
+  ["A","ከዚያ በኋላስ?","keziya behwalas?","And after that?","Check -ስ “and…?” on ከዚያ በኋላ."],
+  ["B","ከዚያ በኋላ ቤት ተመልሼ ተኛሁ።","keziya behwala bét temelsé tegnahu","After that I came back home and went to sleep."]]},
+
+{"l":17,"title":"Can you help me?","scene":"Sara needs a friend's phone number and asks Dawit.",
+ "who":{"A":{"name":"Sara","am":"ሳራ","g":"f"},"B":{"name":"Dawit","am":"ዳዊት","g":"m"}},
+ "lines":[
+  ["A","ዳዊት፣ እባክህ እርዳኝ።","dawit, ibakih irdagn","Dawit, please help me."],
+  ["B","እሺ፣ ምን ልርዳሽ?","ishi, min lirdash?","OK, how can I help you?","ልርዳሽ (“let me help you”, to a woman) is not taught; check the form."],
+  ["A","ዮናስን ታውቀዋለህ?","yonasin tawqewalleh?","Do you know Yonas?"],
+  ["B","አዎ፣ ትናንት አየሁት።","awo, tinant ayyehut","Yes, I saw him yesterday."],
+  ["A","ቁጥሩን ስጠኝ፣ እባክህ።","qut'irun sit'egn, ibakih","Give me his number, please."],
+  ["B","እሺ፣ መልእክት እልክልሻለሁ።","ishi, meliikt ilkillishallehu","OK, I'll send you a message.","Check the form እልክልሻለሁ “I'll send (it) to you (f)”."]]},
+
+{"l":18,"title":"Why didn't you come?","scene":"Yonas missed Meron at class yesterday.",
+ "who":{"A":{"name":"Yonas","am":"ዮናስ","g":"m"},"B":{"name":"Meron","am":"ሜሮን","g":"f"}},
+ "lines":[
+  ["A","ትናንት ለምን አልመጣሽም?","tinant lemin almet'ashim?","Why didn't you come yesterday?"],
+  ["B","ስለታመምኩ ቤት ቀረሁ።","siletammemku bét qerrehu","I stayed at home because I was ill."],
+  ["A","አሁን ደህና ነሽ? ነገ ትመጫለሽ?","ahun dehna nesh? nege timech'allesh?","Are you all right now? Will you come tomorrow?"],
+  ["B","ጊዜ ካለኝ እመጣለሁ።","gizé kallegn imet'allehu","If I have time, I'll come."],
+  ["A","ዝናብ ከዘነበስ?","zinab kezennebes?","And if it rains?","Check -ስ “and…?” on an “if” clause."],
+  ["B","ዝናብ ከዘነበ እደውልልሃለሁ።","zinab kezennebe idewilillihallehu","If it rains, I'll ring you."]]},
+
+{"l":19,"title":"Who's that?","scene":"At a family party, Abebe asks Hanna who people are.",
+ "who":{"A":{"name":"Abebe","am":"አበበ","g":"m"},"B":{"name":"Hanna","am":"ሃና","g":"f"}},
+ "lines":[
+  ["A","ጥቁር ሸሚዝ የለበሰው ሰው ማን ነው?","t'iqur shemiz yelebbesew sew man new?","Who is the man in the black shirt?"],
+  ["B","እሱ ወንድሜ ነው። ባንክ ውስጥ ይሠራል።","issu wendimé new. bank wist' yiseral","He's my brother. He works in a bank."],
+  ["A","ሰማያዊ ቀሚስ የለበሰችውስ?","semayawi qemis yelebbesechiws?","And the woman in the blue dress?","Check -ስ on የለበሰችው with no noun after it."],
+  ["B","እሷ አስተማሪዬ ናት።","isswa astemariyé nat","She's my teacher."],
+  ["A","ትናንት የመጣችው ሴት የት አለች?","tinant yemet'achiw sét yet allech?","Where is the woman who came yesterday?"],
+  ["B","ዛሬ አልመጣችም። ታማለች።","zaré almet'achim. tammalech","She didn't come today. She's ill.","Check ታማለች for “she is ill”."]]},
+
+{"l":21,"title":"The shop is closed","scene":"Seble and Tom drive to the shops.",
+ "who":{"A":{"name":"Seble","am":"ሰብለ","g":"f"},"B":{"name":"Tom","am":"ቶም","g":"m"}},
+ "lines":[
+  ["A","መኪናውን እዚህ አቁም።","mekinawin izzih aqum","Park the car here."],
+  ["B","እሺ። ሱቁ ተከፍቷል?","ishi. suqu tekeftwal?","OK. Is the shop open?","Check ተከፍቷል for “it is open”, by analogy with ተዘግቷል."],
+  ["A","አይ፣ ሱቁ ተዘግቷል።","ay, suqu tezegtwal","No, the shop is closed."],
+  ["B","መቼ ይከፈታል?","meché yikkefetal?","When does it open?"],
+  ["A","ከሰዓት በኋላ ይከፈታል።","kese'at behwala yikkefetal","It opens in the afternoon."],
+  ["B","እሺ። ቤት ሄደን ሻይ እናፍላ።","ishi. bét héden shay innafla","OK. Let's go home and make some tea.","Check እናፍላ “let's make (tea)”."]]}
 ];
