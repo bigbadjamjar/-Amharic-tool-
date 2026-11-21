@@ -1,13 +1,13 @@
 {
-  "name": "Amharic Practice",
-  "short_name": "Amharic",
+  "name": "Amharic App",
+  "short_name": "Amharic App",
   "description": "Learn Amharic: a course, the Fidel, numbers, verb tables, tests and listening practice.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f6f3",
-  "theme_color": "#0f6b54",
+  "background_color": "#f6f4ef",
+  "theme_color": "#2f4f57",
   "lang": "en",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

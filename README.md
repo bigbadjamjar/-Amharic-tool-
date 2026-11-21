@@ -1,4 +1,4 @@
-# Amharic Practice
+# Amharic App
 
 A phone-friendly app for learning Amharic: a course, the Fidel chart with typing practice, a numbers trainer,
 conjugation tables for every verb, and tests. It is a plain web page with no build step.
