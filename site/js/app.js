@@ -222,6 +222,8 @@ const ri=n=>Math.floor(Math.random()*n);
 const pick=a=>a[ri(a.length)];
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
 const A=(am,rom)=>`<span class="am">${esc(am)}</span>`+(rom?`<span class="rom">${esc(rom)}</span>`:"");
+// Table titles write the transcription in plain text ("ሰበረ sebbere, break", "ቤት (bét)"): mark it so the switch hides it.
+const ttl=s=>esc(s).replace(/^([\u1200-\u137C ]+) ([^,]+),/,'<span class="am">$1</span> <span class="rom">$2</span>,').replace(/([\u1200-\u137C]+) \(([^)]+)\)/g,'<span class="am">$1</span> <span class="rom">$2</span>');
 const fmt=s=>esc(s).replace(/\{([^|}]+)\|([^}]*)\}/g,(_,a,r)=>`<span class="am">${a}</span> <span class="rom">${r}</span>`);
 const chips=(act,items,sel)=>`<div class="chips">`+items.map(([v,l])=>`<button class="chip" data-act="${act}" data-v="${v}" aria-selected="${String(v)===String(sel)}">${l}</button>`).join("")+`</div>`;
 const mini=(act,items,sel)=>`<div class="mini">`+items.map(([v,l])=>`<button data-act="${act}" data-v="${v}" aria-selected="${v===sel}">${l}</button>`).join("")+`</div>`;
@@ -271,8 +273,8 @@ function renderLesson(l){
     l.notes.forEach(nt=>{
       h+=`<div class="note"><h4>${esc(nt.h)}</h4>`+nt.p.map(p=>`<p>${fmt(p)}</p>`).join("")+`</div>`;
       if(nt.pron){h+=`<div class="grid2" style="margin-top:10px">`+PR.concat(POLITE).map(p=>`<div class="pcard">${A(p.am,p.rom)}<span class="en">${esc(p.en)}</span></div>`).join("")+`</div>`;}
-      (nt.show||[]).concat(nt.tables||[]).forEach(k=>{h+=`<h3>${esc(T[k].title)} <small>· ${esc(T[k].ex)}</small></h3>`+tableHTML(T[k]);});
-      (nt.parts||[]).forEach(k=>{h+=`<h3>${esc(PARTS[k].title)}</h3>`+partsHTML(PARTS[k]);});
+      (nt.show||[]).concat(nt.tables||[]).forEach(k=>{h+=`<h3>${ttl(T[k].title)} <small>· ${ttl(T[k].ex)}</small></h3>`+tableHTML(T[k]);});
+      (nt.parts||[]).forEach(k=>{h+=`<h3>${ttl(PARTS[k].title)}</h3>`+partsHTML(PARTS[k]);});
     });
   }else if(S.lview==="words"){
     h+=wordList(l.vocab);
@@ -360,7 +362,7 @@ function renderFidel(){
 /* ---------- reference ---------- */
 function refPronouns(){
   let h=`<h2>Pronouns</h2><div class="grid2" style="margin-top:10px">`+PR.concat(POLITE).map(p=>`<div class="pcard">${A(p.am,p.rom)}<span class="en">${esc(p.en)}</span></div>`).join("")+`</div>`;
-  for(const k of ["be","alla","have","poss"]) h+=`<h3>${esc(T[k].title)} <small>· ${esc(T[k].ex)}</small></h3>`+tableHTML(T[k]);
+  for(const k of ["be","alla","have","poss"]) h+=`<h3>${ttl(T[k].title)} <small>· ${ttl(T[k].ex)}</small></h3>`+tableHTML(T[k]);
   return h;
 }
 function refExtra(){
@@ -733,6 +735,7 @@ function render(){
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
   $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest());
+  autoRom($("#app"));
   addSayButtons($("#app"));
   // listening questions play by themselves, once, when they first appear
   const Q=S.quiz; if(S.mode==="test"&&Q&&!Q.done){const q=Q.qs[Q.i]; if(q.listen&&Q.heard!==Q.i){Q.heard=Q.i; playAm(q.listen);}}
