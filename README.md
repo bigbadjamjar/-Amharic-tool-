@@ -57,7 +57,11 @@ python3 tools/make_audio.py --voice male    # Ameha instead
 python3 tools/make_audio.py --only "ቡና" "ሻይ"
 ```
 
-It never overwrites an existing clip unless you pass `--redo`, so hand-made clips are safe.
+Clips it makes are recorded in `site/audio/generated.json` with the exact text spoken; if that text changes in the app
+(a comma added, a word fixed), the next run remakes them. Clips you add yourself are never listed there, so they are never replaced.
+
+**Punctuation matters for the sound.** End statements with `።`, use `፣` for a comma and `፤` for a semicolon. The script
+turns these into the Latin marks the voice pauses on.
 Without a clip, the app falls back to the browser's own Amharic voice where one exists (rare).
 
 ## Content status

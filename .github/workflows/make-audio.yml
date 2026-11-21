@@ -2,7 +2,8 @@ name: Make audio clips
 
 # Press "Run workflow" on the Actions tab. It makes a clip for every Amharic word and sentence
 # that doesn't have one yet, saves them in site/audio/clips, and republishes the site.
-# Clips already there (including ones you made yourself) are never replaced.
+# Clips it made before are remade if their text in the app has changed (e.g. punctuation fixed).
+# Clips you added yourself are never replaced.
 on:
   workflow_dispatch:
     inputs:
@@ -58,10 +59,11 @@ jobs:
           git add site/audio
           if git diff --cached --quiet; then echo "No new clips."; exit 0; fi
           n=$(git diff --cached --name-only --diff-filter=A -- site/audio/clips | wc -l)
+          m=$(git diff --cached --name-only --diff-filter=M -- site/audio/clips | wc -l)
           git -c user.name="github-actions[bot]" -c user.email="41898099+github-actions[bot]@users.noreply.github.com" \
-            commit -q -m "Add $n audio clips"
+            commit -q -m "Audio: $n new clips, $m remade"
           git push
-          echo "Saved $n new clips." >> "$GITHUB_STEP_SUMMARY"
+          echo "Saved $n new clips and remade $m whose text had changed." >> "$GITHUB_STEP_SUMMARY"
 
       # A push made by a workflow doesn't start other workflows, so start the deploy directly.
       - name: Republish the site

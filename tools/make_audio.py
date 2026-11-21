@@ -10,17 +10,20 @@
     python3 tools/make_audio.py --from words.txt   # one phrase per line
 
 Clips are saved to site/audio/clips/<the Amharic>.mp3 and the manifest is rebuilt.
-Existing clips are never overwritten unless you pass --redo, so clips you made yourself
-(for example on ttsfree.com) are safe: just name them the same way and drop them in.
+Clips this script made are listed in site/audio/generated.json with the exact text spoken.
+If that text changes in the app (say, a comma is added), the clip is remade. Clips you made
+yourself (for example on ttsfree.com) are not in that list and are never replaced, unless you
+pass --redo-all. Just name them the same way and drop them in.
 Needs an internet connection. edge-tts uses Microsoft Edge's online read-aloud service,
 which is free but unofficial and could change.
 """
 import argparse
 import asyncio
+import json
 import re
 import sys
 import time
-from audio_common import CLIPS, ETHIOPIC, SITE, existing_clips, normalize
+from audio_common import AUDIO, CLIPS, ETHIOPIC, SITE, existing_clips, normalize
 from audio_manifest import write_manifest
 
 VOICES = {"female": "am-ET-MekdesNeural", "male": "am-ET-AmehaNeural"}
@@ -52,13 +55,43 @@ def phrases_from_data(course_only: bool = False) -> list:
     return [s for s in found if "✗" not in s]
 
 
+# The voice pauses reliably on Latin punctuation, so Ethiopic marks are swapped for their
+# Latin equivalents in what is sent to it (the app keeps showing the Ethiopic ones).
+TTS_PUNCT = {"።": ".", "፣": ",", "፤": ";", "፥": ":", "፦": ":", "፧": "?", "፨": ".", "፡": " "}
+PUNCT_COUNT = re.compile(r"[።፣፤፥፦፧?!.,;:]")
+GENERATED = AUDIO / "generated.json"
+
+
+def to_tts(text: str) -> str:
+    """The exact text sent to the voice."""
+    t = "".join(TTS_PUNCT.get(c, c) for c in text)
+    t = re.sub(r"\s*([.,;:?!])\s*", r"\1 ", t)   # no space before a mark, one after
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def load_generated() -> dict:
+    try:
+        return json.loads(GENERATED.read_text(encoding="utf-8")).get("clips", {})
+    except FileNotFoundError:
+        return {}
+
+
+def save_generated(clips: dict) -> None:
+    GENERATED.write_text(json.dumps({
+        "_about": "Clips made automatically by tools/make_audio.py: file key -> the exact text sent to the voice. "
+                  "When the text in the app changes, these are remade. Clips not listed here (e.g. ones you add "
+                  "yourself) are never replaced.",
+        "clips": dict(sorted(clips.items())),
+    }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+
 async def make(text: str, voice: str, rate: str) -> None:
     import edge_tts  # imported here so --list works without it
 
     out = CLIPS / f"{normalize(text)}.mp3"
     tmp = out.with_suffix(".part")
     try:
-        await edge_tts.Communicate(text, voice, rate=rate).save(str(tmp))
+        await edge_tts.Communicate(to_tts(text), voice, rate=rate).save(str(tmp))
         if tmp.stat().st_size == 0:
             raise RuntimeError("empty clip")
         tmp.replace(out)
@@ -73,7 +106,8 @@ def main() -> None:
     ap.add_argument("--only", nargs="+", help="make just these phrases")
     ap.add_argument("--from", dest="src", help="text file with one phrase per line")
     ap.add_argument("--list", action="store_true", help="show what would be made, make nothing")
-    ap.add_argument("--redo", action="store_true", help="replace clips that already exist")
+    ap.add_argument("--redo", action="store_true", help="remake every automatically made clip, even if its text is unchanged")
+    ap.add_argument("--redo-all", action="store_true", help="remake every clip, INCLUDING ones you added yourself")
     ap.add_argument("--limit", type=int, default=0, help="stop after this many clips")
     ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences")
     a = ap.parse_args()
@@ -86,19 +120,35 @@ def main() -> None:
         wanted = phrases_from_data(a.course_only)
 
     have = existing_clips()
-    todo, seen = [], set()
+    made = load_generated()
+
+    # One clip per key. Where the same words appear more than once (a word list and a sentence, say),
+    # use the most fully punctuated version, since that is what tells the voice where to pause.
+    best, order = {}, []
     for text in wanted:
         key = normalize(text)
-        if not key or key in seen or (key in have and not a.redo):
+        if not key:
             continue
-        seen.add(key)
-        todo.append(text)
+        if key not in best:
+            order.append(key)
+            best[key] = text
+        elif len(PUNCT_COUNT.findall(text)) > len(PUNCT_COUNT.findall(best[key])):
+            best[key] = text
+
+    todo, remake = [], 0
+    for key in order:
+        text = best[key]
+        if key not in have:
+            todo.append(text)
+        elif a.redo_all or (key in made and (a.redo or made[key] != to_tts(text))):
+            todo.append(text)
+            remake += 1
     if a.limit:
         todo = todo[: a.limit]
 
-    print(f"{len(todo)} clips to make ({len(have)} already exist)")
+    print(f"{len(todo)} clips to make, {remake} of them remakes ({len(have)} exist, {len(made)} made automatically)")
     if a.list:
-        print("\n".join(todo))
+        print("\n".join(f"{t}   ->   {to_tts(t)}" for t in todo))
         return
 
     voice = VOICES.get(a.voice, a.voice)
@@ -108,7 +158,8 @@ def main() -> None:
         for attempt in (1, 2, 3):
             try:
                 asyncio.run(make(text, voice, a.rate))
-                print(f"[{i}/{len(todo)}] {text}")
+                made[normalize(text)] = to_tts(text)
+                print(f"[{i}/{len(todo)}] {to_tts(text)}")
                 break
             except Exception as e:  # keep going; network hiccups are common
                 if attempt == 3:
@@ -116,6 +167,9 @@ def main() -> None:
                     print(f"[{i}/{len(todo)}] FAILED {text}: {e}", file=sys.stderr)
                 else:
                     time.sleep(2 * attempt)
+        if i % 25 == 0:
+            save_generated(made)
+    save_generated(made)
     print(f"done, {failed} failed; manifest lists {write_manifest()} clips")
 
 

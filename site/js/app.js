@@ -452,7 +452,7 @@ const qAns = q => q.type==="mc"?q.opts[q.ans].l:q.answer;
 const qKey = q => q.type+"|"+q.big+"|"+qAns(q);
 /* sentences */
 const sentOf = ns => SENT.filter(x=>ns.includes(x.l));
-const sWords = x => x.am.replace(/[?!]/g,"").split(" ");
+const sWords = x => x.am.replace(/[?!።፣፤]/g,"").split(" ").filter(Boolean);
 function qOrder(pool,kind){
   const long=pool.filter(x=>sWords(x).length>=3); if(!long.length) return qSentMean(pool,kind);
   const x=pick(long), w=sWords(x); let tiles=shuffle(w.slice()), g=0;
