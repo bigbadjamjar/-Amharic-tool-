@@ -54,8 +54,11 @@ function addSayButtons(root){
   root.querySelectorAll(".am").forEach(el=>{
     if(el.closest("button,.say,.nosay")) return;
     const am = el.textContent;
-    if(!canSay(am) || el.querySelector(".say") || (el.nextElementSibling && el.nextElementSibling.classList.contains("say"))) return;
+    const nx = el.nextElementSibling;
+    if(!canSay(am) || el.querySelector(".say") || (nx && (nx.classList.contains("say") || nx.classList.contains("sbtns")))) return;
     // a word on a line of its own gets the button beside it, not on the next line
-    el.insertAdjacentHTML(getComputedStyle(el).display==="block" ? "beforeend" : "afterend", sayBtn(am));
+    // inside a list marked .canrec, a 🎙 record-yourself button follows (recorder.js)
+    const mic = el.closest(".canrec") && typeof micBtn==="function" ? micBtn(am) : "";
+    el.insertAdjacentHTML(getComputedStyle(el).display==="block" ? "beforeend" : "afterend", mic ? `<span class="sbtns">${sayBtn(am)}${mic}</span>` : sayBtn(am));
   });
 }

@@ -264,3 +264,41 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .offtip{max-width:560px;margin:10px auto 0;padding:10px 12px;display:flex;align-items:center;gap:10px;background:var(--tint);border-radius:10px;font-size:.9rem;width:calc(100% - 32px)}
 .offtip span{flex:1}
 .offx{font-size:1.3rem;line-height:1;color:var(--muted);padding:0 4px}
+/* search (js/find.js) */
+.findbtn{display:flex;align-items:center;justify-content:center;width:34px;height:30px;border-radius:8px;color:var(--muted)}
+.findbtn[aria-pressed="true"]{background:var(--tint);color:var(--accent)}
+.findq{width:100%;font-size:1.05rem;padding:12px 14px;margin:10px 0 8px}
+.findlist .frow{grid-template-columns:1fr}
+.frow .form .am{display:inline;font-size:1.3rem}
+.frow .rom{display:block}
+.fen{display:block;font-weight:500;margin-top:2px}
+.fplaces{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:4px;font-size:.85rem}
+.hit{animation:hit 2.2s ease-out}
+@keyframes hit{0%,40%{background:var(--tint);box-shadow:0 0 0 3px var(--gold)}100%{box-shadow:0 0 0 3px transparent}}
+/* record yourself (js/recorder.js) */
+.mic{display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;margin:0 .15em;border-radius:50%;background:var(--tint);color:var(--bad);font-size:.85rem;line-height:1;vertical-align:middle;flex:none}
+.findback{display:block;margin-bottom:2px}
+.bigbtns{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:10px}
+.bigbtns .say.big{margin:0}
+.bigbtns .mic{width:2.6em;height:2.6em;font-size:1.05rem;margin:0}
+.recsheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 24px rgba(0,0,0,.18);border-radius:16px 16px 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom))}
+.recsheet[hidden]{display:none}
+.rsinner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.rshead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.rshead>div{display:flex;flex-direction:column;min-width:0}
+.rshead .am{font-size:1.6rem;line-height:1.25}
+.rshead .en{color:var(--muted);font-size:.9rem}
+.rsx{font-size:1.7rem;line-height:1;color:var(--muted);padding:0 6px}
+.recbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;font-size:1.05rem}
+.recbtn i{width:14px;height:14px;border-radius:50%;background:var(--bad)}
+.recbtn.going{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.recbtn.going i{border-radius:3px;animation:recpulse 1s infinite}
+@keyframes recpulse{50%{opacity:.35}}
+.rsplay{display:flex;gap:8px;flex-wrap:wrap}
+.rsplay .btn{flex:1 1 auto;padding:10px}
+.rsplay .btn.on{border-color:var(--accent);color:var(--accent)}
+body.recopen main{padding-bottom:240px}
+.am .mic{font-family:var(--f-body);font-size:max(.5em,.8rem);margin-left:.1em}
+@media (max-width:380px){ .brand{gap:6px} .brand .tools{gap:5px} .findbtn{width:28px} .whobtn{max-width:5.5rem} }
+.sbtns{white-space:nowrap}
+@media (max-width:400px){ .canrec .vrow .en{max-width:8.5rem} }
