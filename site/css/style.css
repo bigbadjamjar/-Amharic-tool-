@@ -177,7 +177,6 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .ntry input{flex:1;min-width:0;font:inherit;font-size:1.3rem;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
 .keys.npad{grid-template-columns:repeat(5,1fr)}
 .keys.npad button{font-size:1.5rem}.keys.npad .fn{font-size:.9rem}
-@media(max-width:350px){.seg button{font-size:.78rem}}
 .ncard .sym.am{font-size:2.2rem;line-height:1.2}
 /* audio */
 .say{display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;margin:0 .25em;border-radius:50%;background:var(--tint);color:var(--accent);font-size:.72rem;line-height:1;vertical-align:middle;flex:none}
@@ -298,7 +297,8 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .pgkey{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--muted)}
 .pgkey span{display:inline-flex;align-items:center;gap:5px}
 .pgkey i{width:12px;height:12px;border-radius:3px;background:var(--line);display:inline-block}
-@media(max-width:400px){.seg button{font-size:.76rem}}
+/* narrow phones: each tab only as wide as its word needs, so long names (Numbers, Progress) don't touch their neighbours */
+@media(max-width:400px){.seg{display:flex}.seg button{flex:1 1 auto;font-size:.76rem;padding:8px 1px}}
 /* welcome page (js/welcome.js) */
 body.welcoming .offtip{display:none}
 .wlhero{margin-top:18px;padding:22px 18px 18px;border-radius:16px;background:var(--tint);text-align:center}
