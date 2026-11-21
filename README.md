@@ -41,11 +41,17 @@ leaving out punctuation — `ሰላም.mp3`, `እንደምን ነህ.mp3` — an
 GitHub website (Add file → Upload files). The deploy workflow rebuilds the clip list, so nothing else needs editing.
 To see it locally before pushing, run `python3 tools/audio_manifest.py`.
 
-**Making clips in bulk** with Microsoft's free Amharic neural voices:
+**Making clips automatically on GitHub** (nothing to install): open the repo's **Actions** tab, pick
+**Make audio clips** on the left, press **Run workflow**, choose which words and which voice, and press the green
+**Run workflow** button. It takes from a few minutes to about an hour, saves the new clips into `site/audio/clips/` and
+republishes the site. Run it again any time new words are added; it only makes clips that are missing.
+
+**Making clips in bulk on your own computer** with the same free Microsoft Amharic voices:
 
 ```bash
 pip install edge-tts
 python3 tools/make_audio.py --list          # see what's missing
+python3 tools/make_audio.py --course-only   # just the course words and sentences
 python3 tools/make_audio.py                 # make them all (female voice, Mekdes)
 python3 tools/make_audio.py --voice male    # Ameha instead
 python3 tools/make_audio.py --only "ቡና" "ሻይ"

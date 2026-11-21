@@ -5,6 +5,7 @@
     python3 tools/make_audio.py                 # every word and sentence that has no clip yet
     python3 tools/make_audio.py --voice male    # use the male voice (am-ET-AmehaNeural)
     python3 tools/make_audio.py --list          # only show what would be made
+    python3 tools/make_audio.py --course-only   # just the course words and sentences
     python3 tools/make_audio.py --only "ሰላም" "ቡና"
     python3 tools/make_audio.py --from words.txt   # one phrase per line
 
@@ -18,6 +19,7 @@ import argparse
 import asyncio
 import re
 import sys
+import time
 from audio_common import CLIPS, ETHIOPIC, SITE, existing_clips, normalize
 from audio_manifest import write_manifest
 
@@ -25,19 +27,29 @@ VOICES = {"female": "am-ET-MekdesNeural", "male": "am-ET-AmehaNeural"}
 STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
 
-def phrases_from_data() -> list:
-    """Every quoted string in the data files that starts with Amharic script."""
+# Course words and sentences first, so a partial run still covers what matters most.
+ORDER = ["course.js", "sentences.js", "tables.js", "vocab.js", "verbs.js"]
+LATIN = re.compile(r"[A-Za-z]")
+
+
+def phrases_from_data(course_only: bool = False) -> list:
+    """Every quoted string in the data files that is Amharic only (no Latin letters)."""
+    files = sorted((SITE / "js" / "data").glob("*.js"), key=lambda f: (ORDER.index(f.name) if f.name in ORDER else 99, f.name))
+    files = [f for f in files if f.name != "fidel.js"]  # single letters, not words
+    if course_only:
+        files = [f for f in files if f.name in ("course.js", "sentences.js")]
     found = []
-    for f in sorted((SITE / "js" / "data").glob("*.js")):
-        for m in STRING.finditer(f.read_text(encoding="utf-8")):
+    for f in files:
+        text = f.read_text(encoding="utf-8")
+        for m in STRING.finditer(text):
             s = m.group(1)
-            if s and ETHIOPIC.match(s):
+            if s and ETHIOPIC.match(s) and not LATIN.search(s):
                 found.append(s)
         # notes write examples as {fidel|transcription}
-        for m in re.finditer(r"\{([^|}]+)\|", f.read_text(encoding="utf-8")):
-            if ETHIOPIC.match(m.group(1)):
+        for m in re.finditer(r"\{([^|}]+)\|", text):
+            if ETHIOPIC.match(m.group(1)) and not LATIN.search(m.group(1)):
                 found.append(m.group(1))
-    return found
+    return [s for s in found if "✗" not in s]
 
 
 async def make(text: str, voice: str, rate: str) -> None:
@@ -63,6 +75,7 @@ def main() -> None:
     ap.add_argument("--list", action="store_true", help="show what would be made, make nothing")
     ap.add_argument("--redo", action="store_true", help="replace clips that already exist")
     ap.add_argument("--limit", type=int, default=0, help="stop after this many clips")
+    ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences")
     a = ap.parse_args()
 
     if a.only:
@@ -70,7 +83,7 @@ def main() -> None:
     elif a.src:
         wanted = [l.strip() for l in open(a.src, encoding="utf-8") if l.strip()]
     else:
-        wanted = phrases_from_data()
+        wanted = phrases_from_data(a.course_only)
 
     have = existing_clips()
     todo, seen = [], set()
@@ -92,12 +105,17 @@ def main() -> None:
     CLIPS.mkdir(parents=True, exist_ok=True)
     failed = 0
     for i, text in enumerate(todo, 1):
-        try:
-            asyncio.run(make(text, voice, a.rate))
-            print(f"[{i}/{len(todo)}] {text}")
-        except Exception as e:  # keep going; network hiccups are common
-            failed += 1
-            print(f"[{i}/{len(todo)}] FAILED {text}: {e}", file=sys.stderr)
+        for attempt in (1, 2, 3):
+            try:
+                asyncio.run(make(text, voice, a.rate))
+                print(f"[{i}/{len(todo)}] {text}")
+                break
+            except Exception as e:  # keep going; network hiccups are common
+                if attempt == 3:
+                    failed += 1
+                    print(f"[{i}/{len(todo)}] FAILED {text}: {e}", file=sys.stderr)
+                else:
+                    time.sleep(2 * attempt)
     print(f"done, {failed} failed; manifest lists {write_manifest()} clips")
 
 
