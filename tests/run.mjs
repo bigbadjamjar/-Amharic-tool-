@@ -8,10 +8,10 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "site
 // Same order as the <script> tags in site/index.html, minus the browser-only files.
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
-  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder)\.js$/.test(f));
+  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex};", ctx);
+  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -144,6 +144,32 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   const fresh = Y.makeProfiles(Y.memoryStore()); ok(fresh.list().length === 0 && fresh.cur() === null, "a new device starts with no profiles");
 }
 
+// --- spaced repetition: boxes, due dates, streaks, and moving old progress across
+{
+  const D = 20000, st = X.srsEmpty();
+  X.srsAnswer(st, "w:ሰላም", true, D); ok(st.it["w:ሰላም"][0] === 1 && st.it["w:ሰላም"][1] === D + 1, "a new item starts in box 1, due tomorrow");
+  X.srsAnswer(st, "w:ሰላም", true, D); ok(st.it["w:ሰላም"][0] === 1, "a right answer before it's due doesn't move it up");
+  const days = [D + 1, D + 4, D + 11, D + 25, D + 55];
+  days.forEach(d => X.srsAnswer(st, "w:ሰላም", true, d));
+  ok(st.it["w:ሰላም"][0] === 6 && st.it["w:ሰላም"][1] === D + 115, "right on each due day climbs to box 6: " + JSON.stringify(st.it["w:ሰላም"]));
+  X.srsAnswer(st, "w:ሰላም", false, D + 120); ok(st.it["w:ሰላም"][0] === 4 && st.it["w:ሰላም"][1] === D + 121, "a wrong answer drops two boxes, due tomorrow");
+  ok(X.srsDue(st, D + 121).length === 1 && X.srsDue(st, D + 120).length === 0, "due list");
+  ok(X.srsForecast(st, 3, D + 120).join() === "0,1,0", "forecast");
+  const a = X.srsEmpty(); [D - 3, D - 2, D - 1, D, D - 10, D - 9].forEach(d => X.srsActivity(a, d));
+  const k = X.srsStreak(a, D); ok(k.now === 4 && k.best === 4 && k.today === 1, "streak counts days in a row: " + JSON.stringify(k));
+  ok(X.srsStreak(a, D + 1).now === 4 && X.srsStreak(a, D + 2).now === 0, "streak survives until the end of the next day");
+  const ix = X.srsIndex(), u1 = X.LESSONS.find(l => l.n === 1).vocab[0];
+  ok(ix["w:" + u1[0]] && ix["w:" + u1[0]].unit === 1, "index knows unit 1's words");
+  ok(X.srsKeyOf({ type: "mc", big: u1[2], opts: [{ l: u1[0] }], ans: 0 }) === "w:" + u1[0], "old saved mistakes are matched to their word");
+  const m = X.srsMigrate({ best: { L1: 9, L2: 4 }, miss: [{ k: "x", q: { type: "mc", big: u1[2], opts: [{ l: u1[0] }], ans: 0 } }], day: "2024-10-1" }, D);
+  const u2 = X.LESSONS.find(l => l.n === 2).vocab[0];
+  ok(m.it["w:" + u1[0]][0] === 1 && m.it["w:" + u1[0]][1] === D, "a saved mistake is due today after moving across");
+  ok(m.it["w:" + u2[0]][0] === 1 && !m.it["w:" + X.LESSONS.find(l => l.n === 3).vocab[0][0]], "a weak unit starts in box 1, untested units stay new");
+  const good = X.LESSONS.find(l => l.n === 1).vocab.filter(w => w[0] !== u1[0]).map(w => m.it["w:" + w[0]]);
+  ok(good.every(r => r && r[0] === 2 && r[1] > D), "words from a well-scored unit start in box 2");
+  ok(Object.keys(X.srsClean(JSON.parse(JSON.stringify(m))).it).length === Object.keys(m.it).length, "saved review data survives a save and load");
+  ok(X.srsClean({ it: { bad: [9, 1], ok: [2, 5] } }).it.bad === undefined, "bad saved rows are dropped");
+}
 // --- search: finds things by English, Amharic (twin letters alike), transcription and verb forms
 {
   const top = (q, n = 5) => X.findSearch(q, n).hits.map(e => e.am);
