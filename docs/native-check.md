@@ -1,6 +1,6 @@
 # Sentences for a native speaker to check
 
-All 94 practice sentences in the course were written for this app and none has been checked yet. Please mark each one OK, or write the natural way to say it. 11 have a specific doubt and are listed first.
+All 155 practice sentences in the course were written for this app and none has been checked yet. Please mark each one OK, or write the natural way to say it. 18 have a specific doubt and are listed first.
 
 ## Specific doubts
 
@@ -17,6 +17,13 @@ All 94 practice sentences in the course were written for this app and none has b
 | 12 | ወደ ቀኝ ታጠፍ። | wede qegn tat'ef | Turn right | ታጠፍ “turn” is not in the word list; check it is the usual word for giving directions. |  |
 | 13 | ታምሜአለሁ፤ ሐኪም ጋ መሄድ እፈልጋለሁ። | tamméallehu; hakim ga mehéd ifeligallehu | I'm ill; I want to go to the doctor | ጋ “at (someone's)” is not taught yet; check the spelling ጋ vs ጋር here. |  |
 | 13 | ስላየሁህ ደስ አለኝ። | silayyehuh des allegn | I'm glad to see you (m) | Uses ስለ “because” from a later unit. Check. |  |
+| 16 | ታጥቤ ልብሴን ለበስኩ። | tat'ibé libsén lebesku | I washed and got dressed | Check: is ልብሴን ለበስኩ the natural way to say “I got dressed”? |  |
+| 17 | እባክሽ፣ እርጂኝ። | ibakish, irjign | Please help me (to a woman) | Check the spelling of the command with “me”: እርጂኝ or ርጂኝ. |  |
+| 17 | ለእህቴ ስጦታ ገዛሁላት። | le'ihté sit'ota gezzahulat | I bought my sister a present | Uses ለ “for” and the -ል- ending together; check it sounds natural. |  |
+| 18 | ከመተኛቴ በፊት መጽሐፍ አነባለሁ። | kemetegnaté befit mets'haf anebballehu | Before I go to sleep, I read a book | Check the “before” construction ከመ…ኤ በፊት. |  |
+| 18 | ዛሬ ብርድ ነው። | zaré bird new | It's cold today | Check: do people say ብርድ ነው, or ይበርዳል? |  |
+| 19 | የምኖርበት ቤት ትንሽ ነው። | yemminorbet bét tinnish new | The house I live in is small | Uses -በት “in which”, which the notes don't explain; check it reads well. |  |
+| 21 | መብራቱ ጠፋ። | mebratu t'effa | The power has gone off | Check: is መብራቱ ጠፋ what people say for a power cut? |  |
 
 ## Everything else, by unit
 
@@ -162,3 +169,82 @@ All 94 practice sentences in the course were written for this app and none has b
 | 14 | ቅዳሜ እንገናኝ። | qidamé innigenagn | Let's meet on Saturday |  |  |
 | 14 | አማርኛ መማር እወዳለሁ። | amarigna memar iwedallehu | I like learning Amharic |  |  |
 | 14 | ነገ መምጣት አልችልም። | nege memt'at alchilim | I can't come tomorrow |  |  |
+
+### 16. Telling a story: “and then…”
+
+| Unit | Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| 16 | ጠዋት ተነሥቼ ቡና ጠጣሁ። | t'ewat tenesché bunna t'et'ahu | In the morning I got up and drank coffee |  |  |
+| 16 | ቁርስ በልቼ ወደ ሥራ ሄድኩ። | qurs belché wede sira hédku | I had breakfast and went to work |  |  |
+| 16 | ቁርስ በልቼ ወደ ሥራ እሄዳለሁ። | qurs belché wede sira ihédallehu | I'll have breakfast and go to work |  |  |
+| 16 | ትናንት ማታ ሲኒማ ሄደን ፊልም አየን። | tinant mata sinima héden film ayyen | Last night we went to the cinema and saw a film |  |  |
+| 16 | እሷ ገበያ ሄዳ ሙዝ ገዛች። | isswa gebeya héda muz gezzach | She went to the market and bought bananas |  |  |
+| 16 | ነገ ወደ ከተማ ሄጄ ጓደኛዬን አገኛለሁ። | nege wede ketema héjé gwadegnayén agenyallehu | Tomorrow I'll go into town and meet my friend |  |  |
+| 16 | ከዚያ በኋላ ቤት ተመልሼ ተኛሁ። | keziya behwala bét temelsé tegnahu | After that I came back home and went to sleep |  |  |
+| 16 | መጀመሪያ እጅህን ታጠብ። | mejemmerya ijjihin tat'eb | First wash your hands (to a man) |  |  |
+| 16 | ልጁ ሮጦ መጣ። | liju rot'o met'a | The boy came running |  |  |
+| 16 | ቶሎ ብለሽ ነይ። | tolo bilesh ney | Come quickly (to a woman) |  |  |
+| 16 | በመጨረሻ አዲስ አበባ ደረስን። | bemech'ersha addis abeba dersen | Finally we arrived in Addis Ababa |  |  |
+
+### 17. Tell me, give her: object endings on verbs
+
+| Unit | Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| 17 | ስምሽን ንገሪኝ። | simishin nigerign | Tell me your name (to a woman) |  |  |
+| 17 | እባክህ፣ ውሃ ስጠኝ። | ibakih, wiha sit'egn | Please give me some water (to a man) |  |  |
+| 17 | ትናንት ዳዊትን አየሁት። | tinant dawitin ayyehut | I saw Dawit yesterday |  |  |
+| 17 | እናቴ ደወለችልኝ። | innaté dewwelechillign | My mother rang me |  |  |
+| 17 | ማታ እደውልልሃለሁ። | mata idewilillihallehu | I'll ring you this evening (to a man) |  |  |
+| 17 | እወድሻለሁ። | iwedishallehu | I love you (to a woman) |  |  |
+| 17 | አስተማሪው ጥያቄ ጠየቀን። | astemariw t'iyaqé t'eyyeqen | The teacher asked us a question |  |  |
+| 17 | እሷን ታውቃታለህ? | isswan tawqatalleh? | Do you know her? (to a man) |  |  |
+| 17 | መልእክት ላክልኝ። | meliikt lakillign | Send me a message (to a man) |  |  |
+| 17 | ይህን ማን ነገረህ? | yihin man neggereh? | Who told you this? (to a man) |  |  |
+
+### 18. When, if and because
+
+| Unit | Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| 18 | ጊዜ ካለኝ ነገ እመጣለሁ። | gizé kallegn nege imet'allehu | If I have time, I'll come tomorrow |  |  |
+| 18 | ዝናብ ከዘነበ ቤት እቀራለሁ። | zinab kezennebe bét iqerallehu | If it rains, I'll stay at home |  |  |
+| 18 | ከፈለግሽ ነይ። | kefellegish ney | Come if you want (to a woman) |  |  |
+| 18 | ስደርስ እደውልልሃለሁ። | sidders idewilillihallehu | I'll ring you when I arrive (to a man) |  |  |
+| 18 | ሲመጣ ንገሪኝ። | simet'a nigerign | Tell me when he comes (to a woman) |  |  |
+| 18 | ለምን አልመጣህም? | lemin almet'ahim? | Why didn't you come? (to a man) |  |  |
+| 18 | ስለታመምኩ ቤት ቀረሁ። | siletammemku bét qerrehu | I stayed at home because I was ill |  |  |
+| 18 | ስለደከመኝ ቶሎ ተኛሁ። | siledekkemegn tolo tegnahu | I went to bed early because I was tired |  |  |
+| 18 | ከበላሁ በኋላ ቡና እጠጣለሁ። | kebellahu behwala bunna it'et'allehu | After I eat, I'll have coffee |  |  |
+| 18 | አውቶቡሱ ስለዘገየ ዘገየሁ። | awtobusu silezegeyye zegeyyehu | I was late because the bus was late |  |  |
+| 18 | ስለ ኢትዮጵያ ብዙ ማወቅ እፈልጋለሁ። | sile ityop'iya bizu mawek ifeligallehu | I want to know a lot about Ethiopia |  |  |
+
+### 19. The one who…: describing people and things
+
+| Unit | Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| 19 | ትናንት የመጣው ሰው ወንድሜ ነው። | tinant yemet'aw sew wendimé new | The man who came yesterday is my brother |  |  |
+| 19 | ባንክ ውስጥ የሚሠራ ጓደኛ አለኝ። | bank wist' yemmisera gwadegna allegn | I have a friend who works in a bank |  |  |
+| 19 | ይህ ትናንት የገዛሁት መጽሐፍ ነው። | yih tinant yegezzahut mets'haf new | This is the book I bought yesterday |  |  |
+| 19 | የምትወደው ምግብ ምንድን ነው? | yemmitwedew migib mindin new? | What's your favourite food? (to a man) |  |  |
+| 19 | አማርኛ የሚናገር ሰው እፈልጋለሁ። | amarigna yemminager sew ifeligallehu | I'm looking for someone who speaks Amharic |  |  |
+| 19 | ጥቁር ሸሚዝ የለበሰው ሰው ማን ነው? | t'iqur shemiz yelebbesew sew man new? | Who is the man in the black shirt? |  |  |
+| 19 | ሰማያዊ ቀሚስ የለበሰችው ሴት አስተማሪዬ ናት። | semayawi qemis yelebbesechiw sét astemariyé nat | The woman in the blue dress is my teacher |  |  |
+| 19 | እህቴ ረጅም ፀጉር አላት። | ihté rejjim ts'egur allat | My sister has long hair |  |  |
+| 19 | ዛሬ ያልመጣው ማን ነው? | zaré yalmet'aw man new? | Who didn't come today? |  |  |
+| 19 | ሥጋ የማይበላ ጓደኛ አለኝ። | siga yemmayibela gwadegna allegn | I have a friend who doesn't eat meat |  |  |
+| 19 | ወንድሜ ረጅምና ቀጭን ነው። | wendimé rejjiminna qech'in new | My brother is tall and thin |  |  |
+
+### 21. Making things happen: a-, as- and te- verbs
+
+| Unit | Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| 21 | መኪናውን እዚህ አቁም። | mekinawin izzih aqum | Park the car here (to a man) |  |  |
+| 21 | ሻይ ላፍላ? | shay lafla? | Shall I make some tea? |  |  |
+| 21 | ልጁን አበላችው። | lijun abellachiw | She fed the child |  |  |
+| 21 | አስተማሪያችን አማርኛ ያስተምረናል። | astemariyachin amarigna yastemrenal | Our teacher teaches us Amharic |  |  |
+| 21 | ሱቁ ተዘግቷል። | suqu tezegtwal | The shop is closed |  |  |
+| 21 | ባንኩ መቼ ይከፈታል? | banku meché yikkefetal? | When does the bank open? |  |  |
+| 21 | ብርጭቆው ተሰበረ። | birch'iqqow tesebbere | The glass broke |  |  |
+| 21 | ይህ በአማርኛ ምን ይባላል? | yih be'amarigna min yibbalal? | What is this called in Amharic? |  |  |
+| 21 | መኪናዬ ተበላሸ፤ ማሠራት አለብኝ። | mekinayé tebelashe; maserat allebbign | My car has broken down; I need to get it repaired |  |  |
+| 21 | እባክሽ፣ ፎቶዎቹን አሳዪኝ። | ibakish, fotowochun asayign | Please show me the photos (to a woman) |  |  |
+| 21 | በሩን ክፈትልኝ። | berun kifetillign | Open the door for me (to a man) |  |  |

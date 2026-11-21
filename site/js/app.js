@@ -493,7 +493,7 @@ function fresh(q){
 const today = () => {const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();};
 const upto = () => S.upto || Math.max(1,...FULL.filter(n=>S.best["L"+n]!=null));
 // the unit where each tense is first taught (99 = not in the course yet)
-const TMIN={past:9,pastNeg:9,pres:8,presNeg:8,short:14,cmd:12,cmdNeg:12,ger:99,perf:13};
+const TMIN={past:9,pastNeg:9,pres:8,presNeg:8,short:14,cmd:12,cmdNeg:12,ger:16,perf:13};
 function verbPool(N){
   const vs=VLIST.filter(v=>v.lesson<=N).map(v=>[v,vTenses(v).filter(t=>v.fixed?v.lesson<=N&&(t[0]!=="past"&&t[0]!=="pastNeg"||N>=TMIN.past):TMIN[t[0]]<=N)]).filter(x=>x[1].length);
   return vs;
