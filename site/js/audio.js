@@ -19,22 +19,23 @@ let nowPlaying = null;
 // Playback speed, set from the header (1, 0.75 or 0.5). Saved clips keep their pitch when slowed.
 let sayRate = 1;
 const SAY_RATES = [1, .75, .5];
-function playAm(am){
+function playAm(am, rate){
+  rate = rate || sayRate;
   const clip = clipFor(am);
   if(nowPlaying){ nowPlaying.pause(); nowPlaying=null; }
   if(clip){
     nowPlaying = new Audio("audio/"+clip.split("/").map(encodeURIComponent).join("/"));
     nowPlaying.preservesPitch = nowPlaying.mozPreservesPitch = nowPlaying.webkitPreservesPitch = true;
-    nowPlaying.defaultPlaybackRate = nowPlaying.playbackRate = sayRate;
-    nowPlaying.play().catch(()=>speakAm(am));
+    nowPlaying.defaultPlaybackRate = nowPlaying.playbackRate = rate;
+    nowPlaying.play().catch(()=>speakAm(am, rate));
     return;
   }
-  speakAm(am);
+  speakAm(am, rate);
 }
-function speakAm(am){
+function speakAm(am, rate){
   if(!amVoice) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(am); u.voice = amVoice; u.lang = amVoice.lang; u.rate = .85*sayRate;
+  const u = new SpeechSynthesisUtterance(am); u.voice = amVoice; u.lang = amVoice.lang; u.rate = .85*(rate||sayRate);
   speechSynthesis.speak(u);
 }
 const sayBtn = (am, cls="") => canSay(am) ? `<button class="say ${cls}" data-act="say" data-v="${esc(am)}" aria-label="Listen" title="Listen">▶</button>` : "";
