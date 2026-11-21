@@ -11,7 +11,7 @@ const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
   .filter(f => f.startsWith("js/") && !/js\/(app|audio)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel};", ctx);
+  "\n;globalThis.X={VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -51,6 +51,7 @@ const knownForms = [
   ["säbbärä", "past", 0, "ሰበርኩ"],
   ["säbbärä", "pres", 3, "ይሰብራል"],
   ["fällägä", "pres", 0, "እፈልጋለሁ"],
+  ["anäbbäbä", "pastNeg", 0, "አላነበብኩም"],  // not አልአነበብኩም
 ];
 for (const [h, t, i, want] of knownForms) {
   if (!verb(h)) { console.log(`note: ${h} is not in the word list, skipped`); continue; }
@@ -69,6 +70,19 @@ for (const l of X.LESSONS) for (const w of l.vocab || []) {
 for (const s of X.SENT) ok(!units.get(s.l)?.review, `sentence "${s.am}" is filed under a review unit`);
 const courseWords = new Set(X.LESSONS.flatMap(l => (l.vocab || []).map(w => w[0])));
 for (const [cat, words] of Object.entries(X.EXTRA)) for (const w of words) ok(!courseWords.has(w[0]), `extra vocab ${cat} repeats course word ${w[0]}`);
+
+// --- sentence builder: every slot offers the right word once, plus 3 different wrong ones
+for (const b of X.BVERBS) ok(verb(b[0]), `sentence builder uses ${b[0]}, which is not in the verb list`);
+const checkSlots = (x, what) => {
+  for (const w of x.words) {
+    const o = X.bOptions(w), ams = o.map(y => y.am);
+    ok(o.filter(y => y.ok).length === 1 && o.find(y => y.ok).am === w.am, `${what}: "${w.am}" is not offered exactly once as right`);
+    ok(new Set(ams).size === ams.length, `${what}: repeated choices for "${w.am}"`);
+    ok(o.length === 4, `${what}: only ${o.length} choices for "${w.am}"`);
+  }
+};
+for (let n = 0; n < 400; n++) { const x = X.bMakeVerbSentence(); if (x) checkSlots(x, `made-up "${x.en}"`); }
+for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);
 process.exit(fails ? 1 : 0);
