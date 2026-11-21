@@ -670,7 +670,7 @@ function renderMe(){
       <div class="pfrow"><button class="btn primary" data-act="pf-in-read">Restore code</button><label class="btn filebtn">Choose file<input type="file" id="pf-infile" accept=".json,.txt,application/json,text/plain"></label></div>`;
     if(P.inErr) h+=`<p class="count bad" role="alert">${esc(P.inErr)}</p>`;
   }
-  return h+`</div>`;
+  return h+`</div>`+offlineHTML();
 }
 function useProfile(id){ keep(); PROF.use(id); applyData(PROF.load()); S.pf.ren=null; S.pf.del=false; S.pf.code=""; S.pf.msg=""; }
 async function readIncoming(text){

@@ -232,6 +232,7 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .heard{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:8px}
 .heard .am{font-size:2rem;line-height:1.25}
 .heard .en{color:var(--muted);font-size:.95rem}
+<<<<<<< HEAD
 /* dialogues: chat bubbles, speaker A on the left, B on the right; your lines are tinted */
 .dtitle{margin-top:16px}
 .dbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap}
@@ -256,3 +257,13 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .bar .mini{max-width:100%;overflow-x:auto}
 .bar .mini button{padding:6px 10px}
 .dturn .btns{grid-template-columns:1fr}
+=======
+/* phone app + offline (js/offline.js) */
+.offsteps{margin:8px 0 4px;padding-left:22px}
+.offsteps li{margin:3px 0}
+.offbar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:6px 0 10px}
+.offbar i{display:block;height:100%;background:var(--accent);transition:width .2s}
+.offtip{max-width:560px;margin:10px auto 0;padding:10px 12px;display:flex;align-items:center;gap:10px;background:var(--tint);border-radius:10px;font-size:.9rem;width:calc(100% - 32px)}
+.offtip span{flex:1}
+.offx{font-size:1.3rem;line-height:1;color:var(--muted);padding:0 4px}
+>>>>>>> origin/main

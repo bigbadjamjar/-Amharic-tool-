@@ -8,7 +8,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "site
 // Same order as the <script> tags in site/index.html, minus the browser-only files.
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
-  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|dialogue)\.js$/.test(f));
+  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
   "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions};", ctx);

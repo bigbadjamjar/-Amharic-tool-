@@ -34,6 +34,14 @@ docs/native-check.md  sentences for a native speaker to check
 tests/run.mjs         checks the data and the verb engine:  node tests/run.mjs
 ```
 
+## Phone app and offline use
+
+The site can be added to a phone's home screen and then works with no signal. `site/sw.js` (a service worker) keeps a
+copy of the app and of every clip that has been played; `site/js/offline.js` shows install steps for iPhone and
+Android at the bottom of the Profiles page, with a **Save all clips** button that downloads every clip in one go.
+New scripts added to `index.html` are picked up automatically. Icons are in `site/icons/`, settings in
+`site/manifest.webmanifest`.
+
 ## Audio
 
 Any Amharic word or sentence that has a saved clip gets a ▶ button next to it.
