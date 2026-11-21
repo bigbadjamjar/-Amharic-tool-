@@ -116,15 +116,56 @@ const LESSONS = [
   {h:"Meeting up",p:["{እንገናኝ|innigenagn} “let's meet”. {ቅዳሜ እንገናኝ|qidamé innigenagn} “see you on Saturday”."]}],
  vocab:[["እንሂድ","innihid","let's go"],["እንገናኝ","innigenagn","let's meet"],["መሄድ","mehéd","to go, going"],["መምጣት","memt'at","to come"],["መሥራት","mesrat","to work"],["መማር","memar","to learn"],["አለብኝ","allebbign","I must"],["ቻለ","chale","be able to"],["ወደደ","weddede","like, love"],["ተገናኘ","tegenagne","meet"],["አደረገ","aderrege","do"],["ምን ማድረግ","min madreg","what to do"],["ዕቅድ","iqid","plan"],["በዓል","beal","holiday, festival"],["ሠርግ","serg","wedding"],["ልደት","lidet","birthday"],["ምናልባት","minalbat","maybe"],["በእርግጥ","be'irgit'","of course"]]},
 
-{n:15,title:"Review of units 11–14",review:[11,12,13,14]}
+{n:15,title:"Review of units 11–14",review:[11,12,13,14]},
+
+{n:16,title:"Telling a story: “and then…”",
+ notes:[
+  {h:"Joining actions",p:["English strings actions together with “and”: “I got up and had a coffee”. Amharic puts every action except the last in a special joining form, and only the last verb shows the tense: {ተነሥቼ ቡና ጠጣሁ|tenesché bunna t'et'ahu} “I got up and drank coffee”.","This joining form is often called the gerundive. In this course we call it the -ቶ form, after the ending you hear on the “he” form: {በልቶ|belto} “he ate, and…”, {ሄዶ|hédo} “he went, and…”."]},
+  {h:"How it is built",p:["The endings are {-ኤ|-é} for “I”, {-ኧህ|-eh} for “you (m)”, {-ኦ|-o} for “he”, {-ኣ|-a} for “she”, {-ኧን|-en} for “we” and {-ኧው|-ew} for “they”. The “I” form often changes the consonant before it, just like “you (f)” does: {ሄደ|héde} → {ሄጄ|héjé} “I went, and…”.","Verbs that end in -a, like {በላ|bella} and {ጠጣ|t'et'a}, slip in a {ት|t} before the ending: {በልቶ|belto}, {ጠጥቼ|t'et'ché}. The Verbs tab shows this form for every verb."],tables:["gerA","gerSamma"]},
+  {h:"The tense comes at the end",p:["Because the -ቶ form has no tense of its own, the same words can be past or future. Only the last verb decides: {ቁርስ በልቼ ወደ ሥራ ሄድኩ|qurs belché wede sira hédku} “I had breakfast and went to work”, but {ቁርስ በልቼ ወደ ሥራ እሄዳለሁ|qurs belché wede sira ihédallehu} “I'll have breakfast and go to work”.","The joined verbs must share the same doer. If someone else does the next thing, start a new sentence."]},
+  {h:"First, then, finally",p:["To tell a longer story, mark the steps: {መጀመሪያ|mejemmerya} “first”, {ከዚያ|keziya} “then”, {ከዚያ በኋላ|keziya behwala} “after that”, {በመጨረሻ|bemech'ersha} “finally”."]},
+  {h:"How you did it",p:["The -ቶ form can also say how something happened: {ሮጦ መጣ|rot'o met'a} “he came running”.","Now you can see what {ቀጥ ብለህ ሂድ|qet' bileh hid} “go straight on” from unit 12 is made of: {ብለህ|bileh} is the -ቶ form of {አለ|ale} “say”, and many manner words are built with it: {ቶሎ ብለህ ና|tolo bileh na} “come quickly”."],tables:["gerSay"]}],
+ vocab:[["መጀመሪያ","mejemmerya","first, at first"],["ከዚያ","keziya","then"],["ከዚያ በኋላ","keziya behwala","after that"],["በመጨረሻ","bemech'ersha","finally, in the end"],["ቶሎ","tolo","quickly, soon"],["ቀስ ብሎ","qess bilo","slowly"],["አብረን","abren","together (we)"],["ታሪክ","tarik","story; history"],["ልብስ","libs","clothes"],["ሲኒማ","sinima","cinema"],["ታጠበ","tat'ebe","wash (yourself)"],["ለበሰ","lebbese","put on, wear"],["ወሰደ","wessede","take, take away"],["አገኘ","agegnye","find, meet"],["ሮጠ","rot'e","run"],["ተነሥቼ","tenesché","I got up, and…"],["በልቼ","belché","I ate, and…"],["ሄጄ","héjé","I went, and…"],["ሄዶ","hédo","he went, and…"]]},
+
+{n:17,title:"Tell me, give her: object endings on verbs",
+ notes:[
+  {h:"Me, you, him: on the end of the verb",p:["“Me”, “him”, “her” are not separate words in Amharic. They are endings on the verb: {ነገረኝ|neggeregn} “he told me”, {ነገረው|neggerew} “he told him”, {ነገራት|neggerat} “he told her”."],tables:["objHe","objShe"]},
+  {h:"The endings",p:["{-ኝ|-gn} me, {-ህ|-h} you (m), {-ሽ|-sh} you (f), {-ው|-w} him, {-ኣት|-at} her, {-ን|-n} us, {-ኣችሁ|-achihu} you (pl), {-ኣቸው|-achew} them.","After a verb ending in -u, “him” is {-ት|-t} instead: {አየሁት|ayyehut} “I saw him”, {ነገርኩት|neggerkut} “I told him”. And -u plus “her” runs together: {አየኋት|ayyehwat} “I saw her”."]},
+  {h:"In the present",p:["In the present the object goes just before the {-አል|-al} part: {ይነግረኛል|yinegregnal} “he tells me”, {እወድሃለሁ|iwedihallehu} “I love you (to a man)”, {እወድሻለሁ|iwedishallehu} “I love you (to a woman)”."],tables:["objImp"]},
+  {h:"Tell me, give me",p:["Commands take the endings too, and these are some of the most useful words you can learn: {ንገረኝ|nigeregn} “tell me”, {ስጠኝ|sit'egn} “give me”, {እርዳኝ|irdagn} “help me”. To a woman: {ንገሪኝ|nigerign}, {ስጪኝ|sich'ign}, {እርጂኝ|irjign}."]},
+  {h:"For me: -ልኝ",p:["A second set of endings with {-ል-|-l-} means “for” or “to”: {ደውልልኝ|dewilillign} “ring me” (literally “ring for me”), {ክፈትልኝ|kifetillign} “open it for me”, {ግዛልኝ|gizallign} “buy it for me”. Phoning always uses this set: {ደወለችልኝ|dewwelechillign} “she rang me”."],tables:["lla"]},
+  {h:"Naming the person too",p:["When you name the person, they take {-ን|-n} and the verb usually keeps its ending as well: {ዳዊትን አየሁት|dawitin ayyehut} “I saw Dawit”, literally “Dawit, I saw him”."]}],
+ vocab:[["ነገረ","neggere","tell"],["ጠየቀ","t'eyyeqe","ask"],["ረዳ","redda","help"],["ጠራ","t'erra","call (someone), invite"],["ላከ","lake","send"],["ንገረኝ","nigeregn","tell me (to a man)"],["ስጠኝ","sit'egn","give me (to a man)"],["እርዳኝ","irdagn","help me (to a man)"],["ደውልልኝ","dewilillign","ring me (to a man)"],["እወድሃለሁ","iwedihallehu","I love you (to a man)"],["እወድሻለሁ","iwedishallehu","I love you (to a woman)"],["አየሁት","ayyehut","I saw him"],["አየኋት","ayyehwat","I saw her"],["ጥያቄ","t'iyaqé","question"],["መልስ","mels","answer"],["መልእክት","meliikt","message"],["ስጦታ","sit'ota","present, gift"],["ቁጥር","qut'ir","number"],["ፎቶ","foto","photo"],["እንደገና","indegena","again"]]},
+
+{n:18,title:"When, if and because",
+ notes:[
+  {h:"When…: ስ-",p:["Put {ስ-|si-} on the front of the short present (the form used after “let's”) to say “when” or “while”: {ስደርስ|sidders} “when I arrive”, {ሲመጣ|simet'a} “when he comes” ({ስ|si} + {ይ|yi} becomes {ሲ|si}).","As with the -ቶ form, the last verb sets the time: {ሲመጣ እነግረዋለሁ|simet'a inegrewallehu} “when he comes I'll tell him”, {ሲመጣ ነገርኩት|simet'a neggerkut} “when he came I told him”."],tables:["subS"]},
+  {h:"If…: ከ- with the past",p:["“If” is {ከ-|ke-} on the past form, even when you mean the future: {ዝናብ ከዘነበ|zinab kezennebe} “if it rains”, {ከፈለግህ|kefellegih} “if you want (m)”. Before {አ|a} it becomes {ካ|ka}: {ጊዜ ካለኝ|gizé kallegn} “if I have time”."]},
+  {h:"Because: ስለ",p:["{ስለ|sile} on the past form gives the reason: {ስለደከመኝ|siledekkemegn} “because I was tired”. Before {አ|a} it becomes {ስላ|sila}: {ስላየሁህ|silayyehuh} “because I saw you”.","In front of a noun, {ስለ|sile} means “about”: {ስለ ኢትዮጵያ|sile ityop'iya} “about Ethiopia”. To ask the reason, {ለምን?|lemin?} “why?”"]},
+  {h:"After and before",p:["{ከ-|ke-} on the past plus {በኋላ|behwala} means “after”: {ከበላሁ በኋላ|kebellahu behwala} “after I eat” or “after I ate”.","“Before” uses the {መ-|me-} form with a possessive ending, between {ከ|ke-} and {በፊት|befit}: {ከመተኛቴ በፊት|kemetegnaté befit} “before I go to bed”, literally “from my sleeping, before”."]},
+  {h:"The order stays the same",p:["The “when”, “if” or “because” part always comes first, and the main verb still comes last. Think of it as one more thing that goes in front of the verb, like a time word."]}],
+ vocab:[["ለምን","lemin","why?"],["ስለ","sile","because; about"],["በኋላ","behwala","after, later"],["በፊት","befit","before, earlier"],["ስደርስ","sidders","when I arrive"],["ሲመጣ","simet'a","when he comes"],["ካለኝ","kallegn","if I have"],["ከፈለግህ","kefellegih","if you want (to a man)"],["ከፈለግሽ","kefellegish","if you want (to a woman)"],["ዝናብ","zinab","rain"],["ዘነበ","zennebe","rain (verb)"],["ፀሐይ","ts'ehay","sun"],["ብርድ","bird","cold (weather); a cold"],["ዘገየ","zegeyye","be late"],["ገና","gena","still, not yet"],["ምክንያት","mikniyat","reason"]]},
+
+{n:19,title:"The one who…: describing people and things",
+ notes:[
+  {h:"“Who” and “which”: የ- on the verb",p:["Amharic has no separate word for “who”, “which” or “that”. Instead {የ-|ye-} goes on the verb, and the verb then sits before the noun like an adjective: {የመጣ ሰው|yemet'a sew} “a man who came”.","For “the man who came”, the “the” ending goes on the verb, not the noun: {የመጣው ሰው|yemet'aw sew}."]},
+  {h:"In the present: የሚ-",p:["For something that happens now or usually, use the short present with {የ-|ye-} in front; {ይ-|yi-} becomes {ሚ-|mi-}: {ባንክ የሚሠራ ጓደኛ|bank yemmisera gwadegna} “a friend who works at a bank”, {አማርኛ የሚናገር ሰው|amarigna yemminager sew} “someone who speaks Amharic”."],tables:["relImp"]},
+  {h:"The thing I bought",p:["When the noun is the thing acted on, the verb keeps its own ending for who did it and adds “the”: {የገዛሁት መጽሐፍ|yegezzahut mets'haf} “the book I bought”, {የምትወደው ምግብ|yemmitwedew migib} “the food you like”, which is how you ask about someone's favourite."]},
+  {h:"Not",p:["For “who didn't”, {የ|ye-} and {አል|al-} join into {ያል-|yal-}: {ያልመጣው|yalmet'aw} “the one who didn't come”. In the present it is {የማይ-|yemmay-}: {ሥጋ የማይበላ|siga yemmayibela} “someone who doesn't eat meat”."]},
+  {h:"Describing people",p:["Clothes are described with “who wore”: {ጥቁር ሸሚዝ የለበሰው ሰው|t'iqur shemiz yelebbesew sew} “the man in the black shirt”. Looks are plain adjectives: {ረጅም|rejjim} “tall”, {አጭር|ach'ir} “short”, and for hair {ረጅም ፀጉር አላት|rejjim ts'egur allat} “she has long hair”."]}],
+ vocab:[["ረጅም","rejjim","tall, long"],["አጭር","ach'ir","short"],["ወፍራም","wefram","fat, thick"],["ጥቁር","t'iqur","black"],["ነጭ","nech'","white"],["ቀይ","qey","red"],["ሰማያዊ","semayawi","blue"],["አረንጓዴ","arengwadé","green"],["ቢጫ","bich'a","yellow"],["ሸሚዝ","shemiz","shirt"],["ቀሚስ","qemis","dress, skirt"],["ጫማ","ch'amma","shoes"],["ኮት","kot","coat"],["ፀጉር","ts'egur","hair"],["መነጽር","menets'ir","glasses"],["ኖረ","nore","live"],["የመጣው","yemet'aw","the one who came"],["የሚሠራ","yemmisera","who works"],["የገዛሁት","yegezzahut","(the one) I bought"],["ምንድን ነው?","mindin new?","what is it?"]]},
+
+{n:20,title:"Review of units 16–19",review:[16,17,18,19]},
+
+{n:21,title:"Making things happen: a-, as- and te- verbs",
+ notes:[
+  {h:"One verb gives you three",p:["Amharic makes new verbs by adding something to the front of one you know. {አ-|a-} and {አስ-|as-} usually mean “make someone do it” or “make it happen”. {ተ-|te-} usually means “be done” or “do it to yourself”.","You will meet these verbs everywhere, so it pays to spot the old verb inside the new one."]},
+  {h:"አ-: make it happen",p:["{ቆመ|qome} “stand, stop” → {አቆመ|aqome} “stop (something), park”. {በላ|bella} “eat” → {አበላ|abella} “feed”. {ፈላ|fella} “boil” → {አፈላ|afella} “boil (water), make (tea or coffee)”. {አየ|ayye} “see” → {አሳየ|asayye} “show”, literally “make see”."],parts:["aQoma","asayya"]},
+  {h:"አስ-: have it done, let",p:["{ገባ|gebba} “go in” → {አስገባ|asgebba} “let in, bring in”. {ተማረ|temarre} “learn” → {አስተማረ|astemarre} “teach”, literally “make learn”. Some verbs take only {አ-|a-} for this: {ሠራ|serra} “make” → {አሠራ|aserra} “have made, have repaired”."],parts:["asStem"]},
+  {h:"ተ-: be done",p:["{ዘጋ|zegga} “close” → {ተዘጋ|tezegga} “be closed”: {ሱቁ ተዘግቷል|suqu tezegtwal} “the shop is closed”. {ከፈተ|keffete} “open” → {ይከፈታል|yikkefetal} “it opens, it is opened”. {ሰበረ|sebbere} “break” → {ተሰበረ|tesebbere} “got broken”.","The most useful of all is {ተባለ|tebale} “be called, be said”: {ይህ በአማርኛ ምን ይባላል?|yih be'amarigna min yibbalal?} “what is this called in Amharic?”"],parts:["taStem","taBala"]},
+  {h:"Learn them as words",p:["Not every verb takes every front part, and the meaning can drift: {አገባ|agebba} is “bring in” but also “marry”. Treat each one as a new word that happens to have a family resemblance. The Verbs tab conjugates all of them."]}],
+ vocab:[["አቆመ","aqome","stop (something), park"],["አበላ","abella","feed"],["አፈላ","afella","boil, make (tea, coffee)"],["አሳየ","asayye","show"],["አስገባ","asgebba","let in, bring in"],["አስተማረ","astemarre","teach"],["አሠራ","aserra","have made, have repaired"],["ተዘጋ","tezegga","be closed"],["ተከፈተ","tekeffete","be opened"],["ተሰበረ","tesebbere","break, get broken"],["ተበላሸ","tebelashe","break down, go bad"],["ተባለ","tebale","be called, be said"],["ዘጋ","zegga","close"],["ከፈተ","keffete","open"],["በር","ber","door"],["መስኮት","meskot","window"],["መብራት","mebrat","light; electricity"],["ይባላል","yibbalal","it is called"]]}
 ];
 
 // Units planned but not written yet: number, short description.
-const LATER = [
- [16,"Telling a story: “and then…” (the -ቶ form)"],
- [17,"Tell me, give her: object endings on verbs"],
- [18,"When, if and because"],
- [19,"The one who…: describing people and things"],
- [20,"Review of units 16–19"],
- [21,"Making things happen: derived verbs (a-, as-, te-)"]
-];
+const LATER = [];

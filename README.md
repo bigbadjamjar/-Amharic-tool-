@@ -75,9 +75,9 @@ Without a clip, the app falls back to the browser's own Amharic voice where one 
 
 ## Content status
 
-The course is original: 12 topic-based units (greetings, family, food, getting around, health, plans) plus a review
-after every four. Everything in it was written for this app, but **none of the Amharic has been checked by a native
+The course is original: 17 topic-based units (greetings, family, food, getting around, health, plans, telling a story,
+object endings, when/if/because, describing people, derived verbs) plus a review after every four. Everything in it was written for this app, but **none of the Amharic has been checked by a native
 speaker yet**. `docs/native-check.md` lists every practice sentence, with the doubtful ones first, ready to hand to
-a reviewer (regenerate it with `node tools/native-check.mjs`). Units 16–21 are planned and listed in the app.
+a reviewer (regenerate it with `node tools/native-check.mjs`).
 
 The conjugation tables and the verb list are standard grammar; the verb engine works out every form by rule.
