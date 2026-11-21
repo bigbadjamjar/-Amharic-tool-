@@ -199,10 +199,11 @@ function applyData(d){
   S.upto=d.upto&&LMAP[+d.upto]?+d.upto:null;
   S.day=typeof d.day==="string"?d.day:"";
   S.kb.hints=d.kbhints!==false;
+  sayRate=SAY_RATES.includes(+d.rate)?+d.rate:1;
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,builder:S.bs});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -674,6 +675,7 @@ function render(){
   document.body.classList.toggle("norom",!S.rom);
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
+  const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#app").innerHTML = S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():renderTest();
   addSayButtons($("#app"));
@@ -710,6 +712,7 @@ document.addEventListener("click",e=>{
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
   if(a==="rom"){S.rom=!S.rom;save();}
+  else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
   else if(a==="mode"){S.mode=v;top=true; if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
   else if(a==="pf-use"){useProfile(v); if(S.mode==="who")S.mode="course"; top=S.mode!=="me";}
   else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}

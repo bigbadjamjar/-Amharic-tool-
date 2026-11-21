@@ -217,3 +217,10 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .brand h1 em{font-style:normal}
 .ntry.pfrow .btn{flex:none;padding:12px 22px}
 @media (max-width:420px){ .brand h1 .long{display:none} .brand .tools{gap:8px} }
+/* audio speed */
+.ratebtn{font-size:.8rem;font-weight:700;color:var(--muted);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 8px;min-width:2.9rem;font-variant-numeric:tabular-nums}
+.ratebtn::before{content:"▶ ";font-size:.62rem;vertical-align:.08em}
+.ratebtn.slow{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+.ratebtn,.romtoggle{white-space:nowrap}
+.brand{align-items:center}
+@media (max-width:420px){ .whobtn{max-width:6.5rem} }
