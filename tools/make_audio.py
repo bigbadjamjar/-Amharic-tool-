@@ -11,6 +11,8 @@
     python3 tools/make_audio.py --from words.txt   # one phrase per line
 
 Clips are saved to site/audio/clips/<the Amharic>.mp3 and the manifest is rebuilt.
+Dialogue lines (site/js/data/dialogues.js) come with the course: lines spoken by a woman use the
+voice chosen for the run, and lines spoken by a man always use the male voice and go in clips/m/.
 Clips this script made are listed in site/audio/generated.json with the exact text spoken.
 If that text changes in the app (say, a comma is added), the clip is remade. Clips you made
 yourself (for example on ttsfree.com) are not in that list and are never replaced, unless you
@@ -24,7 +26,7 @@ import json
 import re
 import sys
 import time
-from audio_common import AUDIO, CLIPS, ETHIOPIC, SITE, existing_clips, normalize
+from audio_common import AUDIO, CLIPS, ETHIOPIC, MALE_DIR, SITE, existing_clips, normalize
 from audio_manifest import write_manifest
 
 VOICES = {"female": "am-ET-MekdesNeural", "male": "am-ET-AmehaNeural"}
@@ -39,7 +41,7 @@ LATIN = re.compile(r"[A-Za-z]")
 def phrases_from_data(course_only: bool = False) -> list:
     """Every quoted string in the data files that is Amharic only (no Latin letters)."""
     files = sorted((SITE / "js" / "data").glob("*.js"), key=lambda f: (ORDER.index(f.name) if f.name in ORDER else 99, f.name))
-    files = [f for f in files if f.name != "fidel.js"]  # single letters, not words
+    files = [f for f in files if f.name not in ("fidel.js", "dialogues.js")]  # letters; dialogues are read below
     if course_only:
         files = [f for f in files if f.name in ("course.js", "sentences.js")]
     found = []
@@ -54,6 +56,13 @@ def phrases_from_data(course_only: bool = False) -> list:
             if ETHIOPIC.match(m.group(1)) and not LATIN.search(m.group(1)):
                 found.append(m.group(1))
     return [s for s in found if "✗" not in s]
+
+
+def dialogue_lines() -> list:
+    """(Amharic, "f" or "m") for every line in dialogues.js, by the speaker's gender."""
+    text = (SITE / "js" / "data" / "dialogues.js").read_text(encoding="utf-8")
+    data = json.loads(text[text.index("= [") + 2: text.rindex("]") + 1])
+    return [(line[1], d["who"][line[0]]["g"]) for d in data for line in d["lines"]]
 
 
 # The voice pauses reliably on Latin punctuation, so Ethiopic marks are swapped for their
@@ -105,10 +114,10 @@ def fidel_letters() -> list:
     return out
 
 
-async def make(text: str, voice: str, rate: str) -> None:
+async def make(text: str, voice: str, rate: str, male: bool = False) -> None:
     import edge_tts  # imported here so --list works without it
 
-    out = CLIPS / f"{normalize(text)}.mp3"
+    out = (CLIPS / MALE_DIR if male else CLIPS) / f"{normalize(text)}.mp3"
     tmp = out.with_suffix(".part")
     try:
         await edge_tts.Communicate(to_tts(text), voice, rate=rate).save(str(tmp))
@@ -133,6 +142,7 @@ def main() -> None:
     ap.add_argument("--fidel", action="store_true", help="only the letters of the Fidel chart")
     a = ap.parse_args()
 
+    male = []   # dialogue lines spoken by a man: always the male voice, saved in clips/m/
     if a.only:
         wanted = a.only
     elif a.src:
@@ -140,18 +150,23 @@ def main() -> None:
     elif a.fidel:
         wanted = fidel_letters()
     else:
-        wanted = phrases_from_data(a.course_only) + ([] if a.course_only else fidel_letters())
+        dl = dialogue_lines()
+        wanted = phrases_from_data(a.course_only) + [t for t, g in dl if g == "f"] + ([] if a.course_only else fidel_letters())
+        male = [t for t, g in dl if g == "m"]
 
+    # Male clips are tracked under "m/<key>" in generated.json.
     have = existing_clips()
+    have.update({MALE_DIR + "/" + k: v for k, v in existing_clips(male=True).items()})
     made = load_generated()
 
     # One clip per key. Where the same words appear more than once (a word list and a sentence, say),
     # use the most fully punctuated version, since that is what tells the voice where to pause.
     best, order = {}, []
-    for text in wanted:
+    for text, pre in [(t, "") for t in wanted] + [(t, MALE_DIR + "/") for t in male]:
         key = normalize(text)
         if not key:
             continue
+        key = pre + key
         if key not in best:
             order.append(key)
             best[key] = text
@@ -160,28 +175,28 @@ def main() -> None:
 
     todo, remake = [], 0
     for key in order:
-        text = best[key]
+        text, m = best[key], key.startswith(MALE_DIR + "/")
         if key not in have:
-            todo.append(text)
+            todo.append((text, m))
         elif a.redo_all or (key in made and (a.redo or made[key] != to_tts(text))):
-            todo.append(text)
+            todo.append((text, m))
             remake += 1
     if a.limit:
         todo = todo[: a.limit]
 
     print(f"{len(todo)} clips to make, {remake} of them remakes ({len(have)} exist, {len(made)} made automatically)")
     if a.list:
-        print("\n".join(f"{t}   ->   {to_tts(t)}" for t in todo))
+        print("\n".join(f"{t}   ->   {to_tts(t)}" + ("   (male voice)" if m else "") for t, m in todo))
         return
 
     voice = VOICES.get(a.voice, a.voice)
-    CLIPS.mkdir(parents=True, exist_ok=True)
+    (CLIPS / MALE_DIR).mkdir(parents=True, exist_ok=True)
     failed = 0
-    for i, text in enumerate(todo, 1):
+    for i, (text, m) in enumerate(todo, 1):
         for attempt in (1, 2, 3):
             try:
-                asyncio.run(make(text, voice, a.rate))
-                made[normalize(text)] = to_tts(text)
+                asyncio.run(make(text, VOICES["male"] if m else voice, a.rate, m))
+                made[(MALE_DIR + "/" if m else "") + normalize(text)] = to_tts(text)
                 print(f"[{i}/{len(todo)}] {to_tts(text)}")
                 break
             except Exception as e:  # keep going; network hiccups are common

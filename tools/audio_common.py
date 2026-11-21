@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 AUDIO = SITE / "audio"
 CLIPS = AUDIO / "clips"
+# Clips in the male voice for the male speakers in dialogues, filed the same way in clips/m/.
+MALE_DIR = "m"
 EXTS = {".mp3", ".m4a", ".ogg", ".wav", ".webm"}
 
 _STRIP = re.compile(r"[?!.,;:\"'“”‘’()\[\]/\\*<>|…።፣፤፡፥፦፧፨]")
@@ -20,12 +22,16 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def existing_clips() -> dict:
-    """Map of key -> path relative to site/audio/ for every clip on disk."""
+def existing_clips(male: bool = False) -> dict:
+    """Map of key -> path relative to site/audio/ for every clip on disk.
+    male=False: the main clips (everything except clips/m/). male=True: only the clips in clips/m/."""
     out = {}
-    if not CLIPS.exists():
+    base = CLIPS / MALE_DIR if male else CLIPS
+    if not base.exists():
         return out
-    for f in sorted(CLIPS.rglob("*")):
+    for f in sorted(base.rglob("*")):
+        if not male and f.relative_to(CLIPS).parts[0] == MALE_DIR:
+            continue
         if f.is_file() and f.suffix.lower() in EXTS and f.stat().st_size > 0:
             key = normalize(f.stem)
             if key:

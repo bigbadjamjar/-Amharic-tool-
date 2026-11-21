@@ -18,12 +18,14 @@ site/
   js/data/            all the content — edit these to change what the app teaches
     course.js         the units (notes, vocabulary)
     sentences.js      practice sentences
+    dialogues.js      one short conversation per unit (two speakers, a woman and a man)
     tables.js         conjugation and grammar tables shown in lessons
     verbs.js          the verb list fed to the conjugation engine
     vocab.js          extra vocabulary by theme
     fidel.js          the Fidel rows
   js/engine.js        the verb engine: works out every tense from a verb's dictionary form
   js/audio.js         plays saved clips
+  js/dialogue.js      the Dialogue tab: read, play it all, or take one part
   js/app.js           the screens and quizzes
   audio/clips/        saved sound files
   audio/manifest.js   list of clips (generated)
@@ -45,6 +47,10 @@ To see it locally before pushing, run `python3 tools/audio_manifest.py`.
 **Make audio clips** on the left, press **Run workflow**, choose which words and which voice, and press the green
 **Run workflow** button. It takes from a few minutes to about an hour, saves the new clips into `site/audio/clips/` and
 republishes the site. Run it again any time new words are added; it only makes clips that are missing.
+
+**Dialogues** use two voices: lines spoken by a woman use the normal clips, and lines spoken by a man use clips in
+`site/audio/clips/m/` (same naming), made with the male voice. The **Make audio clips** workflow makes both when you
+choose “course words and sentences”. A man's line with no male clip falls back to the normal clip if there is one.
 
 **Making clips in bulk on your own computer** with the same free Microsoft Amharic voices:
 
