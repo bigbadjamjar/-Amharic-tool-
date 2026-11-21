@@ -297,6 +297,27 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .pgkey span{display:inline-flex;align-items:center;gap:5px}
 .pgkey i{width:12px;height:12px;border-radius:3px;background:var(--line);display:inline-block}
 @media(max-width:400px){.seg button{font-size:.76rem}}
+/* welcome page (js/welcome.js) */
+body.welcoming .offtip{display:none}
+.wlhero{margin-top:18px;padding:22px 18px 18px;border-radius:16px;background:var(--tint);text-align:center}
+.wlhero h2{font-size:1.45rem;line-height:1.2;margin:6px auto 8px;max-width:22ch}
+.wlhero .lead{margin:0 auto 16px;color:var(--ink);opacity:.82}
+.wlhi{margin:0;display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap}
+.wlhi .am{font-size:2.6rem;line-height:1.2;color:var(--accent);font-weight:700}
+.wlhi .rom{font-size:1rem}
+.wlgo{font-size:1.05rem;padding:14px}
+.wlfeats{display:grid;grid-template-columns:1fr;gap:8px}
+@media (min-width:520px){ .wlfeats{grid-template-columns:1fr 1fr} }
+.wlfeat{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.wlfeat b{display:block;font-size:.98rem}
+.wlfeat small{display:block;color:var(--muted);font-size:.86rem;line-height:1.4;margin-top:2px}
+.wlicon{flex:none;width:2.2rem;height:2.2rem;border-radius:50%;background:var(--tint);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.wlicon .am{font-size:1.25rem;font-weight:700}
+.wlsteps{margin:0;padding:0;list-style:none;counter-reset:wl;display:flex;flex-direction:column;gap:8px}
+.wlsteps li{counter-increment:wl;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 52px;font-size:.94rem}
+.wlsteps li::before{content:counter(wl);position:absolute;left:12px;top:11px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.wlhonest p{margin:8px 0}
+.wllink{text-align:center;margin-top:22px}
 /* search (js/find.js) */
 .findbtn{display:flex;align-items:center;justify-content:center;width:34px;height:30px;border-radius:8px;color:var(--muted)}
 .findbtn[aria-pressed="true"]{background:var(--tint);color:var(--accent)}

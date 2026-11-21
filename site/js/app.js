@@ -212,6 +212,8 @@ const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store 
 applyData(PROF.load());
 // Several people on this device: ask who's practising each time the app opens. Nobody yet: ask for a name.
 if(PROF.list().length!==1) S.mode="who";
+// First time on this device, or opened with #welcome: show the welcome page first.
+if(wlFirst()) S.mode="welcome";
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -259,7 +261,7 @@ function renderCourse(){
   });
   h+=`</div>`;
   if(LATER.length){h+=`<h3>Still to add</h3><div class="stack">`;LATER.forEach(([n,t])=>{h+=`<button class="topic" disabled><b><span class="lnum">${n}</span>${esc(t)}</b></button>`;});h+=`</div>`;}
-  return h;
+  return h+wlLink();
 }
 function renderLesson(l){
   let h=`<button class="back" data-act="lesson" data-v="">‹ All units</button>
@@ -675,11 +677,11 @@ function statLine(d){
 }
 function renderWho(){
   const L=PROF.list(), P=S.pf;
-  let h=`<h2>${L.length?"Who's practising?":"Welcome"}</h2><p class="lead">${L.length?"Each person has their own scores, mistakes and settings.":"Type your name to start. If other people use this device they can add their own name later, and everyone's progress is kept separately."}</p>`;
+  let h=`<h2>${L.length?"Who's practising?":"What's your name?"}</h2><p class="lead">${L.length?"Each person has their own scores, mistakes and settings.":"Type your name to start. If other people use this device they can add their own name later, and everyone's progress is kept separately."}</p>`;
   if(L.length) h+=`<div class="stack" style="margin-top:14px">`+L.map(p=>`<button class="topic" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small></button>`).join("")+`</div><h3>Someone new</h3>`;
   h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
   if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? <button class="link" data-act="mode" data-v="me">Restore a backup</button></p>`;
-  return h;
+  return h+wlLink();
 }
 function renderMe(){
   const P=S.pf, cur=PROF.cur(), L=PROF.list();
@@ -711,7 +713,7 @@ function renderMe(){
       <div class="pfrow"><button class="btn primary" data-act="pf-in-read">Restore code</button><label class="btn filebtn">Choose file<input type="file" id="pf-infile" accept=".json,.txt,application/json,text/plain"></label></div>`;
     if(P.inErr) h+=`<p class="count bad" role="alert">${esc(P.inErr)}</p>`;
   }
-  return h+`</div>`+recHTML()+offlineHTML();
+  return h+`</div>`+recHTML()+offlineHTML()+wlLink();
 }
 function useProfile(id){ recCount=null; keep(); PROF.use(id); applyData(PROF.load()); S.pf.ren=null; S.pf.del=false; S.pf.code=""; S.pf.msg=""; }
 async function readIncoming(text){
@@ -724,12 +726,13 @@ async function readIncoming(text){
 const MODES=["course","fidel","num","ref","test","prog"];
 function render(){
   document.body.classList.toggle("norom",!S.rom);
+  document.body.classList.toggle("welcoming",S.mode==="welcome");
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
-  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest());
+  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest());
   addSayButtons($("#app"));
   // listening questions play by themselves, once, when they first appear
   const Q=S.quiz; if(S.mode==="test"&&Q&&!Q.done){const q=Q.qs[Q.i]; if(q.listen&&Q.heard!==Q.i){Q.heard=Q.i; playAm(q.listen);}}
@@ -779,6 +782,7 @@ document.addEventListener("click",e=>{
   if(a==="rom"){S.rom=!S.rom;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
   else if(a==="mode"){S.mode=v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
+  else if(a==="wl-start"){S.mode=wlStart();top=true;}
   else if(a==="pf-use"){useProfile(v); if(S.mode==="who")S.mode="course"; top=S.mode!=="me";}
   else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}
   else if(a==="pf-ren"){S.pf.ren=PROF.cur().name;S.pf.del=false;}
@@ -846,4 +850,6 @@ document.addEventListener("click",e=>{
   render();
   if(top) window.scrollTo(0,0);
 });
+// A shared link ending #welcome opens the welcome page, even in a tab that is already open.
+window.addEventListener("hashchange",()=>{ if(wlAsked()){ dgStop(); S.mode="welcome"; render(); window.scrollTo(0,0); } });
 render();
