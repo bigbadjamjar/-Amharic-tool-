@@ -8,10 +8,10 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "site
 // Same order as the <script> tags in site/index.html, minus the browser-only files.
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
-  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|progress)\.js$/.test(f));
+  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount};", ctx);
+  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -169,6 +169,18 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   ok(good.every(r => r && r[0] === 2 && r[1] > D), "words from a well-scored unit start in box 2");
   ok(Object.keys(X.srsClean(JSON.parse(JSON.stringify(m))).it).length === Object.keys(m.it).length, "saved review data survives a save and load");
   ok(X.srsClean({ it: { bad: [9, 1], ok: [2, 5] } }).it.bad === undefined, "bad saved rows are dropped");
+}
+// --- search: finds things by English, Amharic (twin letters alike), transcription and verb forms
+{
+  const top = (q, n = 5) => X.findSearch(q, n).hits.map(e => e.am);
+  ok(top("hello").includes("ሰላም"), "search: 'hello' should find ሰላም");
+  ok(top("selam")[0] === "ሰላም", "search: transcription 'selam' should put ሰላም first");
+  ok(top("ሠላም")[0] === "ሰላም", "search: twin letter ሠ should match ሰ");
+  ok(top("ameseginalehu").includes("አመሰግናለሁ"), "search: transcription ignores doubled letters");
+  ok(X.findSearch("አያለሁ").hits.some(e => e.places.some(p => p.t === "verb")), "search: a verb form (አያለሁ) finds its verb");
+  ok(X.findSearch("zzzzqq").hits.length === 0, "search: nonsense finds nothing");
+  ok(X.findSearch("water", 500).hits.every(e => e.places.length), "search: every result has somewhere to go");
+  const n = X.findIndex().length; ok(n > 1000, `search index looks too small (${n})`);
 }
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);

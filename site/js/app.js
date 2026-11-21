@@ -39,7 +39,7 @@ function vCards(){
   let h=`<div class="bar">${mini("vdeck",[["mean","Meanings"],["conj","Conjugations"]],C.deck)}${lessonSelect("vclesson",C.clesson)}</div>`;
   if(C.deck==="conj") h+=`<select id="vctense" class="sel" aria-label="Tense" style="margin-bottom:10px;width:100%"><option value="any">Any tense</option>`+TENSES.map(x=>`<option value="${x[0]}" ${C.ctense===x[0]?"selected":""}>${x[1]}</option>`).join("")+`</select>`;
   if(C.deck==="mean"){
-    h+=`<button class="flash" data-act="vflip" aria-label="Flip card">${A(v.am,modern(v.rom))}`+(C.flip?`<span class="en">${esc(v.en)}</span>`:`<span class="hint">Tap to see the meaning</span>`)+`</button>${sayBtn(v.am,"big")}`;
+    h+=`<button class="flash" data-act="vflip" aria-label="Flip card">${A(v.am,modern(v.rom))}`+(C.flip?`<span class="en">${esc(v.en)}</span>`:`<span class="hint">Tap to see the meaning</span>`)+`</button><div class="bigbtns">${sayBtn(v.am,"big")}${canSay(v.am)?micBtn(v.am):""}</div>`;
   }else{
     const f=vforms(v)[t][i];
     h+=`<button class="flash" data-act="vflip" aria-label="Flip card"><span class="count">${esc(TNAME[t])}</span>
@@ -186,7 +186,7 @@ const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filt
 /* ---------- state ---------- */
 const S = {bs:{mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
   fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
-  kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
+  find:{q:"",from:false},kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
 S.ls=JSON.parse(JSON.stringify(LS_DEF));
 S.pf={add:"",ren:null,del:false,code:"",msg:"",inText:"",inErr:"",incoming:null};
 /* Saved progress lives in the current profile (see profiles.js). */
@@ -233,14 +233,14 @@ function partsHTML(p){
   return `<div class="tbl">`+PL.map((l,i)=>`<div class="row" style="grid-template-columns:8.6rem 1fr"><span class="count">${l}</span><span class="form">${A(p.am[i],p.rom[i])}</span></div>`).join("")+`</div>`;
 }
 function wordList(words){
-  return `<div class="tbl">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span></div>`).join("")+`</div>`;
+  return `<div class="tbl canrec">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span></div>`).join("")+`</div>`;
 }
 function flashHTML(words,key){
   const F=S.fc;
   if(F.key!==key||F.order.length!==words.length){F.key=key;F.order=words.map((_,i)=>i);F.i=0;F.flip=false;}
   const w=words[F.order[F.i%words.length]];
   return `<button class="flash" data-act="flip" aria-label="Flip card">${A(w[0],w[1])}`+
-    (F.flip?`<span class="en">${esc(w[2])}</span>`:`<span class="hint">Tap to see the meaning</span>`)+`</button>${sayBtn(w[0],"big")}
+    (F.flip?`<span class="en">${esc(w[2])}</span>`:`<span class="hint">Tap to see the meaning</span>`)+`</button><div class="bigbtns">${sayBtn(w[0],"big")}${canSay(w[0])?micBtn(w[0]):""}</div>
     <div class="btns"><button class="btn" data-act="card" data-v="-1">Back</button>
     <button class="btn" data-act="mix">Shuffle</button>
     <button class="btn primary" data-act="card" data-v="1">Next</button></div>
@@ -711,9 +711,9 @@ function renderMe(){
       <div class="pfrow"><button class="btn primary" data-act="pf-in-read">Restore code</button><label class="btn filebtn">Choose file<input type="file" id="pf-infile" accept=".json,.txt,application/json,text/plain"></label></div>`;
     if(P.inErr) h+=`<p class="count bad" role="alert">${esc(P.inErr)}</p>`;
   }
-  return h+`</div>`+offlineHTML();
+  return h+`</div>`+recHTML()+offlineHTML();
 }
-function useProfile(id){ keep(); PROF.use(id); applyData(PROF.load()); S.pf.ren=null; S.pf.del=false; S.pf.code=""; S.pf.msg=""; }
+function useProfile(id){ recCount=null; keep(); PROF.use(id); applyData(PROF.load()); S.pf.ren=null; S.pf.del=false; S.pf.code=""; S.pf.msg=""; }
 async function readIncoming(text){
   try{ S.pf.incoming=await readBackup(text); S.pf.inErr=""; S.pf.inText=""; }
   catch(e){ S.pf.incoming=null; S.pf.inErr=e.message; }
@@ -728,7 +728,8 @@ function render(){
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
-  $("#app").innerHTML = S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest();
+  $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
+  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest());
   addSayButtons($("#app"));
   // listening questions play by themselves, once, when they first appear
   const Q=S.quiz; if(S.mode==="test"&&Q&&!Q.done){const q=Q.qs[Q.i]; if(q.listen&&Q.heard!==Q.i){Q.heard=Q.i; playAm(q.listen);}}
@@ -743,6 +744,7 @@ function check(){
 document.addEventListener("input",e=>{
   if(e.target.id==="nin"){S.num.n=e.target.value;$("#nout").innerHTML=numOut();}
   if(e.target.id==="tin"){const t=typing(); if(t) t.typed=e.target.value;}
+  if(e.target.id==="findq"){S.find.q=e.target.value;findRefresh();}
   if(e.target.id==="pf-add") S.pf.add=e.target.value;
   if(e.target.id==="pf-ren") S.pf.ren=e.target.value;
   if(e.target.id==="pf-in") S.pf.inText=e.target.value;
@@ -765,13 +767,18 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
+  if(a.startsWith("rec-")){recAct(a,v,b.dataset.g);return;}
+  if(a==="find-go"){dgStop();S.find.from=true;findGo(v);return;}
+  if(a==="find-back"){dgStop();S.mode="find";render();window.scrollTo(0,0);const i=$("#findq");if(i)i.focus({preventScroll:true});return;}
+  if(a==="find-try"){S.find.q=v;const i=$("#findq");if(i)i.value=v;findRefresh();return;}
   if(a.startsWith("dg-")&&a!=="dg-open"){ if(!dgAct(a,v)) render(); return; }
   if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
+  if(a==="mode"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
   if(a==="dg-open"){S.mode="course";S.lesson=+v;S.lview="dlg";dgReset(+v,true);render();window.scrollTo(0,0);return;}
   if(a==="say-slow"){playAm(v,lsSlow());return;}
   if(a==="rom"){S.rom=!S.rom;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
-  else if(a==="mode"){S.mode=v;top=true; if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
+  else if(a==="mode"){S.mode=v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
   else if(a==="pf-use"){useProfile(v); if(S.mode==="who")S.mode="course"; top=S.mode!=="me";}
   else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}
   else if(a==="pf-ren"){S.pf.ren=PROF.cur().name;S.pf.del=false;}
@@ -779,7 +786,7 @@ document.addEventListener("click",e=>{
   else if(a==="pf-ren-x"){S.pf.ren=null;}
   else if(a==="pf-del"){S.pf.del=true;S.pf.ren=null;}
   else if(a==="pf-del-x"){S.pf.del=false;}
-  else if(a==="pf-del-ok"){PROF.remove(PROF.cur().id); S.pf.del=false; S.pf.code=""; applyData(PROF.load()); if(!PROF.cur())S.mode="who";}
+  else if(a==="pf-del-ok"){recDelAll(PROF.cur().id); recCount=null; PROF.remove(PROF.cur().id); S.pf.del=false; S.pf.code=""; applyData(PROF.load()); if(!PROF.cur())S.mode="who";}
   else if(a==="pf-file"){save(); const b=PROF.backup(), url=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"})), l=document.createElement("a");
     l.href=url; l.download="amharic-"+b.name.replace(/[^\w-]+/g,"-").toLowerCase()+"-"+b.saved.slice(0,10)+".json"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
     S.pf.msg="Backup file saved to your downloads.";}

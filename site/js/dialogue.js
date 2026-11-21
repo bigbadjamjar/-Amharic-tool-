@@ -17,7 +17,7 @@ function dgBubble(d, i, opt){
   const [sp, am, rom, en] = d.lines[i], p = d.who[sp], you = DG.side===sp;
   return `<div class="bub ${sp==="A"?"l":"r"} ${you?"you":""} ${opt.now?"now":""}">
     <div class="bwho">${esc(p.name)}${you?" (you)":""}</div>
-    <div class="bline"><span class="am nosay">${esc(am)}</span>${canSay(am)?`<button class="say" data-act="dg-say" data-v="${i}" aria-label="Listen" title="Listen">▶</button>`:""}</div>
+    <div class="bline"><span class="am nosay">${esc(am)}</span>${canSay(am)||clipFor(am,p.g)?`<span class="sbtns"><button class="say" data-act="dg-say" data-v="${i}" aria-label="Listen" title="Listen">▶</button>${typeof micBtn==="function"?micBtn(am,p.g):""}</span>`:""}</div>
     ${rom?`<span class="rom">${esc(rom)}</span>`:""}${DG.en||opt.en?`<span class="en">${esc(en)}</span>`:""}</div>`;
 }
 
