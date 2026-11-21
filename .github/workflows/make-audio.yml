@@ -1,0 +1,71 @@
+name: Make audio clips
+
+# Press "Run workflow" on the Actions tab. It makes a clip for every Amharic word and sentence
+# that doesn't have one yet, saves them in site/audio/clips, and republishes the site.
+# Clips already there (including ones you made yourself) are never replaced.
+on:
+  workflow_dispatch:
+    inputs:
+      which:
+        description: Which words to make clips for
+        type: choice
+        default: course words and sentences
+        options:
+          - course words and sentences
+          - everything
+      voice:
+        description: Voice
+        type: choice
+        default: female (Mekdes)
+        options:
+          - female (Mekdes)
+          - male (Ameha)
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: make-audio
+  cancel-in-progress: false
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the voice tool
+        run: pip install edge-tts
+
+      - name: Make missing clips
+        run: |
+          args=""
+          [ "${{ inputs.which }}" = "course words and sentences" ] && args="$args --course-only"
+          case "${{ inputs.voice }}" in male*) args="$args --voice male";; esac
+          python3 tools/make_audio.py $args
+
+      # Runs even if the step above stopped part way, so finished clips are kept.
+      - name: Save the clips
+        if: always()
+        run: |
+          python3 tools/audio_manifest.py
+          git add site/audio
+          if git diff --cached --quiet; then echo "No new clips."; exit 0; fi
+          n=$(git diff --cached --name-only --diff-filter=A -- site/audio/clips | wc -l)
+          git -c user.name="github-actions[bot]" -c user.email="41898099+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Add $n audio clips"
+          git push
+          echo "Saved $n new clips." >> "$GITHUB_STEP_SUMMARY"
+
+      # A push made by a workflow doesn't start other workflows, so start the deploy directly.
+      - name: Republish the site
+        if: always() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

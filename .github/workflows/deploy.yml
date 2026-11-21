@@ -10,6 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,16 +26,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps
-        run: npm ci
+      - name: Check the data and verb engine
+        run: node tests/run.mjs
 
-      - name: Build
-        run: npm run build
+      # Clips added through the GitHub website are picked up here, so the manifest never has to be edited by hand.
+      - name: Rebuild the audio list
+        run: python3 tools/audio_manifest.py
 
-      - name: Upload artifact
+      - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build
