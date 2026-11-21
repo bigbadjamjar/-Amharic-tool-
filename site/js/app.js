@@ -283,7 +283,7 @@ function renderLesson(l){
 function fidelChart(){
   const p=FID.find(f=>f.ch===S.pick)||FID[0], r=FR[p.row];
   const ordName=p.ord<7?["1st","2nd","3rd","4th","5th","6th","7th"][p.ord]+" order":p.ord===7?"“wa” form":"rounded form";
-  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter.</p>
+  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter${Object.keys(AUDIO_FILES).length?" to hear it":""}.</p>
    <div class="peek"><span class="am">${p.ch}</span><div><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}${p.ord===5?" · also the bare consonant":""}</small></div></div>
    <div class="chartbox"><table class="chart"><tr><th></th>${VOW.map(v=>`<th>${v}</th>`).join("")}<th>wa</th></tr>`;
   FR.forEach(r=>{
@@ -452,7 +452,7 @@ const qAns = q => q.type==="mc"?q.opts[q.ans].l:q.answer;
 const qKey = q => q.type+"|"+q.big+"|"+qAns(q);
 /* sentences */
 const sentOf = ns => SENT.filter(x=>ns.includes(x.l));
-const sWords = x => x.am.replace(/[?!]/g,"").split(" ");
+const sWords = x => x.am.replace(/[?!።፣፤]/g,"").split(" ").filter(Boolean);
 function qOrder(pool,kind){
   const long=pool.filter(x=>sWords(x).length>=3); if(!long.length) return qSentMean(pool,kind);
   const x=pick(long), w=sWords(x); let tiles=shuffle(w.slice()), g=0;
@@ -589,7 +589,7 @@ function renderTest(){
   const q=Q.qs[Q.i], answered=q.type==="mc"?Q.picked!==null:Q.result!==null;
   let h=`<div class="prog"><i style="width:${(Q.i+(answered?1:0))/QN*100}%"></i></div>
    <div class="bar" style="margin:0"><span class="count">Question ${Q.i+1} of ${QN}</span><button class="link" data-act="quit">End test</button></div>
-   <div class="q ${q.type==="type"?"slim":""}"><div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""}">${esc(q.big)}</div><div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div></div>`;
+   <div class="q ${q.type==="type"?"slim":""}"><div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered?"nosay":""}">${esc(q.big)}</div><div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div></div>`;
   let ok;
   if(q.type==="type"){
     h+=kbHTML(Q); ok=Q.result==="ok";
@@ -735,7 +735,7 @@ document.addEventListener("click",e=>{
   else if(a==="lesson"){S.lesson=v?+v:null;S.lview="notes";top=true;}
   else if(a==="lview"){S.lview=v;}
   else if(a==="ftab"){S.ftab=v;top=true;}
-  else if(a==="pick"){S.pick=v;}
+  else if(a==="pick"){S.pick=v; if(clipFor(v)) playAm(v);}
   else if(a==="rtab"){S.rtab=v;top=true;}
   else if(a==="cat"){S.cat=v;}
   else if(a==="eview"){S.eview=v;}

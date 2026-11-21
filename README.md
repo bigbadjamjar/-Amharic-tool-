@@ -52,12 +52,17 @@ republishes the site. Run it again any time new words are added; it only makes c
 pip install edge-tts
 python3 tools/make_audio.py --list          # see what's missing
 python3 tools/make_audio.py --course-only   # just the course words and sentences
+python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
 python3 tools/make_audio.py                 # make them all (female voice, Mekdes)
 python3 tools/make_audio.py --voice male    # Ameha instead
 python3 tools/make_audio.py --only "ቡና" "ሻይ"
 ```
 
-It never overwrites an existing clip unless you pass `--redo`, so hand-made clips are safe.
+Clips it makes are recorded in `site/audio/generated.json` with the exact text spoken; if that text changes in the app
+(a comma added, a word fixed), the next run remakes them. Clips you add yourself are never listed there, so they are never replaced.
+
+**Punctuation matters for the sound.** End statements with `።`, use `፣` for a comma and `፤` for a semicolon. The script
+turns these into the Latin marks the voice pauses on.
 Without a clip, the app falls back to the browser's own Amharic voice where one exists (rare).
 
 ## Content status
