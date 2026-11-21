@@ -1,0 +1,627 @@
+/* ---------- verbs: look up, flashcards, questions ---------- */
+const TNAME={}; TENSES.forEach(t=>TNAME[t[0]]=t[1]);
+const inLesson=(v,L)=>L==="all"||v.lesson===+L||!!(LMAP[+L].review&&LMAP[+L].review.includes(v.lesson));
+const vTenses=v=>TENSES.filter(t=>vforms(v)[t[0]]);
+const vMatch=()=>{
+  const q=S.v.q.trim().toLowerCase(), L=S.v.lesson;
+  return VLIST.map((v,i)=>[v,i]).filter(([v])=>inLesson(v,L)&&(!q||v.en.toLowerCase().includes(q)||v.am.includes(q)||modern(v.rom).includes(q)));
+};
+const lessonSelect=(id,val)=>`<select id="${id}" class="sel" aria-label="Unit"><option value="all">All units</option>`+
+  LESSONS.filter(l=>VLIST.some(v=>inLesson(v,l.n))).map(l=>`<option value="${l.n}" ${String(val)===String(l.n)?"selected":""}>Unit ${l.n}${l.review?" (review)":""}</option>`).join("")+`</select>`;
+function vListHTML(){
+  const m=vMatch(), show=m.slice(0,60);
+  if(!m.length) return `<p class="count">No verbs match.</p>`;
+  return `<div class="vgrid">`+show.map(([v,i])=>`<button class="vitem" data-act="vsel" data-v="${i}" aria-pressed="${i===S.v.sel}"><span class="am">${esc(v.am)}</span><small>${esc(v.en)}</small></button>`).join("")+`</div>`+
+    (m.length>show.length?`<p class="count">Showing 60 of ${m.length}. Search or pick a unit to narrow the list.</p>`:"");
+}
+function vPanel(){
+  const v=VLIST[S.v.sel], f=vforms(v), av=vTenses(v); if(!f[S.v.tense])S.v.tense=av[0][0];
+  const t=S.v.tense, info=TENSES.find(x=>x[0]===t);
+  let h=`<div class="note" id="vpanel"><h4><span class="am" style="font-size:1.5rem">${esc(v.am)}</span> <span class="rom">${esc(modern(v.rom))}</span></h4>
+    <p><b>${esc(v.en)}</b> ${LMAP[v.lesson]?`<span class="count">· unit ${v.lesson}</span>`:""}</p>
+    ${f.vn?`<p class="count">“-ing” noun: <span class="am">${esc(f.vn.am)}</span> <span class="rom">${esc(f.vn.rom)}</span> · doer: <span class="am">${esc(f.part.am)}</span> <span class="rom">${esc(f.part.rom)}</span></p>`:`<p class="count">This verb has only the forms below. For “will be” use <span class="am">ሆነ</span>; for commands use <span class="am">ሁን</span> “be!”.</p>`}</div>`;
+  h+=chips("vtense",av.map(x=>[x[0],x[1]]),t)+`<p class="count" style="margin:6px 0 8px">${esc(info[2])}</p><div class="tbl">`;
+  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(f[t][i].am,f[t][i].rom)}</span><span class="en">${esc(t==="cmd"||t==="cmdNeg"?(i===0?"let me":i===3?"let him":i===4?"let her":i===5?"let us":i===7?"let them":subj(i)+"!"):subj(i))}</span></div>`;});
+  return h+`</div>`;
+}
+function vNewCard(){
+  const C=S.v, pool=VLIST.filter(v=>inLesson(v,C.clesson));
+  const v=pick(pool.length?pool:VLIST);
+  if(C.deck==="mean"){C.card={v};}
+  else{let w=v, t=C.ctense==="any"?pick(vTenses(w))[0]:C.ctense;
+    if(!vforms(w)[t]){const ok=(pool.length?pool:VLIST).filter(x=>vforms(x)[t]);if(ok.length)w=pick(ok);else t=pick(vTenses(w))[0];}
+    C.card={v:w,t,i:ri(8)};}
+  C.flip=false;
+}
+function vCards(){
+  const C=S.v; if(!C.card||(C.deck==="conj")!==("t" in C.card)) vNewCard();
+  const {v,t,i}=C.card;
+  let h=`<div class="bar">${mini("vdeck",[["mean","Meanings"],["conj","Conjugations"]],C.deck)}${lessonSelect("vclesson",C.clesson)}</div>`;
+  if(C.deck==="conj") h+=`<select id="vctense" class="sel" aria-label="Tense" style="margin-bottom:10px;width:100%"><option value="any">Any tense</option>`+TENSES.map(x=>`<option value="${x[0]}" ${C.ctense===x[0]?"selected":""}>${x[1]}</option>`).join("")+`</select>`;
+  if(C.deck==="mean"){
+    h+=`<button class="flash" data-act="vflip" aria-label="Flip card">${A(v.am,modern(v.rom))}`+(C.flip?`<span class="en">${esc(v.en)}</span>`:`<span class="hint">Tap to see the meaning</span>`)+`</button>${sayBtn(v.am,"big")}`;
+  }else{
+    const f=vforms(v)[t][i];
+    h+=`<button class="flash" data-act="vflip" aria-label="Flip card"><span class="count">${esc(TNAME[t])}</span>
+      <span class="am" style="font-size:1.7rem">${PR[i].am} · ${esc(v.am)}</span><span class="count">${esc(subj(i))} · ${esc(v.en)}</span>`+
+      (C.flip?`<span class="am" style="margin-top:8px">${esc(f.am)}</span><span class="rom">${esc(f.rom)}</span>`:`<span class="hint">Say the form, then tap to check</span>`)+`</button>`+(C.flip?sayBtn(f.am,"big"):"");
+  }
+  return h+`<div class="btns" style="grid-template-columns:1fr 2fr"><button class="btn" data-act="vflip">${C.flip?"Hide":"Show"}</button><button class="btn primary" data-act="vnext">Next card</button></div>
+    <p class="count" style="text-align:center;margin-top:10px">Cards are drawn at random from ${C.clesson==="all"?"all "+VLIST.length+" verbs":"unit "+C.clesson}. Only units that teach verbs are listed.</p>`;
+}
+function refVerbs(){
+  let h=`<h2>Verbs</h2><p class="lead">All ${VLIST.length} verbs, each in nine tenses for every person. The ones used in the course are tagged with their unit.</p>
+    <div class="bar">${mini("vview",[["look","Look up"],["cards","Flashcards"]],S.v.view)}</div>`;
+  if(S.v.view==="cards") return h+vCards();
+  h+=`<div class="bar" style="margin-top:0"><input id="vsearch" class="sel" style="flex:1;min-width:0" type="search" placeholder="Search English or Amharic" value="${esc(S.v.q)}" autocomplete="off">${lessonSelect("vlesson",S.v.lesson)}</div>
+    <div id="vlist">${vListHTML()}</div>`;
+  return h+vPanel()+`<div class="tip">The forms are built by rule from each verb's class, and checked against the tables in the course. For a rare verb, treat an unusual-looking form with care.</div>`;
+}
+function qVerbType(v0,TS0){
+  for(let g=0;g<60;g++){
+    const v=v0||pick(VLIST), f=vforms(v), t=pick(TS0||vTenses(v))[0], i=ri(8), x=f[t][i];
+    if(x&&x.am&&x.am.length>1&&!/[…\-]/.test(x.am)) return {type:"type",kind:"Verbs · type it",big:PR[i].am+" · "+v.am,bigAm:true,sub:`${subj(i)} · ${v.en} · ${TNAME[t].toLowerCase()}`,answer:x.am,rom:x.rom};
+  }
+}
+function qVerb(v0,TS0){
+  const v=v0||pick(VLIST), f=vforms(v), TS=vTenses(v), t=pick(TS0||TS)[0], i=ri(8), ok=f[t][i];
+  const alt=[];
+  for(let j=0;j<8;j++) if(j!==i&&f[t][j].am!==ok.am) alt.push({k:[t,j],x:f[t][j]});
+  TS.forEach(x=>{if(x[0]!==t&&f[x[0]][i].am!==ok.am) alt.push({k:[x[0],i],x:f[x[0]][i]});});
+  if(ri(2)) return mk("Verbs · "+TNAME[t],PR[i].am+" · "+v.am,true,`${subj(i)} · ${v.en}`,{l:ok.am,r:ok.rom},alt.map(a=>({l:a.x.am,r:a.x.rom})),true);
+  const lab=(tt,j)=>subj(j)+" · "+TNAME[tt];
+  const same=k=>f[k[0]][k[1]].am===ok.am;
+  const wr=[];
+  for(let j=0;j<8;j++) if(j!==i&&!same([t,j])) wr.push({l:lab(t,j)});
+  TS.forEach(x=>{if(x[0]!==t&&!same([x[0],i])) wr.push({l:lab(x[0],i)});});
+  return mk("Verbs",ok.am,true,`${v.am} · ${v.en}`,{l:lab(t,i)},wr,false);
+}
+
+/* ---------- numbers: words and Ethiopic numerals ---------- */
+const N1=["","አንድ","ሁለት","ሦስት","አራት","አምስት","ስድስት","ሰባት","ስምንት","ዘጠኝ"], N1R=["","and","hulett","sost","aratt","ammist","siddist","sebatt","simmint","zet'egn"];
+const N10=["","አሥር","ሃያ","ሠላሳ","አርባ","ሃምሳ","ስልሳ","ሰባ","ሰማንያ","ዘጠና"], N10R=["","assir","haya","selasa","arba","hamsa","silsa","seba","semanya","zet'ena"];
+const S1=["","፩","፪","፫","፬","፭","፮","፯","፰","፱"], S10=["","፲","፳","፴","፵","፶","፷","፸","፹","፺"];
+const NMAX=9999;
+function numWord(n){           // -> [fidel, latin]
+  if(n===0) return ["ዜሮ","zéro"];
+  const a=[], r=[], put=(x,y)=>{a.push(x);r.push(y);};
+  const th=Math.floor(n/1000), h=Math.floor(n%1000/100), t=Math.floor(n%100/10), u=n%10;
+  if(th){put(N1[th],N1R[th]);put("ሺ","shi");}
+  if(h){if(h>1)put(N1[h],N1R[h]);put("መቶ","meto");}
+  if(t===1&&u){put("አሥራ","asra");put(N1[u],N1R[u]);}
+  else{ if(t)put(N10[t],N10R[t]); if(u)put(N1[u],N1R[u]); }
+  return [a.join(" "),r.join(" ")];
+}
+const sym2 = n => S10[Math.floor(n/10)]+S1[n%10];
+function numSym(n){            // Ethiopic numerals, 1 to 9999
+  if(n<1) return "";
+  const hi=Math.floor(n/100), lo=n%100;
+  return (hi?(hi>1?sym2(hi):"")+"፻":"")+sym2(lo);
+}
+const numNorm = s => String(s).replace(/[ሃሐሓኀኃ]/g,"ሀ").replace(/ሺህ/g,"ሺ").replace(/አንድ\s+(መቶ|ሺ)/g,"$1").replace(/አስር/g,"አሥር").replace(/አስራ/g,"አሥራ");
+const NBASE=[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,1000];
+const NRULES=[
+ {h:"Eleven to nineteen",p:["Ten is {አሥር|assir}. For 11 to 19 it becomes {አሥራ|asra} followed by the unit: {አሥራ አንድ|asra and} 11, {አሥራ ሁለት|asra hulett} 12, {አሥራ ዘጠኝ|asra zet'egn} 19.","In everyday writing you will also see it spelt with the other s: አስር, አስራ. Both are accepted in the tests."]},
+ {h:"Tens and units",p:["Say the ten, then the unit, with nothing in between: {ሃያ አንድ|haya and} 21, {አርባ ሰባት|arba sebatt} 47, {ዘጠና ዘጠኝ|zet'ena zet'egn} 99.","The tens are worth learning as a set: {ሃያ|haya} 20, {ሠላሳ|selasa} 30, {አርባ|arba} 40, {ሃምሳ|hamsa} 50, {ስልሳ|silsa} 60, {ሰባ|seba} 70, {ሰማንያ|semanya} 80, {ዘጠና|zet'ena} 90."]},
+ {h:"Hundreds and thousands",p:["A hundred is {መቶ|meto}. Put the number of hundreds in front: {ሁለት መቶ|hulett meto} 200, {አምስት መቶ|ammist meto} 500. Then carry on with the rest: {መቶ ሃምሳ|meto hamsa} 150, {ሦስት መቶ ስልሳ አምስት|sost meto silsa ammist} 365.","A thousand is {ሺ|shi}, also written ሺህ: {አንድ ሺ|and shi} 1,000, {ሁለት ሺ|hulett shi} 2,000, {አሥር ሺ|assir shi} 10,000. A million is {ሚሊዮን|miliyon}.","You can say {አንድ መቶ|and meto} or just {መቶ|meto} for 100. The tests accept either."]},
+ {h:"The Amharic number symbols",p:["Amharic has its own numerals. There is one symbol for each of 1 to 9, one for each ten from 10 to 90, one for 100 (፻) and one for 10,000 (፼). There is no symbol for zero.","Below 100, write the ten then the unit: ፲፩ is 11, ፳፭ is 25, ፺፱ is 99.","For hundreds, write how many hundreds, then ፻, then the rest: ፪፻ is 200, ፫፻፷፭ is 365. One hundred is just ፻.","A thousand is written as ten hundreds: ፲፻ is 1,000, ፲፱፻፺፮ is 1996, ፳፻፲፱ is 2019."]},
+ {h:"Where you will see them",p:["In daily life (prices, phone numbers, times) Ethiopians mostly write Western digits and say the Amharic words. The Amharic symbols appear on calendars, dates, church texts, page numbers of books and formal documents, so it is worth being able to read them."]},
+ {h:"First, second, third",p:["Add {-ኛ|-gna} to the number to make “first, second …”: {አንደኛ|andegna} first, {ሁለተኛ|hulettegna} second, {ሦስተኛ|sostegna} third, {አሥረኛ|assiregna} tenth."]}
+];
+const NTESTS=["num-words","num-sym","num-type","num-pad"];
+const nCard = n => {const w=numWord(n);return `<div class="ncard"><span class="sym am">${numSym(n)}</span><span class="dig">${n.toLocaleString("en")}</span>${A(w[0],w[1])}</div>`;};
+function numOut(){
+  const n=Math.floor(+S.num.n);
+  if(S.num.n===""||isNaN(n)||n<0||n>NMAX) return `<p class="count" style="text-align:center">Enter a number from 0 to ${NMAX.toLocaleString("en")}.</p>`;
+  const w=numWord(n);
+  return `<div class="q"><div class="kind">${n.toLocaleString("en")}</div><div class="big am">${n?numSym(n):"no symbol"}</div><div class="am" style="font-size:1.5rem;margin-top:6px">${esc(w[0])}</div><div class="rom">${esc(w[1])}</div></div>`;
+}
+function renderNum(){
+  const t=S.num.tab;
+  let h=`<h2>Numbers</h2><p class="lead">Learn the Amharic words for numbers and the Amharic number symbols, then test yourself.</p>
+   <div class="bar">${mini("ntab",[["chart","Chart"],["rules","Rules"],["try","Try any"],["cards","Cards"]],t)}</div>`;
+  if(t==="chart"){
+    h+=`<h3>One to ten</h3><div class="grid2">${NBASE.slice(0,10).map(nCard).join("")}</div>
+        <h3>Tens</h3><div class="grid2">${NBASE.slice(10,18).map(nCard).join("")}</div>
+        <h3>Hundred and thousand</h3><div class="grid2">${nCard(100)}${nCard(1000)}<div class="ncard"><span class="sym am">፼</span><span class="dig">10,000</span>${A("አሥር ሺ","assir shi")}</div><div class="ncard"><span class="sym am">–</span><span class="dig">0</span>${A("ዜሮ","zéro")}</div></div>`;
+  }else if(t==="rules"){
+    h+=NRULES.map(nt=>`<div class="note"><h4>${esc(nt.h)}</h4>`+nt.p.map(p=>`<p>${fmt(p)}</p>`).join("")+`</div>`).join("");
+  }else if(t==="try"){
+    h+=`<p class="lead">Type any number to see how it is said and written.</p>
+        <div class="ntry"><input id="nin" type="number" inputmode="numeric" min="0" max="${NMAX}" value="${esc(S.num.n)}" aria-label="A number"><button class="btn" data-act="nrand">Random</button></div>
+        <div id="nout">${numOut()}</div>`;
+  }else{
+    const deck=S.num.deck, ns=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,30,40,50,60,70,80,90,100,1000];
+    const words=deck==="words"?ns.map(n=>{const w=numWord(n);return [w[0],w[1],n.toLocaleString("en")];})
+      :NBASE.concat([11,25,48,99,150,365,1996,2019]).map(n=>[numSym(n),"",n.toLocaleString("en")+" · "+numWord(n)[0]]);
+    h+=`<div class="bar">${mini("ndeck",[["words","Words"],["symbols","Symbols"]],deck)}</div>`+flashHTML(words,"num-"+deck);
+  }
+  h+=`<h3>Test yourself</h3><div class="stack">${NTESTS.map(id=>{const tp=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(tp.name)}</b><small>${esc(tp.desc)}</small>${bestChip(id)}</button>`;}).join("")}</div>`;
+  return h;
+}
+/* questions */
+function nPick(kind){
+  const r=Math.random();
+  if(kind==="sym") return r<.45?pick(NBASE):r<.8?11+ri(89):r<.92?100+ri(900):1000+ri(1100);
+  if(kind==="type") return r<.35?ri(21):r<.85?21+ri(79):100+ri(900);
+  return r<.35?ri(21):r<.75?21+ri(79):r<.9?100+ri(900):1000+ri(9000);
+}
+function nNear(n){
+  const d=String(n), c=[n+1,n-1,n+2,n+10,n-10,n+100,n-100,n*10,Math.floor(n/10),+d.split("").reverse().join(""),n+1000,n-1000];
+  if(n<100) for(let i=0;i<6;i++) c.push(1+ri(99)); else for(let i=0;i<6;i++) c.push(Math.pow(10,d.length-1)+ri(9*Math.pow(10,d.length-1)));
+  return [...new Set(c)].filter(x=>x>0&&x<=NMAX&&x!==n);
+}
+const nStr = n => n.toLocaleString("en");
+function qNumWord(max){
+  let n=nPick("word"); if(max) n=1+ri(max);
+  const w=numWord(n), near=nNear(n);
+  if(ri(2)) return mk("Numbers",nStr(n),false,"Choose the Amharic",{l:w[0],r:w[1]},near.map(x=>{const y=numWord(x);return {l:y[0],r:y[1]};}),true);
+  return mk("Numbers",w[0],true,"Which number is this?",{l:nStr(n)},near.map(x=>({l:nStr(x)})),false);
+}
+function qNumSym(){
+  const n=nPick("sym"), near=nNear(n), r=ri(3);
+  if(r===0) return mk("Number symbols",nStr(n),false,"Choose the Amharic numeral",{l:numSym(n)},near.map(x=>({l:numSym(x)})),true);
+  if(r===1) return mk("Number symbols",numSym(n),true,"Which number is this?",{l:nStr(n)},near.map(x=>({l:nStr(x)})),false);
+  const w=numWord(n); return mk("Number symbols",numSym(n),true,"Choose the word",{l:w[0],r:w[1]},near.map(x=>{const y=numWord(x);return {l:y[0],r:y[1]};}),true);
+}
+function qNumType(){const n=nPick("type"), w=numWord(n);return {type:"type",kind:"Numbers · type it",big:nStr(n),sub:"Type this number in words",answer:w[0],rom:w[1],num:1};}
+function qNumPad(){const n=nPick("sym");return {type:"type",kind:"Number symbols · type it",big:nStr(n),sub:"Tap the Amharic numerals",answer:numSym(n),rom:numWord(n)[1],pad:1};}
+function numPad(inp){
+  return `<div class="kbd">${inp}<div class="keys npad">`+S1.slice(1).concat(S10.slice(1),["፻","፼"]).map(c=>`<button data-act="k-form" data-v="${c}">${c}</button>`).join("")+
+    `<button class="fn" data-act="k-clear">clear</button><button class="fn w2" data-act="k-del">delete</button><button class="fn w2 go" data-act="k-check">Check</button></div></div>`;
+}
+
+/* ---------- derived data ---------- */
+const LMAP = {}; LESSONS.forEach(l=>LMAP[l.n]=l);
+const FULL = LESSONS.filter(l=>!l.review).map(l=>l.n);
+const canon = s => Array.from(String(s).replace(/[\s፡።፣፤?!.…]/g,"")).map(c=>CAN[c]||c).join("|");
+const typable = w => w[0].length>1 && !/[…\-]/.test(w[0]) && !/name\)/.test(w[2]);
+const lessonWords = ns => ns.flatMap(n=>LMAP[n].vocab||[]);
+const EXTRA_ALL = Object.values(EXTRA).flat();
+const ECATS = Object.keys(EXTRA);
+
+const tEn = (t,i) => t.full ? t.en[i] : subj(i)+" "+t.en[i];
+const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filter(l=>!l.review).map(l=>l.n));
+
+/* ---------- state ---------- */
+const S = {mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
+  fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
+  kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
+try{ const b=JSON.parse(localStorage.getItem("amharic-best")||"{}"); if(b&&typeof b==="object") S.best=b;
+     if(localStorage.getItem("amharic-rom")==="0") S.rom=false; const m=JSON.parse(localStorage.getItem("amharic-miss")||"[]"); if(Array.isArray(m)) S.miss=m.filter(x=>x&&x.k&&x.q); const u=+localStorage.getItem("amharic-upto"); if(u&&LMAP[u]) S.upto=u; S.day=localStorage.getItem("amharic-day")||""; if(localStorage.getItem("amharic-kbhints")==="0") S.kb.hints=false; }catch(e){}
+const save=()=>{try{localStorage.setItem("amharic-best",JSON.stringify(S.best));localStorage.setItem("amharic-rom",S.rom?"1":"0");localStorage.setItem("amharic-miss",JSON.stringify(S.miss));if(S.upto)localStorage.setItem("amharic-upto",S.upto);localStorage.setItem("amharic-day",S.day);localStorage.setItem("amharic-kbhints",S.kb.hints?"1":"0");}catch(e){}};
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ri=n=>Math.floor(Math.random()*n);
+const pick=a=>a[ri(a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+const A=(am,rom)=>`<span class="am">${esc(am)}</span>`+(rom?`<span class="rom">${esc(rom)}</span>`:"");
+const fmt=s=>esc(s).replace(/\{([^|}]+)\|([^}]*)\}/g,(_,a,r)=>`<span class="am">${a}</span> <span class="rom">${r}</span>`);
+const chips=(act,items,sel)=>`<div class="chips">`+items.map(([v,l])=>`<button class="chip" data-act="${act}" data-v="${v}" aria-selected="${String(v)===String(sel)}">${l}</button>`).join("")+`</div>`;
+const mini=(act,items,sel)=>`<div class="mini">`+items.map(([v,l])=>`<button data-act="${act}" data-v="${v}" aria-selected="${v===sel}">${l}</button>`).join("")+`</div>`;
+
+function tableHTML(t){
+  let h=`<div class="tbl">`;
+  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(t.am[i],t.rom[i])}</span><span class="en">${esc(tEn(t,i))}</span></div>`;});
+  return h+`</div>`;
+}
+function partsHTML(p){
+  return `<div class="tbl">`+PL.map((l,i)=>`<div class="row" style="grid-template-columns:8.6rem 1fr"><span class="count">${l}</span><span class="form">${A(p.am[i],p.rom[i])}</span></div>`).join("")+`</div>`;
+}
+function wordList(words){
+  return `<div class="tbl">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span></div>`).join("")+`</div>`;
+}
+function flashHTML(words,key){
+  const F=S.fc;
+  if(F.key!==key||F.order.length!==words.length){F.key=key;F.order=words.map((_,i)=>i);F.i=0;F.flip=false;}
+  const w=words[F.order[F.i%words.length]];
+  return `<button class="flash" data-act="flip" aria-label="Flip card">${A(w[0],w[1])}`+
+    (F.flip?`<span class="en">${esc(w[2])}</span>`:`<span class="hint">Tap to see the meaning</span>`)+`</button>${sayBtn(w[0],"big")}
+    <div class="btns"><button class="btn" data-act="card" data-v="-1">Back</button>
+    <button class="btn" data-act="mix">Shuffle</button>
+    <button class="btn primary" data-act="card" data-v="1">Next</button></div>
+    <p class="count" style="text-align:center;margin-top:10px">Card ${F.i%words.length+1} of ${words.length}</p>`;
+}
+const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[id]}/${id==="daily"?20:10}</strong>best</span>` : `<span class="best">not tried</span>`;
+
+/* ---------- course ---------- */
+function renderCourse(){
+  if(S.lesson) return renderLesson(LMAP[S.lesson]);
+  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}<div class="stack" style="margin-top:14px">`;
+  LESSONS.forEach(l=>{
+    h+= l.review
+      ? `<button class="topic" data-act="start" data-v="R${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>Mixed test</small>${bestChip("R"+l.n)}</button>`
+      : `<button class="topic" data-act="lesson" data-v="${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>${l.vocab.length} words</small>${bestChip("L"+l.n)}</button>`;
+  });
+  h+=`</div>`;
+  if(LATER.length){h+=`<h3>Still to add</h3><div class="stack">`;LATER.forEach(([n,t])=>{h+=`<button class="topic" disabled><b><span class="lnum">${n}</span>${esc(t)}</b></button>`;});h+=`</div>`;}
+  return h;
+}
+function renderLesson(l){
+  let h=`<button class="back" data-act="lesson" data-v="">‹ All units</button>
+   <h2>Unit ${l.n}: ${esc(l.title)}</h2>
+   <div class="bar">${mini("lview",[["notes","Notes"],["words","Words"]].concat(sentOf([l.n]).length?[["sent","Sentences"]]:[],[["cards","Flashcards"]]),S.lview)}</div>`;
+  if(S.lview==="notes"){
+    l.notes.forEach(nt=>{
+      h+=`<div class="note"><h4>${esc(nt.h)}</h4>`+nt.p.map(p=>`<p>${fmt(p)}</p>`).join("")+`</div>`;
+      if(nt.pron){h+=`<div class="grid2" style="margin-top:10px">`+PR.concat(POLITE).map(p=>`<div class="pcard">${A(p.am,p.rom)}<span class="en">${esc(p.en)}</span></div>`).join("")+`</div>`;}
+      (nt.show||[]).concat(nt.tables||[]).forEach(k=>{h+=`<h3>${esc(T[k].title)} <small>· ${esc(T[k].ex)}</small></h3>`+tableHTML(T[k]);});
+      (nt.parts||[]).forEach(k=>{h+=`<h3>${esc(PARTS[k].title)}</h3>`+partsHTML(PARTS[k]);});
+    });
+  }else if(S.lview==="words"){
+    h+=wordList(l.vocab);
+  }else if(S.lview==="sent"&&sentOf([l.n]).length){
+    h+=`<p class="lead">Short sentences made from the words and grammar up to this unit.</p>`+wordList(sentOf([l.n]).map(x=>[x.am,x.rom,x.en]));
+  }else h+=flashHTML(l.vocab,"L"+l.n);
+  h+=`<div class="stack" style="margin-top:18px"><button class="btn primary wide" data-act="start" data-v="L${l.n}">Test unit ${l.n}</button>
+      <button class="btn wide" data-act="typelesson" data-v="${l.n}">Practise typing these words</button></div>`;
+  return h;
+}
+
+/* ---------- fidel ---------- */
+function fidelChart(){
+  const p=FID.find(f=>f.ch===S.pick)||FID[0], r=FR[p.row];
+  const ordName=p.ord<7?["1st","2nd","3rd","4th","5th","6th","7th"][p.ord]+" order":p.ord===7?"“wa” form":"rounded form";
+  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter.</p>
+   <div class="peek"><span class="am">${p.ch}</span><div><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}${p.ord===5?" · also the bare consonant":""}</small></div></div>
+   <div class="chartbox"><table class="chart"><tr><th></th>${VOW.map(v=>`<th>${v}</th>`).join("")}<th>wa</th></tr>`;
+  FR.forEach(r=>{
+    h+=`<tr><td>${r[1]||"–"}</td>`+r.forms.map(f=>`<td><button data-act="pick" data-v="${f.ch}" aria-pressed="${f.ch===S.pick}">${f.ch}</button></td>`).join("");
+    const wa=r.extra.find(f=>f.ord===7);
+    h+=`<td>${wa?`<button data-act="pick" data-v="${wa.ch}" aria-pressed="${wa.ch===S.pick}">${wa.ch}</button>`:""}</td></tr>`;
+  });
+  h+=`</table></div><h3>Rounded letters <small>· q, h, k, g + w</small></h3><div class="chartbox"><table class="chart"><tr><th></th>${LVO.map(x=>`<th>${x[1]}</th>`).join("")}</tr>`;
+  FR.filter(r=>LV[r[0]]).forEach(r=>{h+=`<tr><td>${r[1]}</td>`+r.extra.filter(f=>f.ord===8).map(f=>`<td><button data-act="pick" data-v="${f.ch}" aria-pressed="${f.ch===S.pick}">${f.ch}</button></td>`).join("")+`</tr>`;});
+  h+=`</table></div>
+   <div class="tip"><b>Twin letters.</b> Some sounds have more than one letter: <span class="am">ሀ ሐ ኀ</span> are all h, <span class="am">ሰ ሠ</span> are s, <span class="am">አ ዐ</span> carry a bare vowel, and <span class="am">ጸ ፀ</span> are ts'. Spelling decides which one a word uses. When you type here, either twin is marked correct.</div>
+   <div class="tip"><b>First and fourth order.</b> For the h letters and for <span class="am">አ ዐ</span>, the first order sounds the same as the fourth: <span class="am">ሀ</span> and <span class="am">ሃ</span> are both ha.</div>
+   <div class="tip"><b>Sixth order.</b> The same letter stands for the consonant alone and for the consonant with a very short i, so the chart labels it (i): <span class="am">ልብስ</span> is libs, with only one vowel sounded. Doubled consonants are not shown in fidel either.</div>
+   <div class="tip"><b>Numerals and marks.</b> ፩ 1, ፪ 2, ፫ 3, ፬ 4, ፭ 5, ፮ 6, ፯ 7, ፰ 8, ፱ 9, ፲ 10, ፳ 20. Sentences end with <span class="am">።</span>. Older texts also separate words with <span class="am">፡</span>; modern writing uses a space.</div>`;
+  return h;
+}
+function fidelKey(){
+  const rows=[["e","a short, relaxed “e”, like the first sound of “about”"],["é","as in “they”, without the glide: bét “house”"],["u","as in “rule”"],["i","as in “machine”; in a 6th-order letter it is very short, like the i in “bit”, or silent"],["a","as in “father”"],["o","as in “more”"],
+   ["sh","as in “ship”"],["ch","as in “church”"],["j","as in “judge”"],["zh","the s in “pleasure”"],["gn","ny as in “canyon”: dehna negn"],
+   ["t', ch', p', ts'","“popped” versions of t, ch, p, ts: stop the breath in the throat and release the sound sharply"],["q","a popped k"],
+   ["'","between two vowels, a slight catch: se'at"],["bb, ll…","a doubled letter is held longer: alle “is present”, ale “said”. Doubling of sh, ch, gn and the popped sounds is not shown"],["kw, gw…","consonant with rounded lips, as in sikkwar"]];
+  return `<p class="lead">The Latin spellings here follow everyday modern usage. They are a guide to the sound, so trust the fidel for the exact spelling.</p>
+   <div class="tbl"><table class="keytab">`+rows.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td></tr>`).join("")+`</table></div>`;
+}
+function kbHTML(t,prac){
+  const done=t.result!==null&&t.result!==undefined;
+  const inp=`<input class="tin am ${t.result==="ok"?"ok":t.result==="no"?"no":""}" id="tin" value="${esc(t.typed)}" inputmode="${S.kb.native?"text":"none"}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer in fidel" placeholder="${S.kb.native?"Type here":"Your answer"}" ${done||!S.kb.native?"readonly":""}>`;
+  if(done) return inp;
+  if(!prac&&t.qs&&t.qs[t.i].pad) return numPad(inp);
+  const links=`<div class="kbar"><button class="link" data-act="k-native">${S.kb.native?"Use the on-screen keys":"Use my phone's keyboard"}</button>`+
+     (prac?`<button class="link" data-act="p-show">${t.shown?"Hide answer":"Show answer"}</button>`:"")+
+     `</div>`+(S.kb.native||S.mode==="test"?"":`<p class="count" style="margin-top:4px">${S.rom?"To hide the sounds on the keys, turn off Transcription at the top.":"Sounds on the keys are hidden. Turn on Transcription at the top to show them."}</p>`);
+  const shown=prac&&t.shown?`<p class="fb" style="text-align:center;margin:0 0 6px">Answer: <span class="am">${esc(t.q.answer)}</span></p>`:"";
+  if(S.kb.native) return shown+inp+`<button class="btn primary wide" data-act="k-check" style="margin-top:8px">Check</button>`+links;
+  let h=shown+`<div class="kbd">${inp}<div class="forms">`;
+  if(S.kb.cons!==null){const r=FR[S.kb.cons]; h+=r.forms.concat(r.extra).map(f=>`<button data-act="k-form" data-v="${f.ch}">${f.ch}${S.rom&&S.mode!=="test"?`<small>${esc(f.snd)}</small>`:""}</button>`).join("");}
+  else h+=`<span class="hint">Tap a consonant, then pick the form with the vowel you need.</span>`;
+  h+=`</div><div class="keys">`+FR.map((r,i)=>`<button data-act="k-cons" data-v="${i}" aria-pressed="${S.kb.cons===i}">${r[0]}</button>`).join("")+
+     `<button class="fn" data-act="k-clear">clear</button><button class="fn w2" data-act="k-space">space</button><button class="fn w2" data-act="k-del">delete</button><button class="fn w3 go" data-act="k-check">Check</button></div></div>`;
+  return h+links;
+}
+function newPrac(){
+  const P=S.prac; P.typed="";P.result=null;P.shown=false;S.kb.cons=null;
+  if(P.src==="letters"){const f=pick(FID.filter(f=>f.ord<7));P.q={big:f.snd||"(vowel) "+VOW[f.ord],sub:"Type the letter for this sound",answer:f.ch};}
+  else{
+    let pool = P.src==="extra"?EXTRA_ALL : lessonWords(P.lesson==="all"?FULL:[+P.lesson]);
+    pool=pool.filter(typable); const w=pick(pool);
+    P.q={big:w[2],sub:w[1],subRom:true,answer:w[0]};
+  }
+}
+function fidelType(){
+  const P=S.prac; if(!P.q) newPrac();
+  let h=`<div class="bar">${mini("psrc",[["letters","Letters"],["words","Course words"],["extra","Extra words"]],P.src)}</div>`;
+  if(P.src==="words") h+=chips("plesson",[["all","All"]].concat(FULL.map(n=>[n,"Unit "+n])),P.lesson);
+  h+=`<div class="q slim"><div class="kind">Type in fidel</div><div class="big">${esc(P.q.big)}</div><div class="sub ${P.q.subRom?"rom":""}">${esc(P.q.sub)}</div></div>`;
+  if(P.result) h+=kbHTML(P,true)+`<p class="fb ${P.result==="ok"?"good":"bad"}">${P.result==="ok"?"Correct":"Not quite. It is"} <span class="am">${P.result==="ok"?"":esc(P.q.answer)}</span></p>
+        <button class="btn primary wide" data-act="p-next" style="margin-top:12px">Next</button>`;
+  else h+=kbHTML(P,true);
+  return h;
+}
+function renderFidel(){
+  return chips("ftab",[["chart","Chart"],["type","Typing practice"],["key","Sound guide"]],S.ftab)+
+    (S.ftab==="type"?"":`<h2>${S.ftab==="chart"?"The fidel":"Sound guide"}</h2>`)+
+    (S.ftab==="chart"?fidelChart():S.ftab==="type"?fidelType():fidelKey());
+}
+
+/* ---------- reference ---------- */
+function refPronouns(){
+  let h=`<h2>Pronouns</h2><div class="grid2" style="margin-top:10px">`+PR.concat(POLITE).map(p=>`<div class="pcard">${A(p.am,p.rom)}<span class="en">${esc(p.en)}</span></div>`).join("")+`</div>`;
+  for(const k of ["be","alla","have","poss"]) h+=`<h3>${esc(T[k].title)} <small>· ${esc(T[k].ex)}</small></h3>`+tableHTML(T[k]);
+  return h;
+}
+function refExtra(){
+  const words=EXTRA[S.cat];
+  return `<h2>Extra words</h2><p class="lead">${EXTRA_ALL.length} everyday words in ${ECATS.length} topics. None of them are in the course units.</p>`+chips("cat",ECATS.map(c=>[c,c]),S.cat)+
+   `<div class="bar">${mini("eview",[["list","List"],["cards","Flashcards"]],S.eview)}<span class="count">${words.length} words</span></div>`+
+   (S.eview==="list"?wordList(words):flashHTML(words,"E"+S.cat));
+}
+function renderRef(){
+  return chips("rtab",[["pronouns","Pronouns"],["verbs","Verbs"],["extra","Extra words"]],S.rtab)+
+    (S.rtab==="pronouns"?refPronouns():S.rtab==="verbs"?refVerbs():refExtra());
+}
+
+/* ---------- tests ---------- */
+function mk(kind,big,bigAm,sub,correct,wrongs,optAm){
+  const seen=new Set([correct.l]), opts=[correct];
+  for(const w of shuffle(wrongs)){ if(opts.length>=4)break; if(!seen.has(w.l)){seen.add(w.l);opts.push(w);} }
+  const o=shuffle(opts);
+  return {type:"mc",kind,big,bigAm,sub,opts:o,ans:o.indexOf(correct),optAm};
+}
+const others8 = i => [0,1,2,3,4,5,6,7].filter(j=>j!==i);
+const othersT = (t,i) => others8(i).filter(j=>t.am[j]!==t.am[i]);
+function qTable(k,kind){
+  const t=T[k], i=ri(8), o=j=>({l:t.am[j],r:t.rom[j]});
+  if(k==="be") return mk(kind||"To be",PR[i].am+" ተማሪ ___",true,`${subj(i)} ${t.en[i]} a student`,o(i),others8(i).map(o),true);
+  const rest=othersT(t,i);
+  if(ri(2)) return mk(kind||t.title,tEn(t,i),false,"Choose the Amharic",o(i),rest.map(o),true);
+  return mk(kind||t.title,t.am[i],true,"What does this mean?",{l:tEn(t,i)},rest.map(j=>({l:tEn(t,j)})),false);
+}
+function qParts(k,kind){
+  const p=PARTS[k], i=1+ri(8), o=j=>({l:p.am[j],r:p.rom[j]});
+  const rest=[0,1,2,3,4,5,6,7,8].filter(j=>j!==i&&p.am[j]!==p.am[i]).map(o);
+  return mk(kind,p.am[0]+" → "+PL[i].toLowerCase(),true,"Choose this form of the verb",o(i),rest,true);
+}
+function qPronoun(){
+  const type=ri(5), all=PR.concat(POLITE);
+  if(type===0){const i=ri(all.length);return mk("Pronouns",all[i].am,true,"What does this mean?",{l:all[i].en},all.filter((_,j)=>j!==i).map(p=>({l:p.en})),false);}
+  if(type===1){const i=ri(all.length);return mk("Pronouns",all[i].en,false,"Choose the Amharic pronoun",{l:all[i].am,r:all[i].rom},all.filter((_,j)=>j!==i).map(p=>({l:p.am,r:p.rom})),true);}
+  return qTable(["be","have","poss"][type-2]);
+}
+function qWord(words,kind,backup){
+  const w=pick(words);
+  let others=words.filter(x=>x[0]!==w[0]&&x[2]!==w[2]);
+  if(others.length<6&&backup) others=others.concat(backup.filter(x=>x[0]!==w[0]&&x[2]!==w[2]));
+  if(ri(2)) return mk(kind,w[0],true,"What does this mean?",{l:w[2]},others.map(x=>({l:x[2]})),false);
+  return mk(kind,w[2],false,"Choose the Amharic",{l:w[0],r:w[1]},others.map(x=>({l:x[0],r:x[1]})),true);
+}
+function qTypeWord(words,kind){
+  const w=pick(words.filter(typable));
+  return {type:"type",kind,big:w[2],sub:w[1],subRom:true,answer:w[0],rom:w[1]};
+}
+function qLesson(ns){
+  const n=pick(ns), l=LMAP[n], kind="Unit "+n, r=Math.random();
+  const tabs=l.notes.flatMap(x=>(x.tables||[]).map(k=>[0,k]).concat((x.parts||[]).map(k=>[1,k])));
+  if(r<0.2) return qTypeWord(l.vocab,kind+" · type it");
+  if(r>0.82&&sentOf([n]).length) return qSent([n],kind+" · sentence");
+  if(tabs.length&&r<0.5){const t=pick(tabs);return t[0]?qParts(t[1],kind):qTable(t[1],kind);}
+  return qWord(l.vocab,kind,lessonWords(FULL));
+}
+function qFidRec(){
+  const f=pick(FID.filter(x=>x.snd));
+  const near=FID.filter(x=>x.snd&&x.key!==f.key&&x.snd!==f.snd&&(x.row===f.row||x.ord===f.ord));
+  if(ri(2)) return mk("Fidel",f.ch,true,"Which sound is this?",{l:f.snd},near.map(x=>({l:x.snd})),false);
+  const seen=new Set([f.snd]), wr=[]; shuffle(near).forEach(x=>{if(!seen.has(x.snd)){seen.add(x.snd);wr.push({l:x.ch});}});
+  return mk("Fidel",f.snd,false,"Choose the letter",{l:f.ch},wr,true);
+}
+function qFidType(){
+  const f=pick(FID.filter(x=>x.snd&&x.ord<8));
+  return {type:"type",kind:"Fidel · type it",big:f.snd,sub:"Type the letter for this sound",answer:f.ch};
+}
+function topic(id){
+  if(id==="fid-rec") return {name:"Recognise letters",desc:"See a letter, pick its sound, and the reverse",gen:qFidRec};
+  if(id==="fid-type") return {name:"Type letters",desc:"Read a sound, type the letter",gen:qFidType};
+  if(id==="fid-words") return {name:"Type words",desc:`Spell words from units 1–${LASTF} in fidel`,gen:()=>qTypeWord(lessonWords(FULL),"Type the word")};
+  if(id[0]==="L"&&id!=="Lall"){const n=+id.slice(1);return {name:"Unit "+n,desc:LMAP[n].title,gen:()=>qLesson([n])};}
+  if(id[0]==="R"){const l=LMAP[+id.slice(1)];return {name:"Unit "+l.n+": review",desc:l.title,gen:()=>qLesson(l.review)};}
+  if(id==="Lall") return {name:"All units so far",desc:`Units 1–${LASTF} mixed`,gen:()=>qLesson(FULL)};
+  if(id==="pronouns") return {name:"Pronouns",desc:"Who, to be, to have, my / your / his",gen:qPronoun};
+  if(id==="verbs-type") return {name:"Type verb forms",desc:"Read the person and tense, type the form in fidel",gen:()=>qVerbType()};
+  if(id==="sent-order") return {name:"Build sentences",desc:`Put the words in order · ${SENT.length} sentences`,gen:()=>qOrder(SENT)};
+  if(id==="sent-mean") return {name:"Sentence meanings",desc:"Read a whole sentence and pick its meaning",gen:()=>qSentMean(SENT)};
+  if(id==="num-words") return {name:"Number words",desc:"Match numbers and their Amharic words",gen:()=>qNumWord()};
+  if(id==="num-sym") return {name:"Number symbols",desc:"Read and choose the Amharic numerals",gen:qNumSym};
+  if(id==="num-type") return {name:"Type number words",desc:"See a number, spell it in fidel",gen:qNumType};
+  if(id==="num-pad") return {name:"Type number symbols",desc:"See a number, tap it out in Amharic numerals",gen:qNumPad};
+  if(id==="miss") return {name:"My mistakes",desc:"Things you got wrong, until you get each right three times"};
+  if(id==="daily") return {name:"Today's session",desc:"20 mixed questions"};
+  if(id==="verbs") return {name:"Verb conjugations",desc:`${VLIST.length} verbs, nine tenses`,gen:qVerb};
+  if(id==="extra") return {name:"Extra words",desc:`${ECATS.length} topics, ${EXTRA_ALL.length} words`,gen:()=>{const c=pick(ECATS);return qWord(EXTRA[c],c,EXTRA_ALL);}};
+  return {name:"Everything mixed",desc:"Fidel, course, pronouns and verbs",gen:()=>pick([qFidRec,qFidType,()=>qLesson(FULL),()=>qLesson(FULL),qPronoun,qVerb])()};
+}
+const QN=10;
+const qAns = q => q.type==="mc"?q.opts[q.ans].l:q.answer;
+const qKey = q => q.type+"|"+q.big+"|"+qAns(q);
+/* sentences */
+const sentOf = ns => SENT.filter(x=>ns.includes(x.l));
+const sWords = x => x.am.replace(/[?!]/g,"").split(" ");
+function qOrder(pool,kind){
+  const long=pool.filter(x=>sWords(x).length>=3); if(!long.length) return qSentMean(pool,kind);
+  const x=pick(long), w=sWords(x); let tiles=shuffle(w.slice()), g=0;
+  while(tiles.join(" ")===w.join(" ")&&g++<20) tiles=shuffle(w.slice());
+  return {type:"order",kind:kind||"Build the sentence",big:x.en,sub:"Tap the words in the right order",answer:w.join(" "),rom:x.rom,tiles};
+}
+function qSentMean(pool,kind){
+  const x=pick(pool), rest=SENT.filter(y=>y.am!==x.am&&y.en!==x.en), near=rest.filter(y=>Math.abs(y.l-x.l)<=6);
+  const others=near.length>=6?near:rest;
+  if(ri(2)) return mk(kind||"Sentences",x.am,true,"What does this mean?",{l:x.en},others.map(y=>({l:y.en})),false);
+  return mk(kind||"Sentences",x.en,false,"Choose the Amharic",{l:x.am,r:x.rom},others.map(y=>({l:y.am,r:y.rom})),true);
+}
+const qSent = (ns,kind) => ri(2)?qOrder(sentOf(ns),kind):qSentMean(sentOf(ns),kind);
+/* mistakes: kept on this device until answered right three times */
+function record(q,ok){
+  const k=qKey(q), i=S.miss.findIndex(m=>m.k===k);
+  if(!ok){ if(i>=0) S.miss[i].s=0; else {S.miss.unshift({k,q,s:0}); if(S.miss.length>150) S.miss.length=150;} }
+  else if(i>=0){ if(++S.miss[i].s>=3) S.miss.splice(i,1); }
+  else return;
+  save();
+}
+function fresh(q){
+  q=JSON.parse(JSON.stringify(q));
+  if(q.type==="mc"){const c=q.opts[q.ans]; q.opts=shuffle(q.opts); q.ans=q.opts.indexOf(c);}
+  if(q.type==="order"){let g=0; do q.tiles=shuffle(q.tiles); while(q.tiles.join(" ")===q.answer&&g++<20);}
+  return q;
+}
+/* daily session */
+const today = () => {const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();};
+const upto = () => S.upto || Math.max(1,...FULL.filter(n=>S.best["L"+n]!=null));
+// the unit where each tense is first taught (99 = not in the course yet)
+const TMIN={past:9,pastNeg:9,pres:8,presNeg:8,short:14,cmd:12,cmdNeg:12,ger:99,perf:13};
+function verbPool(N){
+  const vs=VLIST.filter(v=>v.lesson<=N).map(v=>[v,vTenses(v).filter(t=>v.fixed?v.lesson<=N&&(t[0]!=="past"&&t[0]!=="pastNeg"||N>=TMIN.past):TMIN[t[0]]<=N)]).filter(x=>x[1].length);
+  return vs;
+}
+function dailyQs(){
+  const N=upto(), done=FULL.filter(n=>n<=N), recent=done.slice(-5), sp=SENT.filter(x=>x.l<=N), vp=verbPool(N);
+  const lessonQ=ns=>()=>qLesson(ns), verbQ=typed=>()=>{ if(!vp.length) return qLesson(recent); const x=pick(vp); return typed?qVerbType(x[0],x[1]):qVerb(x[0],x[1]); };
+  const sentQ=order=>()=>sp.length?(order?qOrder(sp):qSentMean(sp)):qLesson(done);
+  const gens=[()=>qNumWord(N<11?10:100),qFidRec,qFidType,qFidRec,lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(done),lessonQ(done),lessonQ(done),verbQ(0),verbQ(0),verbQ(1),sentQ(1),sentQ(1),sentQ(0)];
+  const qs=shuffle(S.miss).slice(0,4).map(m=>fresh(m.q)), seen=new Set(qs.map(qKey));
+  gens.push(...Array(20).fill(lessonQ(done)));
+  for(const g of gens){ if(qs.length>=20) break; let n=0; while(n++<30){const q=g(), k=qKey(q); if(!seen.has(k)){seen.add(k);qs.push(q);break;}} }
+  return shuffle(qs);
+}
+function dailyCard(){
+  const N=upto(), done=S.day===today();
+  return `<div class="daily"><div><b>Today's session</b><small>${done?"Done today. Do another whenever you like.":"20 mixed questions: letters, words, verbs, sentences"+(S.miss.length?" and your mistakes":"")}</small></div>
+   <label class="sel">I'm up to <select id="upto">${FULL.map(n=>`<option value="${n}" ${n===N?"selected":""}>Unit ${n}</option>`).join("")}</select></label>
+   <button class="btn primary wide" data-act="start" data-v="daily">${done?"Another session":"Start"}</button></div>`;
+}
+function startQuiz(id){
+  let qs=[];
+  if(id==="miss") qs=shuffle(S.miss).slice(0,QN).map(m=>fresh(m.q));
+  else if(id==="daily") qs=dailyQs();
+  else{ const seen=new Set(), t=topic(id); let guard=0;
+    while(qs.length<QN&&guard++<300){const q=t.gen(), key=qKey(q); if(!seen.has(key)){seen.add(key);qs.push(q);}} }
+  if(!qs.length) return;
+  S.quiz={id,qs,n:qs.length,i:0,score:0,picked:null,typed:"",built:[],result:null,misses:[],done:false};
+  S.kb.cons=null;
+}
+function testMenu(){
+  const item=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
+  let h=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
+   <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button></div>
+   <h3>Fidel</h3><div class="stack">${["fid-rec","fid-type","fid-words"].map(item).join("")}</div>
+   <h3>Units</h3><div class="stack">${LESSONS.map(l=>item((l.review?"R":"L")+l.n)).join("")}${item("Lall")}</div>
+   <h3>Numbers</h3><div class="stack">${NTESTS.map(item).join("")}</div>
+   <h3>Sentences</h3><div class="stack">${["sent-order","sent-mean"].map(item).join("")}</div>
+   <h3>General practice</h3><div class="stack">${["pronouns","verbs","verbs-type","extra","mixed"].map(item).join("")}</div>`;
+  return h;
+}
+function renderTest(){
+  const Q=S.quiz;
+  if(!Q) return testMenu();
+  const tp=topic(Q.id), QN=Q.n;
+  if(Q.done){
+    const msg=Q.score===QN?"Perfect score.":Q.score>=QN*.8?"Strong result.":Q.score>=QN*.5?"Good start. Review the ones below.":"Go back over the notes, then try again.";
+    let h=`<div class="score"><div class="count">${esc(tp.name)}</div><div class="n">${Q.score}/${QN}</div><p style="margin:6px auto">${msg}</p></div>`;
+    if(Q.misses.length){h+=`<h3>To review</h3><div class="tbl">`;
+      Q.misses.forEach(m=>{const q=m.q, am=q.type!=="mc"||q.optAm, rom=q.type!=="mc"?q.rom:q.opts[q.ans].r;
+        h+=`<div class="miss"><span class="${q.bigAm?"am":""}">${esc(q.big)}</span> → <b class="${am?"am":""}">${esc(qAns(q))}</b>`+(rom?` <span class="rom">${esc(rom)}</span>`:"")+
+           `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"?"built":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
+      h+=`</div>`;}
+    return h+`<div class="stack" style="margin-top:16px">${Q.id==="miss"&&!S.miss.length?"":`<button class="btn primary wide" data-act="start" data-v="${Q.id}">${Q.id==="miss"?"More mistakes":Q.id==="daily"?"Another session":"Try again"}</button>`}<button class="btn wide" data-act="quit">Choose another test</button></div>`;
+  }
+  const q=Q.qs[Q.i], answered=q.type==="mc"?Q.picked!==null:Q.result!==null;
+  let h=`<div class="prog"><i style="width:${(Q.i+(answered?1:0))/QN*100}%"></i></div>
+   <div class="bar" style="margin:0"><span class="count">Question ${Q.i+1} of ${QN}</span><button class="link" data-act="quit">End test</button></div>
+   <div class="q ${q.type==="type"?"slim":""}"><div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""}">${esc(q.big)}</div><div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div></div>`;
+  let ok;
+  if(q.type==="type"){
+    h+=kbHTML(Q); ok=Q.result==="ok";
+  }else if(q.type==="order"){
+    ok=Q.result==="ok";
+    h+=`<div class="built ${answered?(ok?"right":"wrong"):""}">`+(Q.built.length?Q.built.map((j,p)=>`<button class="tile am" data-act="o-rem" data-v="${p}" ${answered?"disabled":""}>${esc(q.tiles[j])}</button>`).join(""):`<span class="count">Your sentence appears here</span>`)+`</div>
+       <div class="tiles">`+q.tiles.map((w,j)=>`<button class="tile am ${Q.built.includes(j)?"used":""}" data-act="o-add" data-v="${j}" ${answered||Q.built.includes(j)?"disabled":""}>${esc(w)}</button>`).join("")+`</div>`;
+    if(!answered) h+=`<button class="btn primary wide" data-act="o-check" style="margin-top:14px" ${Q.built.length===q.tiles.length?"":"disabled"}>Check</button>`;
+  }else{
+    h+=`<div class="stack">`; ok=Q.picked===q.ans;
+    q.opts.forEach((o,j)=>{
+      const cls=answered?(j===q.ans?" right":j===Q.picked?" wrong":""):"";
+      h+=`<button class="opt${cls}" data-act="ans" data-v="${j}" ${answered?"disabled":""}>`+
+         (q.optAm?`<span class="am">${esc(o.l)}</span>`+((answered&&o.r)?`<span class="rom">${esc(o.r)}</span>`:""):`<span>${esc(o.l)}</span>`)+`</button>`;
+    });
+    h+=`</div>`;
+  }
+  if(answered){
+    h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="order"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
+        <button class="btn primary wide" data-act="next" style="margin-top:12px">${Q.i===QN-1?"See result":"Next question"}</button>`;
+  }
+  return h;
+}
+
+/* ---------- render + events ---------- */
+const MODES=["course","fidel","num","ref","test"];
+function render(){
+  document.body.classList.toggle("norom",!S.rom);
+  $("#romtoggle").setAttribute("aria-pressed",S.rom);
+  MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
+  $("#app").innerHTML = S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():renderTest();
+  addSayButtons($("#app"));
+}
+const typing = () => (S.mode==="test"&&S.quiz&&!S.quiz.done&&S.quiz.qs[S.quiz.i].type==="type") ? S.quiz : (S.mode==="fidel"&&S.ftab==="type") ? S.prac : null;
+function check(){
+  const t=typing(); if(!t||t.result) return;
+  const q=t===S.prac?t.q:t.qs[t.i];
+  const nz=q.num?numNorm:x=>x; t.result = canon(nz(t.typed))===canon(nz(q.answer))&&t.typed.trim()!=="" ? "ok":"no";
+  if(t===S.quiz){ if(t.result==="ok")t.score++; else t.misses.push({q,p:t.typed}); record(q,t.result==="ok"); }
+}
+document.addEventListener("input",e=>{
+  if(e.target.id==="nin"){S.num.n=e.target.value;$("#nout").innerHTML=numOut();}
+  if(e.target.id==="tin"){const t=typing(); if(t) t.typed=e.target.value;}
+  if(e.target.id==="vsearch"){S.v.q=e.target.value;const m=vMatch();if(m.length&&!m.some(x=>x[1]===S.v.sel))S.v.sel=m[0][1];$("#vlist").innerHTML=vListHTML();const p=$("#vpanel");}
+});
+document.addEventListener("change",e=>{
+  const id=e.target.id, val=e.target.value;
+  if(id==="vlesson"){S.v.lesson=val;const m=vMatch();if(m.length)S.v.sel=m[0][1];render();}
+  else if(id==="vclesson"){S.v.clesson=val;vNewCard();render();}
+  else if(id==="vctense"){S.v.ctense=val;vNewCard();render();}
+  else if(id==="vsearch"){render();}
+  else if(id==="upto"){S.upto=+val;save();render();}
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();} });
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
+  const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
+  if(a==="say"){playAm(v);return;}
+  if(a==="rom"){S.rom=!S.rom;save();}
+  else if(a==="mode"){S.mode=v;top=true;}
+  else if(a==="lesson"){S.lesson=v?+v:null;S.lview="notes";top=true;}
+  else if(a==="lview"){S.lview=v;}
+  else if(a==="ftab"){S.ftab=v;top=true;}
+  else if(a==="pick"){S.pick=v;}
+  else if(a==="rtab"){S.rtab=v;top=true;}
+  else if(a==="cat"){S.cat=v;}
+  else if(a==="eview"){S.eview=v;}
+  else if(a==="flip"){F.flip=!F.flip;}
+  else if(a==="card"){const n=F.order.length;F.i=(F.i+ +v+n)%n;F.flip=false;}
+  else if(a==="mix"){F.order=shuffle(F.order);F.i=0;F.flip=false;}
+  else if(a==="psrc"){S.prac.src=v;newPrac();}
+  else if(a==="plesson"){S.prac.lesson=v;newPrac();}
+  else if(a==="typelesson"){S.mode="fidel";S.ftab="type";S.prac.src="words";S.prac.lesson=v;newPrac();top=true;}
+  else if(a==="p-next"){newPrac();}
+  else if(a==="p-show"){S.prac.shown=!S.prac.shown;}
+  else if(a==="k-native"){S.kb.native=!S.kb.native;S.kb.cons=null;}
+  else if(a==="vview"){S.v.view=v;}
+  else if(a==="vsel"){S.v.sel=+v;}
+  else if(a==="vtense"){S.v.tense=v;}
+  else if(a==="vdeck"){S.v.deck=v;vNewCard();}
+  else if(a==="vflip"){S.v.flip=!S.v.flip;}
+  else if(a==="vnext"){vNewCard();}
+  else if(a==="k-cons"){S.kb.cons=S.kb.cons===+v?null:+v;}
+  else if(a==="k-form"&&t){t.typed+=v;S.kb.cons=null;}
+  else if(a==="k-space"&&t){t.typed+=" ";}
+  else if(a==="k-del"&&t){t.typed=Array.from(t.typed).slice(0,-1).join("");}
+  else if(a==="k-clear"&&t){t.typed="";}
+  else if(a==="k-check"){check();}
+  else if(a==="start"){startQuiz(v);if(S.quiz)S.mode="test";top=true;}
+  else if(a==="quit"){S.quiz=null;top=true;}
+  else if(a==="ntab"){S.num.tab=v;}
+  else if(a==="ndeck"){S.num.deck=v;}
+  else if(a==="nrand"){S.num.n=String(pick([ri(100),ri(100),ri(1000),ri(NMAX+1)]));}
+  else if(a==="o-add"&&Q&&Q.result===null){if(!Q.built.includes(+v))Q.built.push(+v);}
+  else if(a==="o-rem"&&Q&&Q.result===null){Q.built.splice(+v,1);}
+  else if(a==="o-check"&&Q&&Q.result===null){const q=Q.qs[Q.i], said=Q.built.map(j=>q.tiles[j]).join(" "); Q.result=canon(said)===canon(q.answer)?"ok":"no"; if(Q.result==="ok")Q.score++; else Q.misses.push({q,p:said}); record(q,Q.result==="ok");}
+  else if(a==="ans"&&Q&&Q.picked===null){Q.picked=+v; const q=Q.qs[Q.i]; if(Q.picked===q.ans)Q.score++; else Q.misses.push({q,p:q.opts[Q.picked].l}); record(q,Q.picked===q.ans);}
+  else if(a==="next"&&Q){ if(Q.i===Q.n-1){Q.done=true; if(Q.id==="daily")S.day=today(); if(Q.id!=="miss"&&(S.best[Q.id]==null||Q.score>S.best[Q.id]))S.best[Q.id]=Q.score; save();} else {Q.i++;Q.picked=null;Q.typed="";Q.built=[];Q.result=null;S.kb.cons=null;} top=true;}
+  render();
+  if(top) window.scrollTo(0,0);
+});
+render();
