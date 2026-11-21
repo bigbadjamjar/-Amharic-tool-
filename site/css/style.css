@@ -192,3 +192,9 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .tile.gap.now{border-color:var(--gold);color:var(--gold);font-weight:700}
 .slot-opts{margin-top:6px}
 .tile.no{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);opacity:.75}
+.bset{margin-top:12px}
+.bset h4{margin-bottom:4px}
+.bset > .count{margin:10px 0 4px}
+.bset .bhelp{margin:6px 0 0;font-size:.82rem}
+.bset .sel{width:100%}
+.wrapchips{flex-wrap:wrap;overflow:visible;padding:2px 0}

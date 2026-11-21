@@ -82,6 +82,22 @@ const checkSlots = (x, what) => {
   }
 };
 for (let n = 0; n < 400; n++) { const x = X.bMakeVerbSentence(); if (x) checkSlots(x, `made-up "${x.en}"`); }
+// every setting still gives the right number of choices, with the right word once
+for (const mode of ["forms", "mixed", "any"]) for (const n of [2, 3, 6]) for (const tenses of [["past"], ["pres", "presNeg"], undefined]) {
+  const o = { mode, n, tenses, upto: n === 6 ? 0 : 8 };
+  for (let k = 0; k < 30; k++) {
+    const x = X.bMakeVerbSentence(o.upto || 99, tenses) || X.bMakeVerbSentence();
+    for (const w of x.words) {
+      const c = X.bOptions(w, o);
+      ok(c.length === n && c.filter(y => y.ok).length === 1 && new Set(c.map(y => y.am)).size === n, `${mode}/${n}: bad choices for "${w.am}"`);
+      // "same word" mode: every wrong verb choice is a form of the right verb
+      if (mode === "forms" && w.d.k === "verb") {
+        const all = new Set(Object.values(X.vforms(verb(w.d.h))).flat().map(y => y.am));
+        ok(c.every(y => all.has(y.am)), `forms mode offered another verb for "${w.am}": ${c.map(y => y.am).join(" ")}`);
+      }
+    }
+  }
+}
 for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);

@@ -34,39 +34,70 @@ function bVerbPool(kind){
 }
 function bHead(v){ return v.head||v.rom; }      // fixed verbs (ነው, አለ, ነበረ) have no head
 function bVerbByKey(k){ return VLIST.find(v=>bHead(v)===k); }
-function bWrongs(w){
-  const d=w.d||{}, ok=w.am, out=[];   // out: arrays of candidates, one per kind of mistake
+/* Settings (all optional):
+     mode    "forms"  only other forms of the same word: the verb in other persons and tenses
+                      (other slots use words of the same kind: pronouns, time words, nouns)
+             "mixed"  forms of the same word plus other words of the same kind (the default)
+             "any"    words drawn from anywhere in the course, so you need to know the meaning
+     n       how many tiles to show, the right one included
+     tenses  which tenses to use, both for made-up sentences and for wrong-tense choices
+     upto    only use course units up to this one */
+const B_DEFAULT = {mode:"mixed",n:4,tenses:B_TENSES.slice(),upto:0};
+const bOpt = o => { const r=Object.assign({},B_DEFAULT); for(const k in (o||{})) if(o[k]!=null) r[k]=o[k]; if(!r.tenses.length) r.tenses=B_TENSES.slice(); return r; };
+let B_ANY=null;
+function bAnyPool(){            // every word from the course sentences and the made-up ones, plus some verb forms
+  if(B_ANY) return B_ANY;
+  const seen=new Set(); B_ANY=[];
+  const add=(x,l)=>{ if(x&&x.am&&!seen.has(x.am)){seen.add(x.am);B_ANY.push({am:x.am,rom:x.rom||"",l});} };
+  SENT.forEach(s=>bTokens(s).forEach(t=>add(t,s.l)));
+  BTIME.concat(BWHEN_MORE,Object.values(BOBJ).flat()).forEach(x=>add({am:x[0],rom:x[1]},1));
+  BVERBS.forEach(b=>{ const v=bVerb(b[0]); if(!v)return; const f=vforms(v); B_TENSES.forEach(t=>[0,3,5,7].forEach(i=>bUsable(f[t]&&f[t][i])&&add(f[t][i],v.lesson))); });
+  return B_ANY;
+}
+// The candidates for one slot, sorted by kind of mistake.
+function bWrongs(w,o){
+  o=bOpt(o);
+  const d=w.d||{}, ok=w.am, K={person:[],tense:[],verb:[],same:[],forms:[],any:[]};
   if(d.k==="verb"){
     const v=bVerbByKey(d.h); const f=v&&vforms(v);
     if(f&&d.t==="vn"){         // "to do", "to go": other verbs' -ing nouns, and this verb in other forms
-      const C=[]; bVerbPool(d.p).forEach(h=>{ if(h===d.h)return; const o=bVerbByKey(h), g=o&&vforms(o).vn; if(bUsable(g)) C.push(g); });
-      out.push(C,["pres","past","cmd"].map(t=>f[t]&&f[t][t==="cmd"?1:3]).filter(bUsable));
+      bVerbPool(d.p).forEach(h=>{ if(h===d.h)return; const x=bVerbByKey(h), g=x&&vforms(x).vn; if(bUsable(g)) K.verb.push(g); });
+      K.forms=["pres","past","cmd","presNeg"].map(t=>f[t]&&f[t][t==="cmd"?1:3]).filter(bUsable);
     }else if(f){
-      const A=[], B=[], C=[];
-      for(let j=0;j<8;j++) if(j!==d.i&&f[d.t]&&bUsable(f[d.t][j])) A.push(f[d.t][j]);              // wrong person
-      B_TENSES.forEach(t=>{ if(t!==d.t&&f[t]&&bUsable(f[t][d.i])) B.push(f[t][d.i]); });            // wrong tense
-      bVerbPool(v.fixed?"fixed":d.p).forEach(h=>{ if(h===d.h)return; const o=bVerbByKey(h), g=o&&vforms(o)[d.t]; if(g&&bUsable(g[d.i])) C.push(g[d.i]); }); // wrong verb
-      out.push(A,B,C);
+      for(let j=0;j<8;j++) if(j!==d.i&&f[d.t]&&bUsable(f[d.t][j])) K.person.push(f[d.t][j]);
+      const ts=o.tenses.filter(t=>t!==d.t&&f[t]&&bUsable(f[t][d.i]));
+      ts.forEach(t=>K.tense.push(f[t][d.i]));
+      bVerbPool(v.fixed?"fixed":d.p).forEach(h=>{ if(h===d.h)return; const x=bVerbByKey(h), g=x&&vforms(x)[d.t]; if(g&&bUsable(g[d.i])) K.verb.push(g[d.i]); });
     }
   }else if(d.k==="pr"){
-    out.push(PR.filter((_,j)=>j!==d.i));
+    K.same=PR.filter((_,j)=>j!==d.i);
   }else if(d.k==="set"){
     const set = d.s==="when" ? BTIME.concat(BWHEN_MORE) : Object.values(BOBJ).flat();
-    out.push(set.map(x=>({am:x[0],rom:x[1]})));
+    K.same=set.map(x=>({am:x[0],rom:x[1]}));
   }else if(d.k==="near"){
-    const skip=new Set(d.skip||[]), seen=new Set(), near=[];
-    SENT.filter(s=>Math.abs(s.l-d.l)<=3).forEach(s=>bTokens(s).forEach(t=>{ if(!skip.has(t.am)&&!seen.has(t.am)){seen.add(t.am);near.push(t);} }));
-    out.push(near);
+    const skip=new Set(d.skip||[]), seen=new Set();
+    SENT.filter(s=>Math.abs(s.l-d.l)<=3).forEach(s=>bTokens(s).forEach(t=>{ if(!skip.has(t.am)&&!seen.has(t.am)){seen.add(t.am);K.same.push(t);} }));
   }
-  return out.map(list=>{ const seen=new Set(); return list.filter(x=>x&&x.am&&!bSame(x.am,ok)&&!seen.has(x.am)&&seen.add(x.am)); });
+  const skip=new Set(d.skip||[]);
+  K.any=bAnyPool().filter(x=>(!o.upto||x.l<=o.upto)&&!skip.has(x.am));
+  for(const k in K) if(Array.isArray(K[k])){ const seen=new Set(); K[k]=K[k].filter(x=>x&&x.am&&!bSame(x.am,ok)&&!seen.has(x.am)&&seen.add(x.am)); }
+  return K;
 }
-// The right word plus n-1 wrong ones: one of each kind of mistake first, then any.
-function bOptions(w,n){
-  n=n||4;
-  const kinds=bWrongs(w).map(bShuffle), picked=[], seen=new Set([w.am]);
+// The right word plus n-1 wrong ones. The kinds the mode asks for come first, one of each,
+// and only if they run out are other kinds used to make up the number.
+function bOptions(w,o){
+  if(typeof o==="number") o={n:o};
+  o=bOpt(o);
+  const K=bWrongs(w,o), n=o.n, picked=[], seen=new Set([w.am]);
+  const want = o.mode==="forms" ? [K.person,K.tense,K.forms,K.same]
+             : o.mode==="any"   ? [K.any]
+             :                    [K.person,K.tense,K.verb,K.forms,K.same];
+  const backup = [K.person,K.tense,K.verb,K.forms,K.same,K.any];
   const take=x=>{ if(x&&!seen.has(x.am)&&!bSame(x.am,w.am)){seen.add(x.am);picked.push({am:x.am,rom:x.rom||""});} };
+  const kinds=want.map(bShuffle);
   bShuffle(kinds).forEach(k=>{ if(picked.length<n-1) take(k[0]); });
   bShuffle(kinds.flat()).forEach(x=>{ if(picked.length<n-1) take(x); });
+  bShuffle(backup.flat()).forEach(x=>{ if(picked.length<n-1) take(x); });
   return bShuffle(picked.concat([{am:w.am,rom:w.rom||"",ok:true}]));
 }
 
@@ -85,11 +116,11 @@ function bEnglish(b,t,i,time,obj){
   else vp=time&&time[0]==="ነገ"?"will not "+base : (he?"does not ":"do not ")+base;
   return bCap(B_SUBJ[i])+" "+vp+o+when;
 }
-// upto: only verbs and tenses the course has reached by that unit (leave out for all)
-function bMakeVerbSentence(upto){
+// upto: only verbs and tenses the course has reached by that unit (leave out for all); only: tenses to choose from
+function bMakeVerbSentence(upto,only){
   const N=upto||99;
   const verbs=BVERBS.filter(b=>{const v=bVerb(b[0]);return v&&v.lesson<=N;});
-  const tenses=B_TENSES.filter(t=>B_TMIN[t]<=N);
+  const tenses=B_TENSES.filter(t=>B_TMIN[t]<=N&&(!only||!only.length||only.includes(t)));
   if(!verbs.length||!tenses.length) return null;
   const b=bPick(verbs), t=bPick(tenses);
   const i = t==="cmd" ? bPick([1,2,6,5]) : bRand(8);
