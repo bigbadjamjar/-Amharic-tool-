@@ -4,6 +4,8 @@
    tools/audio_manifest.py, which the deploy workflow runs, so dropping a file in is enough.
    If there is no clip, the browser's own Amharic voice is used when it has one (most don't). */
 const AUDIO_FILES = (typeof window!=="undefined" && window.AUDIO_FILES) || {};
+// Male-voice clips (audio/clips/m/) for the men in dialogues. Anything without one uses the main clip.
+const AUDIO_MALE = (typeof window!=="undefined" && window.AUDIO_MALE) || {};
 // Must match normalize() in tools/audio_common.py.
 const SAY_STRIP = /[?!.,;:"'“”‘’()\[\]\/\\*<>|…።፣፤፡፥፦፧፨]/g;
 const sayKey = s => String(s).normalize("NFC").replace(SAY_STRIP," ").replace(/\s+/g," ").trim();
@@ -13,29 +15,36 @@ function findVoice(){
   amVoice = speechSynthesis.getVoices().find(v=>/^am(-|_|$)/i.test(v.lang)) || null;
 }
 if(typeof speechSynthesis!=="undefined"){ findVoice(); speechSynthesis.addEventListener?.("voiceschanged",()=>{findVoice(); if(typeof render==="function") render();}); }
-const clipFor = am => AUDIO_FILES[sayKey(am)];
+const clipFor = (am, voice) => (voice==="m" && AUDIO_MALE[sayKey(am)]) || AUDIO_FILES[sayKey(am)];
 const canSay = am => !!(clipFor(am) || amVoice);
 let nowPlaying = null;
 // Playback speed, set from the header (1, 0.75 or 0.5). Saved clips keep their pitch when slowed.
 let sayRate = 1;
 const SAY_RATES = [1, .75, .5];
-function playAm(am, rate){
+// voice: "m" to prefer the male clip. done: called once when it has finished (or straight away if nothing can play).
+function playAm(am, rate, voice, done){
   rate = rate || sayRate;
-  const clip = clipFor(am);
-  if(nowPlaying){ nowPlaying.pause(); nowPlaying=null; }
+  const clip = clipFor(am, voice);
+  if(nowPlaying){ const p=nowPlaying; nowPlaying=null; p.onended=p.onerror=null; p.pause(); }
+  if(typeof speechSynthesis!=="undefined") speechSynthesis.cancel();
+  let fin = done ? ()=>{ const f=fin; fin=null; if(f) done(); } : null;
   if(clip){
-    nowPlaying = new Audio("audio/"+clip.split("/").map(encodeURIComponent).join("/"));
-    nowPlaying.preservesPitch = nowPlaying.mozPreservesPitch = nowPlaying.webkitPreservesPitch = true;
-    nowPlaying.defaultPlaybackRate = nowPlaying.playbackRate = rate;
-    nowPlaying.play().catch(()=>speakAm(am, rate));
+    const a = nowPlaying = new Audio("audio/"+clip.split("/").map(encodeURIComponent).join("/"));
+    a.preservesPitch = a.mozPreservesPitch = a.webkitPreservesPitch = true;
+    a.defaultPlaybackRate = a.playbackRate = rate;
+    if(fin){ a.onended = ()=>fin&&fin(); a.onerror = ()=>fin&&fin(); }
+    a.play().catch(()=>speakAm(am, rate, fin));
     return;
   }
-  speakAm(am, rate);
+  speakAm(am, rate, fin);
 }
-function speakAm(am, rate){
-  if(!amVoice) return;
+// Stop whatever is playing without calling its done().
+function stopAm(){ if(nowPlaying){ const p=nowPlaying; nowPlaying=null; p.onended=p.onerror=null; p.pause(); } if(typeof speechSynthesis!=="undefined") speechSynthesis.cancel(); }
+function speakAm(am, rate, done){
+  if(!amVoice){ if(done) setTimeout(done, 0); return; }
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(am); u.voice = amVoice; u.lang = amVoice.lang; u.rate = .85*(rate||sayRate);
+  if(done){ u.onend = done; u.onerror = done; }
   speechSynthesis.speak(u);
 }
 const sayBtn = (am, cls="") => canSay(am) ? `<button class="say ${cls}" data-act="say" data-v="${esc(am)}" aria-label="Listen" title="Listen">▶</button>` : "";

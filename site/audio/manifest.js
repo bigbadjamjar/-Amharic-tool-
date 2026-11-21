@@ -704,3 +704,5 @@ window.AUDIO_FILES = {
 "ፖ": "clips/ፖ.mp3",
 "ፖስታ ቤት": "clips/ፖስታ ቤት.mp3"
 };
+// The male voice, for the male speakers in dialogues (clips/m/).
+window.AUDIO_MALE = {};

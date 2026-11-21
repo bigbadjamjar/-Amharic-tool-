@@ -263,7 +263,7 @@ function renderCourse(){
 function renderLesson(l){
   let h=`<button class="back" data-act="lesson" data-v="">‹ All units</button>
    <h2>Unit ${l.n}: ${esc(l.title)}</h2>
-   <div class="bar">${mini("lview",[["notes","Notes"],["words","Words"]].concat(sentOf([l.n]).length?[["sent","Sentences"]]:[],[["cards","Flashcards"]]),S.lview)}</div>`;
+   <div class="bar">${mini("lview",[["notes","Notes"],["words","Words"]].concat(sentOf([l.n]).length?[["sent","Sentences"]]:[],DMAP[l.n]?[["dlg","Dialogue"]]:[],[["cards",DMAP[l.n]?"Cards":"Flashcards"]]),S.lview)}</div>`;
   if(S.lview==="notes"){
     l.notes.forEach(nt=>{
       h+=`<div class="note"><h4>${esc(nt.h)}</h4>`+nt.p.map(p=>`<p>${fmt(p)}</p>`).join("")+`</div>`;
@@ -275,6 +275,8 @@ function renderLesson(l){
     h+=wordList(l.vocab);
   }else if(S.lview==="sent"&&sentOf([l.n]).length){
     h+=`<p class="lead">Short sentences made from the words and grammar up to this unit.</p>`+wordList(sentOf([l.n]).map(x=>[x.am,x.rom,x.en]));
+  }else if(S.lview==="dlg"&&DMAP[l.n]){
+    h+=dialogueHTML(l);
   }else h+=flashHTML(l.vocab,"L"+l.n);
   h+=`<div class="stack" style="margin-top:18px"><button class="btn primary wide" data-act="start" data-v="L${l.n}">Test unit ${l.n}</button>
       <button class="btn wide" data-act="typelesson" data-v="${l.n}">Practise typing these words</button></div>`;
@@ -534,6 +536,7 @@ function testMenu(){
    <h3>Units</h3><div class="stack">${LESSONS.map(l=>item((l.review?"R":"L")+l.n)).join("")}${item("Lall")}</div>
    <h3>Numbers</h3><div class="stack">${NTESTS.map(item).join("")}</div>
    <h3>Sentences</h3><div class="stack">${["sent-order","sent-mean"].map(item).join("")}</div>
+   ${dgMenu()}
    <h3>Sentence builder</h3><div class="stack">${["build-verbs","build-course"].map(item).join("")}</div>${bsHTML()}
    <h3>General practice</h3><div class="stack">${["pronouns","verbs","verbs-type","extra","mixed"].map(item).join("")}</div>`;
   return h;
@@ -721,6 +724,9 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
+  if(a.startsWith("dg-")&&a!=="dg-open"){ if(!dgAct(a,v)) render(); return; }
+  if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
+  if(a==="dg-open"){S.mode="course";S.lesson=+v;S.lview="dlg";dgReset(+v,true);render();window.scrollTo(0,0);return;}
   if(a==="say-slow"){playAm(v,lsSlow());return;}
   if(a==="rom"){S.rom=!S.rom;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}

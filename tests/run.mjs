@@ -8,10 +8,10 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "site
 // Same order as the <script> tags in site/index.html, minus the browser-only files.
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
-  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline)\.js$/.test(f));
+  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions};", ctx);
+  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -32,6 +32,22 @@ for (const l of X.LESSONS) {
 for (const s of X.SENT) ok(lessonNums.has(s.l) && s.am && s.en, `sentence has a bad lesson or is empty: ${JSON.stringify(s)}`);
 for (const t of Object.values(X.T)) ok(t.am.length === 8 && t.rom.length === 8 && t.en.length === 8, `table "${t.title}" needs 8 forms`);
 for (const [cat, words] of Object.entries(X.EXTRA)) for (const w of words) ok(w.length >= 3, `vocab ${cat}: bad entry ${JSON.stringify(w)}`);
+
+// --- dialogues: one per unit, well formed, and readable as JSON by tools/make_audio.py
+const dsrc = fs.readFileSync(path.join(root, "js/data/dialogues.js"), "utf8");
+let djson = null; try { djson = JSON.parse(dsrc.slice(dsrc.indexOf("= [") + 2, dsrc.lastIndexOf("]") + 1)); } catch (e) { ok(false, `dialogues.js is not strict JSON: ${e.message}`); }
+ok(djson && djson.length === X.DIALOGUES.length, "dialogues.js: JSON read and script disagree");
+for (const l of X.LESSONS.filter(l => !l.review)) ok(X.DIALOGUES.some(d => d.l === l.n), `unit ${l.n} has no dialogue`);
+for (const d of X.DIALOGUES) {
+  ok(lessonNums.has(d.l) && d.title && d.scene, `dialogue for unit ${d.l}: bad unit, title or scene`);
+  ok(["A", "B"].every(k => d.who[k] && d.who[k].name && /^[fm]$/.test(d.who[k].g)), `dialogue ${d.l}: each speaker needs a name and g "f" or "m"`);
+  ok(d.lines.length >= 4 && d.lines.length <= 8, `dialogue ${d.l}: should have 4 to 8 lines`);
+  for (const [sp, am, rom, en] of d.lines) {
+    ok(d.who[sp] && am && rom && en, `dialogue ${d.l}: bad line ${JSON.stringify([sp, am])}`);
+    ok(!/[A-Za-z]/.test(am), `dialogue ${d.l}: Latin letters in the Amharic ${am}`);
+  }
+  ok(d.lines.some(x => x[0] === "A") && d.lines.some(x => x[0] === "B"), `dialogue ${d.l}: both speakers need lines`);
+}
 
 // --- every verb conjugates in every tense, 8 persons each
 for (const v of X.VLIST) {
