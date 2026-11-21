@@ -60,7 +60,7 @@ function refVerbs(){
 function qVerbType(v0,TS0){
   for(let g=0;g<60;g++){
     const v=v0||pick(VLIST), f=vforms(v), t=pick(TS0||vTenses(v))[0], i=ri(8), x=f[t][i];
-    if(x&&x.am&&x.am.length>1&&!/[…\-]/.test(x.am)) return {type:"type",kind:"Verbs · type it",big:PR[i].am+" · "+v.am,bigAm:true,sub:`${subj(i)} · ${v.en} · ${TNAME[t].toLowerCase()}`,answer:x.am,rom:x.rom};
+    if(x&&x.am&&x.am.length>1&&!/[…\-]/.test(x.am)) return {type:"type",kind:"Verbs · type it",big:PR[i].am+" · "+v.am,bigAm:true,sub:`${subj(i)} · ${v.en} · ${TNAME[t].toLowerCase()}`,answer:x.am,rom:x.rom,srs:"v:"+v.am};
   }
 }
 function qVerb(v0,TS0){
@@ -68,13 +68,13 @@ function qVerb(v0,TS0){
   const alt=[];
   for(let j=0;j<8;j++) if(j!==i&&f[t][j].am!==ok.am) alt.push({k:[t,j],x:f[t][j]});
   TS.forEach(x=>{if(x[0]!==t&&f[x[0]][i].am!==ok.am) alt.push({k:[x[0],i],x:f[x[0]][i]});});
-  if(ri(2)) return mk("Verbs · "+TNAME[t],PR[i].am+" · "+v.am,true,`${subj(i)} · ${v.en}`,{l:ok.am,r:ok.rom},alt.map(a=>({l:a.x.am,r:a.x.rom})),true);
+  if(ri(2)) return tag(mk("Verbs · "+TNAME[t],PR[i].am+" · "+v.am,true,`${subj(i)} · ${v.en}`,{l:ok.am,r:ok.rom},alt.map(a=>({l:a.x.am,r:a.x.rom})),true),"v:"+v.am);
   const lab=(tt,j)=>subj(j)+" · "+TNAME[tt];
   const same=k=>f[k[0]][k[1]].am===ok.am;
   const wr=[];
   for(let j=0;j<8;j++) if(j!==i&&!same([t,j])) wr.push({l:lab(t,j)});
   TS.forEach(x=>{if(x[0]!==t&&!same([x[0],i])) wr.push({l:lab(x[0],i)});});
-  return mk("Verbs",ok.am,true,`${v.am} · ${v.en}`,{l:lab(t,i)},wr,false);
+  return tag(mk("Verbs",ok.am,true,`${v.am} · ${v.en}`,{l:lab(t,i)},wr,false),"v:"+v.am);
 }
 
 /* ---------- numbers: words and Ethiopic numerals ---------- */
@@ -203,9 +203,10 @@ function applyData(d){
   sayRate=SAY_RATES.includes(+d.rate)?+d.rate:1;
   S.ls=Object.assign({},LS_DEF,d.listen&&typeof d.listen==="object"?d.listen:{});
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
+  S.srs=d.srs?srsClean(d.srs):srsMigrate(d);   // spaced repetition (srs.js); profiles from before it get a starting point
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -378,6 +379,7 @@ function mk(kind,big,bigAm,sub,correct,wrongs,optAm){
   const o=shuffle(opts);
   return {type:"mc",kind,big,bigAm,sub,opts:o,ans:o.indexOf(correct),optAm};
 }
+const tag = (q,k) => { if(q) q.srs=k; return q; };   // which spaced-repetition item a question tests (srs.js)
 const others8 = i => [0,1,2,3,4,5,6,7].filter(j=>j!==i);
 const othersT = (t,i) => others8(i).filter(j=>t.am[j]!==t.am[i]);
 function qTable(k,kind){
@@ -398,16 +400,16 @@ function qPronoun(){
   if(type===1){const i=ri(all.length);return mk("Pronouns",all[i].en,false,"Choose the Amharic pronoun",{l:all[i].am,r:all[i].rom},all.filter((_,j)=>j!==i).map(p=>({l:p.am,r:p.rom})),true);}
   return qTable(["be","have","poss"][type-2]);
 }
-function qWord(words,kind,backup){
-  const w=pick(words);
+function qWord(words,kind,backup,w0){
+  const w=w0||pick(words);
   let others=words.filter(x=>x[0]!==w[0]&&x[2]!==w[2]);
   if(others.length<6&&backup) others=others.concat(backup.filter(x=>x[0]!==w[0]&&x[2]!==w[2]));
-  if(ri(2)) return mk(kind,w[0],true,"What does this mean?",{l:w[2]},others.map(x=>({l:x[2]})),false);
-  return mk(kind,w[2],false,"Choose the Amharic",{l:w[0],r:w[1]},others.map(x=>({l:x[0],r:x[1]})),true);
+  if(ri(2)) return tag(mk(kind,w[0],true,"What does this mean?",{l:w[2]},others.map(x=>({l:x[2]})),false),"w:"+w[0]);
+  return tag(mk(kind,w[2],false,"Choose the Amharic",{l:w[0],r:w[1]},others.map(x=>({l:x[0],r:x[1]})),true),"w:"+w[0]);
 }
-function qTypeWord(words,kind){
-  const w=pick(words.filter(typable));
-  return {type:"type",kind,big:w[2],sub:w[1],subRom:true,answer:w[0],rom:w[1]};
+function qTypeWord(words,kind,w0){
+  const w=w0||pick(words.filter(typable));
+  return {type:"type",kind,big:w[2],sub:w[1],subRom:true,answer:w[0],rom:w[1],srs:"w:"+w[0]};
 }
 function qLesson(ns){
   const n=pick(ns), l=LMAP[n], kind="Unit "+n, r=Math.random();
@@ -417,16 +419,16 @@ function qLesson(ns){
   if(tabs.length&&r<0.5){const t=pick(tabs);return t[0]?qParts(t[1],kind):qTable(t[1],kind);}
   return qWord(l.vocab,kind,lessonWords(FULL));
 }
-function qFidRec(){
-  const f=pick(FID.filter(x=>x.snd));
+function qFidRec(f0){
+  const f=f0&&f0.snd?f0:pick(FID.filter(x=>x.snd));
   const near=FID.filter(x=>x.snd&&x.key!==f.key&&x.snd!==f.snd&&(x.row===f.row||x.ord===f.ord));
-  if(ri(2)) return mk("Fidel",f.ch,true,"Which sound is this?",{l:f.snd},near.map(x=>({l:x.snd})),false);
+  if(ri(2)) return tag(mk("Fidel",f.ch,true,"Which sound is this?",{l:f.snd},near.map(x=>({l:x.snd})),false),"f:"+f.ch);
   const seen=new Set([f.snd]), wr=[]; shuffle(near).forEach(x=>{if(!seen.has(x.snd)){seen.add(x.snd);wr.push({l:x.ch});}});
-  return mk("Fidel",f.snd,false,"Choose the letter",{l:f.ch},wr,true);
+  return tag(mk("Fidel",f.snd,false,"Choose the letter",{l:f.ch},wr,true),"f:"+f.ch);
 }
-function qFidType(){
-  const f=pick(FID.filter(x=>x.snd&&x.ord<8));
-  return {type:"type",kind:"Fidel · type it",big:f.snd,sub:"Type the letter for this sound",answer:f.ch};
+function qFidType(f0){
+  const f=f0&&f0.snd&&f0.ord<8?f0:pick(FID.filter(x=>x.snd&&x.ord<8));
+  return {type:"type",kind:"Fidel · type it",big:f.snd,sub:"Type the letter for this sound",answer:f.ch,srs:"f:"+f.ch};
 }
 function topic(id){
   if(id.startsWith("lis-")) return lsTopic(id);
@@ -448,6 +450,7 @@ function topic(id){
   if(id==="num-pad") return {name:"Type number symbols",desc:"See a number, tap it out in Amharic numerals",gen:qNumPad};
   if(id==="miss") return {name:"My mistakes",desc:"Things you got wrong, until you get each right three times"};
   if(id==="daily") return {name:"Today's session",desc:"20 mixed questions"};
+  if(id==="due") return {name:"Review",desc:"Words, sentences and letters that are due to come back"};
   if(id==="verbs") return {name:"Verb conjugations",desc:`${VLIST.length} verbs, nine tenses`,gen:qVerb};
   if(id==="extra") return {name:"Extra words",desc:`${ECATS.length} topics, ${EXTRA_ALL.length} words`,gen:()=>{const c=pick(ECATS);return qWord(EXTRA[c],c,EXTRA_ALL);}};
   return {name:"Everything mixed",desc:"Fidel, course, pronouns and verbs",gen:()=>pick([qFidRec,qFidType,()=>qLesson(FULL),()=>qLesson(FULL),qPronoun,qVerb])()};
@@ -458,32 +461,60 @@ const qKey = q => q.type+"|"+q.big+"|"+qAns(q);
 /* sentences */
 const sentOf = ns => SENT.filter(x=>ns.includes(x.l));
 const sWords = x => x.am.replace(/[?!።፣፤]/g,"").split(" ").filter(Boolean);
-function qOrder(pool,kind){
-  const long=pool.filter(x=>sWords(x).length>=3); if(!long.length) return qSentMean(pool,kind);
-  const x=pick(long), w=sWords(x); let tiles=shuffle(w.slice()), g=0;
+function qOrder(pool,kind,x0){
+  const long=pool.filter(x=>sWords(x).length>=3); if(!x0&&!long.length) return qSentMean(pool,kind);
+  if(x0&&sWords(x0).length<3) return qSentMean(pool,kind,x0);
+  const x=x0||pick(long), w=sWords(x); let tiles=shuffle(w.slice()), g=0;
   while(tiles.join(" ")===w.join(" ")&&g++<20) tiles=shuffle(w.slice());
-  return {type:"order",kind:kind||"Build the sentence",big:x.en,sub:"Tap the words in the right order",answer:w.join(" "),rom:x.rom,tiles};
+  return {type:"order",kind:kind||"Build the sentence",big:x.en,sub:"Tap the words in the right order",answer:w.join(" "),rom:x.rom,tiles,srs:"s:"+x.am};
 }
-function qSentMean(pool,kind){
-  const x=pick(pool), rest=SENT.filter(y=>y.am!==x.am&&y.en!==x.en), near=rest.filter(y=>Math.abs(y.l-x.l)<=6);
+function qSentMean(pool,kind,x0){
+  const x=x0||pick(pool), rest=SENT.filter(y=>y.am!==x.am&&y.en!==x.en), near=rest.filter(y=>Math.abs(y.l-x.l)<=6);
   const others=near.length>=6?near:rest;
-  if(ri(2)) return mk(kind||"Sentences",x.am,true,"What does this mean?",{l:x.en},others.map(y=>({l:y.en})),false);
-  return mk(kind||"Sentences",x.en,false,"Choose the Amharic",{l:x.am,r:x.rom},others.map(y=>({l:y.am,r:y.rom})),true);
+  if(ri(2)) return tag(mk(kind||"Sentences",x.am,true,"What does this mean?",{l:x.en},others.map(y=>({l:y.en})),false),"s:"+x.am);
+  return tag(mk(kind||"Sentences",x.en,false,"Choose the Amharic",{l:x.am,r:x.rom},others.map(y=>({l:y.am,r:y.rom})),true),"s:"+x.am);
 }
 /* sentence builder (builder.js): one word at a time, from choices that change after each word */
 function qBuild(x,kind){
   return {type:"slot",kind,big:x.en,sub:"Choose each word in turn",words:x.words,answer:x.words.map(w=>w.am).join(" "),rom:x.words.map(w=>w.rom).join(" ")};
 }
 function qBuildVerb(upto){ for(let g=0;g<40;g++){const x=bMakeVerbSentence(upto||S.bs.upto,S.bs.tenses); if(x) return qBuild(x,"Build it · verbs");} return qOrder(SENT); }
-function qBuildCourse(pool,kind){ const ok=pool.filter(s=>bTokens(s).length>=2); return ok.length?qBuild(bCourseSentence(pick(ok)),kind||"Build it · course"):qSentMean(pool,kind); }
+function qBuildCourse(pool,kind){ const ok=pool.filter(s=>bTokens(s).length>=2); if(!ok.length) return qSentMean(pool,kind); const x=pick(ok); return tag(qBuild(bCourseSentence(x),kind||"Build it · course"),"s:"+x.am); }
 const qSent = (ns,kind) => ri(2)?qOrder(sentOf(ns),kind):qSentMean(sentOf(ns),kind);
-/* mistakes: kept on this device until answered right three times */
+/* every answer: moves its item between review boxes (srs.js), counts towards today's streak,
+   and wrong answers also go on the mistakes list until answered right three times */
 function record(q,ok){
+  const sk=srsKeyOf(q); if(sk) srsAnswer(S.srs,sk,ok); srsActivity(S.srs);
   const k=qKey(q), i=S.miss.findIndex(m=>m.k===k);
   if(!ok){ if(i>=0) S.miss[i].s=0; else {S.miss.unshift({k,q,s:0}); if(S.miss.length>150) S.miss.length=150;} }
   else if(i>=0){ if(++S.miss[i].s>=3) S.miss.splice(i,1); }
-  else return;
   save();
+}
+/* a question about one particular item, for reviews. Items you know well are sometimes typed instead of picked. */
+function srsQuestion(k){
+  const ix=srsIndex(), am=k.slice(2);
+  if(k[0]==="l"){
+    const x=lsItems(0,"both").find(y=>y.am===am);
+    const q=x&&(ri(2)?qListenMean(0,"both",x):qListenWord(0,"both",x));
+    return q?tag(q,k):srsQuestion((ix["w:"+am]?"w:":"s:")+am);
+  }
+  const e=ix[k]; if(!e) return null;
+  const strong=srsBox(S.srs,k)>=SRS_KNOWN;
+  if(e.kind==="word"||e.kind==="extra"){
+    if(strong&&typable(e.x)&&ri(5)<2) return qTypeWord(null,"Review · type it",e.x);
+    return e.kind==="word"?qWord(LMAP[e.unit].vocab,"Review · unit "+e.unit,lessonWords(FULL),e.x):qWord(EXTRA_ALL,"Review · extra words",null,e.x);
+  }
+  if(e.kind==="sent") return ri(2)||strong?qOrder(SENT,"Review · sentence",e.x):qSentMean(SENT,"Review · sentence",e.x);
+  if(e.kind==="verb"){ const vp=verbPool(upto()).find(p=>p[0]===e.x); return vp?(strong&&ri(2)?qVerbType(vp[0],vp[1]):qVerb(vp[0],vp[1])):qVerb(e.x); }
+  if(e.kind==="letter") return e.x.ord<8&&ri(2)?qFidType(e.x):qFidRec(e.x);
+  return null;
+}
+const srsQs = (keys,max) => { const out=[]; for(const k of keys){ if(out.length>=max) break; const q=srsQuestion(k); if(q) out.push(tag(q,k)); } return out; };
+// words and sentences not met yet, from units 1 to N, earliest unit first
+function srsNew(N,max){
+  const ix=srsIndex();
+  return Object.keys(ix).filter(k=>(ix[k].kind==="word"||ix[k].kind==="sent")&&ix[k].unit&&ix[k].unit<=N&&!S.srs.it[k]&&(ix[k].kind!=="word"||ix[k].x[0].length>1))
+    .sort((a,b)=>ix[a].unit-ix[b].unit||(ix[a].kind==="word"?0:1)-(ix[b].kind==="word"?0:1)).slice(0,max);
 }
 function fresh(q){
   q=JSON.parse(JSON.stringify(q));
@@ -506,20 +537,26 @@ function dailyQs(){
   const sentQ=order=>()=>sp.length?(order?qOrder(sp):qSentMean(sp)):qLesson(done);
   const lis=g=>()=>g(N)||qLesson(recent);
   const gens=[lis(qListenMean),lis(qListenWord),()=>qNumWord(N<11?10:100),qFidRec,qFidType,qFidRec,lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(done),lessonQ(done),lessonQ(done),verbQ(0),verbQ(0),verbQ(1),sentQ(1),()=>N>=8?qBuildVerb(N):qLesson(done),sentQ(0)];
-  const qs=shuffle(S.miss).slice(0,4).map(m=>fresh(m.q)), seen=new Set(qs.map(qKey));
+  // first whatever is due for review (up to 12), then a few saved mistakes, then up to 4 new words and sentences, then a mix
+  const qs=srsQs(srsDue(S.srs),12), items=new Set(qs.map(q=>q.srs));
+  shuffle(S.miss).filter(m=>{const k=srsKeyOf(m.q);return !k||!items.has(k);}).slice(0,Math.max(0,Math.min(3,16-qs.length))).forEach(m=>{const q=fresh(m.q);qs.push(q);const k=srsKeyOf(q);if(k)items.add(k);});
+  srsQs(srsNew(N,Math.min(4,20-qs.length)),4).forEach(q=>{q.kind="New · "+q.kind.replace(/^Review · /,"");qs.push(q);items.add(q.srs);});
+  const seen=new Set(qs.map(qKey));
   gens.push(...Array(20).fill(lessonQ(done)));
-  for(const g of gens){ if(qs.length>=20) break; let n=0; while(n++<30){const q=g(), k=qKey(q); if(!seen.has(k)){seen.add(k);qs.push(q);break;}} }
+  for(const g of gens){ if(qs.length>=20) break; let n=0; while(n++<30){const q=g(), k=qKey(q), sk=q&&q.srs; if(!seen.has(k)&&!(sk&&items.has(sk))){seen.add(k);if(sk)items.add(sk);qs.push(q);break;}} }
   return shuffle(qs);
 }
 function dailyCard(){
   const N=upto(), done=S.day===today();
-  return `<div class="daily"><div><b>Today's session</b><small>${done?"Done today. Do another whenever you like.":"20 mixed questions: letters, words, verbs, sentences"+(S.miss.length?" and your mistakes":"")}</small></div>
+  const due=srsDue(S.srs).length;
+  return `<div class="daily"><div><b>Today's session</b><small>${done?"Done today. Do another whenever you like.":"20 mixed questions: "+(due?plural(due,"review")+" due, then new words, verbs, sentences and letters":"letters, words, verbs, sentences"+(S.miss.length?" and your mistakes":""))}</small></div>
    <label class="sel">I'm up to <select id="upto">${FULL.map(n=>`<option value="${n}" ${n===N?"selected":""}>Unit ${n}</option>`).join("")}</select></label>
    <button class="btn primary wide" data-act="start" data-v="daily">${done?"Another session":"Start"}</button></div>`;
 }
 function startQuiz(id){
   let qs=[];
   if(id==="miss") qs=shuffle(S.miss).slice(0,QN).map(m=>fresh(m.q));
+  else if(id==="due") qs=srsQs(srsDue(S.srs),QN);
   else if(id==="daily") qs=dailyQs();
   else{ const seen=new Set(), t=topic(id); let guard=0;
     while(qs.length<QN&&guard++<300){const q=t.gen(); if(!q) break; const key=qKey(q); if(!seen.has(key)){seen.add(key);qs.push(q);}} }
@@ -530,7 +567,7 @@ function startQuiz(id){
 function testMenu(){
   const item=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
   let h=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
-   <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button></div>
+   <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
    ${lsMenu()}
    <h3>Fidel</h3><div class="stack">${["fid-rec","fid-type","fid-words"].map(item).join("")}</div>
    <h3>Units</h3><div class="stack">${LESSONS.map(l=>item((l.review?"R":"L")+l.n)).join("")}${item("Lall")}</div>
@@ -540,6 +577,10 @@ function testMenu(){
    <h3>Sentence builder</h3><div class="stack">${["build-verbs","build-course"].map(item).join("")}</div>${bsHTML()}
    <h3>General practice</h3><div class="stack">${["pronouns","verbs","verbs-type","extra","mixed"].map(item).join("")}</div>`;
   return h;
+}
+function dueButton(){
+  const n=srsDue(S.srs).length, f=srsForecast(S.srs,2)[1];
+  return `<button class="topic" data-act="start" data-v="due" ${n?"":"disabled"}><b>Review</b><small>${n?"Words, sentences and letters due to come back today. Up to "+QN+" at a time.":"Nothing due right now."+(f?" "+plural(f,"item")+" tomorrow.":"")}</small><span class="best"><strong>${n}</strong>due</span></button>`;
 }
 /* sentence builder settings: what the wrong choices are, how many, which units and tenses */
 const BS_MODES=[["forms","Same word","Only other forms of the right word: the verb in other persons and tenses. Good for learning how forms change."],
@@ -594,7 +635,7 @@ function renderTest(){
         h+=`<div class="miss"><span class="${q.bigAm?"am":""}">${esc(q.big)}</span> → <b class="${am?"am":""}">${esc(qAns(q))}</b>`+(rom?` <span class="rom">${esc(rom)}</span>`:"")+
            `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"?"built":q.type==="slot"?"also tried":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
       h+=`</div>`;}
-    return h+`<div class="stack" style="margin-top:16px">${Q.id==="miss"&&!S.miss.length?"":`<button class="btn primary wide" data-act="start" data-v="${Q.id}">${Q.id==="miss"?"More mistakes":Q.id==="daily"?"Another session":"Try again"}</button>`}<button class="btn wide" data-act="quit">Choose another test</button></div>`;
+    return h+`<div class="stack" style="margin-top:16px">${Q.id==="miss"&&!S.miss.length||Q.id==="due"&&!srsDue(S.srs).length?"":`<button class="btn primary wide" data-act="start" data-v="${Q.id}">${Q.id==="miss"?"More mistakes":Q.id==="due"?"Review more":Q.id==="daily"?"Another session":"Try again"}</button>`}<button class="btn wide" data-act="mode" data-v="prog">See my progress</button><button class="btn wide" data-act="quit">Choose another test</button></div>`;
   }
   const q=Q.qs[Q.i], answered=q.type==="mc"?Q.picked!==null:Q.result!==null;
   let h=`<div class="prog"><i style="width:${(Q.i+(answered?1:0))/QN*100}%"></i></div>
@@ -629,8 +670,8 @@ function renderTest(){
 /* ---------- profiles and backups ---------- */
 const plural=(n,w)=>n+" "+w+(n===1?"":"s");
 function statLine(d){
-  d=d||{}; const t=Object.keys(d.best||{}).length, m=(d.miss||[]).length;
-  return t||m ? plural(t,"test")+" with scores"+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
+  d=d||{}; const t=Object.keys(d.best||{}).length, m=(d.miss||[]).length, it=d.srs&&d.srs.it?Object.values(d.srs.it):[], ms=it.filter(r=>r[0]>=SRS_MASTER).length;
+  return t||m||it.length ? plural(t,"test")+" with scores"+(it.length?", "+it.length+" items met"+(ms?" ("+ms+" mastered)":""):"")+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
 }
 function renderWho(){
   const L=PROF.list(), P=S.pf;
@@ -680,14 +721,14 @@ async function readIncoming(text){
 }
 
 /* ---------- render + events ---------- */
-const MODES=["course","fidel","num","ref","test"];
+const MODES=["course","fidel","num","ref","test","prog"];
 function render(){
   document.body.classList.toggle("norom",!S.rom);
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
-  $("#app").innerHTML = S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():renderTest();
+  $("#app").innerHTML = S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest();
   addSayButtons($("#app"));
   // listening questions play by themselves, once, when they first appear
   const Q=S.quiz; if(S.mode==="test"&&Q&&!Q.done){const q=Q.qs[Q.i]; if(q.listen&&Q.heard!==Q.i){Q.heard=Q.i; playAm(q.listen);}}
@@ -750,6 +791,7 @@ document.addEventListener("click",e=>{
   else if(a==="pf-in-replace"){const b=S.pf.incoming, p=PROF.byName(b.name); if(p){PROF.save(b.data,p.id); PROF.use(p.id); applyData(b.data);} S.pf.incoming=null; S.pf.msg=""; S.mode="course"; top=true;}
   else if(a==="pf-in-new"){const b=S.pf.incoming; keep(); PROF.add(b.name,b.data); applyData(b.data); S.pf.incoming=null; S.mode="course"; top=true;}
   else if(a==="lesson"){S.lesson=v?+v:null;S.lview="notes";top=true;}
+  else if(a==="lesson-go"){S.mode="course";S.lesson=+v;S.lview="notes";top=true;}
   else if(a==="lview"){S.lview=v;}
   else if(a==="ftab"){S.ftab=v;top=true;}
   else if(a==="pick"){S.pick=v; if(clipFor(v)) playAm(v);}
@@ -793,7 +835,7 @@ document.addEventListener("click",e=>{
   else if(a==="bs-n"){S.bs.n=+v;bsChanged();}
   else if(a==="bs-tense"){const T0=S.bs.tenses,k=T0.indexOf(v); if(k>=0){if(T0.length>1)T0.splice(k,1);} else T0.push(v); bsChanged();}
   else if(a==="ans"&&Q&&Q.picked===null){Q.picked=+v; const q=Q.qs[Q.i]; if(Q.picked===q.ans)Q.score++; else Q.misses.push({q,p:q.opts[Q.picked].l}); record(q,Q.picked===q.ans);}
-  else if(a==="next"&&Q){ if(Q.i===Q.n-1){Q.done=true; if(Q.id==="daily")S.day=today(); if(Q.id!=="miss"&&(S.best[Q.id]==null||Q.score>S.best[Q.id]))S.best[Q.id]=Q.score; save();} else {Q.i++;Q.picked=null;Q.typed="";Q.built=[];Q.result=null;Q.slot=null;S.kb.cons=null;} top=true;}
+  else if(a==="next"&&Q){ if(Q.i===Q.n-1){Q.done=true; if(Q.id==="daily")S.day=today(); if(Q.id!=="miss"&&Q.id!=="due"&&(S.best[Q.id]==null||Q.score>S.best[Q.id]))S.best[Q.id]=Q.score; save();} else {Q.i++;Q.picked=null;Q.typed="";Q.built=[];Q.result=null;Q.slot=null;S.kb.cons=null;} top=true;}
   render();
   if(top) window.scrollTo(0,0);
 });

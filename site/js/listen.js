@@ -14,11 +14,11 @@ function lsItems(N, what){
   return out;
 }
 const lsLetters = () => FID.filter(f=>f.snd && clipFor(f.ch));
-const lsQ = (q, x) => Object.assign(q, {listen:x.am, heardRom:x.rom||"", heardEn:x.en||""});
+const lsQ = (q, x, key) => Object.assign(q, {listen:x.am, heardRom:x.rom||"", heardEn:x.en||"", srs:key||"l:"+x.am});
 // 1. Hear it, pick the meaning
-function qListenMean(N, what){
+function qListenMean(N, what, x0){
   const pool = lsItems(N, what); if(pool.length < 4) return null;
-  const x = pick(pool);
+  const x = x0 || pick(pool);
   // wrong answers: same kind (word / sentence) first, then anything
   let others = pool.filter(y=>y.w===x.w && y.en!==x.en && y.am!==x.am);
   if(others.length < 6) others = pool.filter(y=>y.en!==x.en && y.am!==x.am);
@@ -31,9 +31,9 @@ function lsLike(a, b){
   let share = 0; cA.forEach(c=>{ if(cB.has(c)) share++; });
   return share*2 - Math.abs(A.length - B.length) - (a.split(" ").length !== b.split(" ").length ? 3 : 0) + (A[0]===Array.from(b)[0] ? 2 : 0);
 }
-function qListenWord(N, what){
+function qListenWord(N, what, x0){
   const pool = lsItems(N, what); if(pool.length < 4) return null;
-  const x = pick(pool);
+  const x = x0 || pick(pool);
   const near = pool.filter(y=>canon(y.am)!==canon(x.am)).map(y=>[lsLike(x.am,y.am)+Math.random(),y]).sort((p,q)=>q[0]-p[0]).slice(0,6).map(p=>p[1]);
   return lsQ(mk("Listening · which one?", x.am, true, "Which did you hear?", {l:x.am, r:x.rom}, near.map(y=>({l:y.am, r:y.rom})), true), x);
 }
@@ -51,7 +51,7 @@ function qListenLetter(){
   const seen = new Set([f.snd]), wr = [];
   shuffle(FID.filter(x=>x.snd && x.snd!==f.snd && CAN[x.ch]!==CAN[f.ch] && (x.row===f.row || x.ord===f.ord)))
     .forEach(x=>{ if(!seen.has(x.snd)){ seen.add(x.snd); wr.push({l:x.ch}); } });
-  return lsQ(mk("Listening · letters", f.ch, true, "Which letter did you hear?", {l:f.ch, r:f.snd}, wr.map(o=>({l:o.l, r:(FID.find(y=>y.ch===o.l)||{}).snd})), true), {am:f.ch, rom:f.snd});
+  return lsQ(mk("Listening · letters", f.ch, true, "Which letter did you hear?", {l:f.ch, r:f.snd}, wr.map(o=>({l:o.l, r:(FID.find(y=>y.ch===o.l)||{}).snd})), true), {am:f.ch, rom:f.snd}, "f:"+f.ch);
 }
 const LS_TESTS = ["lis-mean","lis-word","lis-type","lis-letter"];
 function lsTopic(id){
