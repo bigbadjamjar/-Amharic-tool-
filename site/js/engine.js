@@ -205,7 +205,7 @@ function conj(st){
   T.past = Pt==="C" ? [P+"|ku",P+"|k",P+"|š",P+"ä",P+"äčč",P+"|n",P+"aččəhu",P+"u"]
          : Pt==="a" ? [P+"hu",P+"h",P+"š",P,P+"čč",P+"n",P+"ččəhu",P.slice(0,-1)+"u"]
                     : [P+"ähu",P+"äh",P+"äš",P+"ä",P+"äčč",P+"än",P+"aččəhu",P+"u"];
-  T.pastNeg = T.past.map(f=>mEnd("al|"+f));
+  T.pastNeg = T.past.map(f=>mEnd((isV(units(f)[0])?"al":"al|")+f));   // አል + አነበበ -> አላነበበም
   const aI=I[0]==="a", pre=aI?["","t","t","y","t","ənn","t","y"]:["ə","tə","tə","yə","tə","ənnə","tə","yə"];
   const [fS,fL]=fem(I), base=I.endsWith("a")?I.slice(0,-1):I;
   T.short=[pre[0]+I,pre[1]+I,pre[2]+fS,pre[3]+I,pre[4]+I,pre[5]+I,pre[6]+plu(I),pre[7]+plu(I)];

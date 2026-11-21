@@ -184,12 +184,13 @@ const tEn = (t,i) => t.full ? t.en[i] : subj(i)+" "+t.en[i];
 const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filter(l=>!l.review).map(l=>l.n));
 
 /* ---------- state ---------- */
-const S = {mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
+const S = {bs:{mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
   fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
   kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
 try{ const b=JSON.parse(localStorage.getItem("amharic-best")||"{}"); if(b&&typeof b==="object") S.best=b;
-     if(localStorage.getItem("amharic-rom")==="0") S.rom=false; const m=JSON.parse(localStorage.getItem("amharic-miss")||"[]"); if(Array.isArray(m)) S.miss=m.filter(x=>x&&x.k&&x.q); const u=+localStorage.getItem("amharic-upto"); if(u&&LMAP[u]) S.upto=u; S.day=localStorage.getItem("amharic-day")||""; if(localStorage.getItem("amharic-kbhints")==="0") S.kb.hints=false; }catch(e){}
-const save=()=>{try{localStorage.setItem("amharic-best",JSON.stringify(S.best));localStorage.setItem("amharic-rom",S.rom?"1":"0");localStorage.setItem("amharic-miss",JSON.stringify(S.miss));if(S.upto)localStorage.setItem("amharic-upto",S.upto);localStorage.setItem("amharic-day",S.day);localStorage.setItem("amharic-kbhints",S.kb.hints?"1":"0");}catch(e){}};
+     if(localStorage.getItem("amharic-rom")==="0") S.rom=false; const m=JSON.parse(localStorage.getItem("amharic-miss")||"[]"); if(Array.isArray(m)) S.miss=m.filter(x=>x&&x.k&&x.q); const u=+localStorage.getItem("amharic-upto"); if(u&&LMAP[u]) S.upto=u; S.day=localStorage.getItem("amharic-day")||""; if(localStorage.getItem("amharic-kbhints")==="0") S.kb.hints=false;
+     const bs=JSON.parse(localStorage.getItem("amharic-builder")||"null"); if(bs&&typeof bs==="object") Object.assign(S.bs,bs); }catch(e){}
+const save=()=>{try{localStorage.setItem("amharic-best",JSON.stringify(S.best));localStorage.setItem("amharic-rom",S.rom?"1":"0");localStorage.setItem("amharic-miss",JSON.stringify(S.miss));if(S.upto)localStorage.setItem("amharic-upto",S.upto);localStorage.setItem("amharic-day",S.day);localStorage.setItem("amharic-kbhints",S.kb.hints?"1":"0");localStorage.setItem("amharic-builder",JSON.stringify(S.bs));}catch(e){}};
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -415,6 +416,8 @@ function topic(id){
   if(id==="pronouns") return {name:"Pronouns",desc:"Who, to be, to have, my / your / his",gen:qPronoun};
   if(id==="verbs-type") return {name:"Type verb forms",desc:"Read the person and tense, type the form in fidel",gen:()=>qVerbType()};
   if(id==="sent-order") return {name:"Build sentences",desc:`Put the words in order · ${SENT.length} sentences`,gen:()=>qOrder(SENT)};
+  if(id==="build-verbs") return {name:"Verbs in sentences",desc:"Build a sentence word by word: pick the right person, tense and verb",gen:()=>qBuildVerb()};
+  if(id==="build-course") return {name:"Course sentences, word by word",desc:"Build each sentence from choices that change as you go",gen:()=>qBuildCourse(SENT.filter(x=>!S.bs.upto||x.l<=S.bs.upto))};
   if(id==="sent-mean") return {name:"Sentence meanings",desc:"Read a whole sentence and pick its meaning",gen:()=>qSentMean(SENT)};
   if(id==="num-words") return {name:"Number words",desc:"Match numbers and their Amharic words",gen:()=>qNumWord()};
   if(id==="num-sym") return {name:"Number symbols",desc:"Read and choose the Amharic numerals",gen:qNumSym};
@@ -444,6 +447,12 @@ function qSentMean(pool,kind){
   if(ri(2)) return mk(kind||"Sentences",x.am,true,"What does this mean?",{l:x.en},others.map(y=>({l:y.en})),false);
   return mk(kind||"Sentences",x.en,false,"Choose the Amharic",{l:x.am,r:x.rom},others.map(y=>({l:y.am,r:y.rom})),true);
 }
+/* sentence builder (builder.js): one word at a time, from choices that change after each word */
+function qBuild(x,kind){
+  return {type:"slot",kind,big:x.en,sub:"Choose each word in turn",words:x.words,answer:x.words.map(w=>w.am).join(" "),rom:x.words.map(w=>w.rom).join(" ")};
+}
+function qBuildVerb(upto){ for(let g=0;g<40;g++){const x=bMakeVerbSentence(upto||S.bs.upto,S.bs.tenses); if(x) return qBuild(x,"Build it · verbs");} return qOrder(SENT); }
+function qBuildCourse(pool,kind){ const ok=pool.filter(s=>bTokens(s).length>=2); return ok.length?qBuild(bCourseSentence(pick(ok)),kind||"Build it · course"):qSentMean(pool,kind); }
 const qSent = (ns,kind) => ri(2)?qOrder(sentOf(ns),kind):qSentMean(sentOf(ns),kind);
 /* mistakes: kept on this device until answered right three times */
 function record(q,ok){
@@ -472,7 +481,7 @@ function dailyQs(){
   const N=upto(), done=FULL.filter(n=>n<=N), recent=done.slice(-5), sp=SENT.filter(x=>x.l<=N), vp=verbPool(N);
   const lessonQ=ns=>()=>qLesson(ns), verbQ=typed=>()=>{ if(!vp.length) return qLesson(recent); const x=pick(vp); return typed?qVerbType(x[0],x[1]):qVerb(x[0],x[1]); };
   const sentQ=order=>()=>sp.length?(order?qOrder(sp):qSentMean(sp)):qLesson(done);
-  const gens=[()=>qNumWord(N<11?10:100),qFidRec,qFidType,qFidRec,lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(done),lessonQ(done),lessonQ(done),verbQ(0),verbQ(0),verbQ(1),sentQ(1),sentQ(1),sentQ(0)];
+  const gens=[()=>qNumWord(N<11?10:100),qFidRec,qFidType,qFidRec,lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(recent),lessonQ(done),lessonQ(done),lessonQ(done),verbQ(0),verbQ(0),verbQ(1),sentQ(1),()=>N>=8?qBuildVerb(N):qLesson(done),sentQ(0)];
   const qs=shuffle(S.miss).slice(0,4).map(m=>fresh(m.q)), seen=new Set(qs.map(qKey));
   gens.push(...Array(20).fill(lessonQ(done)));
   for(const g of gens){ if(qs.length>=20) break; let n=0; while(n++<30){const q=g(), k=qKey(q); if(!seen.has(k)){seen.add(k);qs.push(q);break;}} }
@@ -491,7 +500,7 @@ function startQuiz(id){
   else{ const seen=new Set(), t=topic(id); let guard=0;
     while(qs.length<QN&&guard++<300){const q=t.gen(), key=qKey(q); if(!seen.has(key)){seen.add(key);qs.push(q);}} }
   if(!qs.length) return;
-  S.quiz={id,qs,n:qs.length,i:0,score:0,picked:null,typed:"",built:[],result:null,misses:[],done:false};
+  S.quiz={id,qs,n:qs.length,i:0,score:0,picked:null,typed:"",built:[],result:null,misses:[],done:false,slot:null};
   S.kb.cons=null;
 }
 function testMenu(){
@@ -502,8 +511,48 @@ function testMenu(){
    <h3>Units</h3><div class="stack">${LESSONS.map(l=>item((l.review?"R":"L")+l.n)).join("")}${item("Lall")}</div>
    <h3>Numbers</h3><div class="stack">${NTESTS.map(item).join("")}</div>
    <h3>Sentences</h3><div class="stack">${["sent-order","sent-mean"].map(item).join("")}</div>
+   <h3>Sentence builder</h3><div class="stack">${["build-verbs","build-course"].map(item).join("")}</div>${bsHTML()}
    <h3>General practice</h3><div class="stack">${["pronouns","verbs","verbs-type","extra","mixed"].map(item).join("")}</div>`;
   return h;
+}
+/* sentence builder settings: what the wrong choices are, how many, which units and tenses */
+const BS_MODES=[["forms","Same word","Only other forms of the right word: the verb in other persons and tenses. Good for learning how forms change."],
+  ["mixed","Mixed","Other forms of the word, plus other words of the same kind (other verbs, pronouns, nouns)."],
+  ["any","Any word","Words from anywhere in the course, so you need to know what each one means."]];
+function bsHTML(){
+  const B=S.bs, m=BS_MODES.find(x=>x[0]===B.mode)||BS_MODES[1];
+  return `<div class="note bset"><h4>Sentence builder settings</h4>
+    <p class="count">Wrong choices</p>${mini("bs-mode",BS_MODES.map(x=>[x[0],x[1]]),B.mode)}<p class="count bhelp">${esc(m[2])}</p>
+    <p class="count">Tiles to choose from</p>${mini("bs-n",[2,3,4,6].map(n=>[String(n),String(n)]),String(B.n))}
+    <p class="count">Units</p><select id="bs-upto" class="sel" aria-label="Units"><option value="0">All units</option>${FULL.map(n=>`<option value="${n}" ${B.upto===n?"selected":""}>Units 1 to ${n}</option>`).join("")}</select>
+    <p class="count">Tenses</p><div class="chips wrapchips">${TENSES.filter(t=>B_TENSES.includes(t[0])).map(t=>`<button class="chip" data-act="bs-tense" data-v="${t[0]}" aria-selected="${B.tenses.includes(t[0])}">${esc(t[1])}</button>`).join("")}</div>
+    <p class="count bhelp">Tenses set which verb forms the made-up sentences use, and which tenses appear as wrong choices.</p></div>`;
+}
+function bsChanged(){ save(); const Q=S.quiz; if(Q&&Q.slot&&Q.result===null){Q.slot.opts=null;Q.slot.bad=[];} }
+/* sentence builder: the slots filled so far, then fresh choices for the next one */
+function slotHTML(Q,q){
+  const W=q.words, done=Q.result!==null;
+  if(!Q.slot) Q.slot={n:0,opts:null,bad:[],errs:[]};
+  const st=Q.slot; if(!done&&!st.opts) st.opts=bOptions(W[st.n],S.bs);
+  let h=`<div class="built slots ${done?(Q.result==="ok"?"right":"wrong"):""}">`+W.map((w,j)=>
+    j<st.n?`<span class="tile am filled">${esc(w.am)}${w.rom?`<small class="rom">${esc(w.rom)}</small>`:""}</span>`
+    :`<span class="tile gap ${j===st.n&&!done?"now":""}" aria-label="${j===st.n?"next word":"word to come"}">${j===st.n&&!done?"?":"…"}</span>`).join("")+`</div>`;
+  if(!done){
+    h+=`<div class="bar" style="margin:10px 0 0"><span class="count">Word ${st.n+1} of ${W.length}</span><button class="link" data-act="bs-open">${S.bsOpen?"Hide settings":"Settings"}</button></div><div class="tiles slot-opts">`+st.opts.map((o,j)=>{const bad=st.bad.includes(j);
+      return `<button class="tile am ${bad?"no":""}" data-act="s-pick" data-v="${j}" ${bad?"disabled":""}>${esc(o.am)}</button>`;}).join("")+`</div>`;
+  }
+  if(!done&&S.bsOpen) h+=bsHTML();
+  return h;
+}
+function slotPick(Q,j){
+  const q=Q.qs[Q.i], st=Q.slot, o=st.opts[j]; if(!o||st.bad.includes(j)) return;
+  if(!o.ok){ st.bad.push(j); st.errs.push(o.am); return; }
+  st.n++; st.bad=[]; st.opts=null;
+  if(st.n===q.words.length){
+    Q.result=st.errs.length?"no":"ok";
+    if(Q.result==="ok")Q.score++; else Q.misses.push({q,p:st.errs.join(" · ")});
+    record(q,Q.result==="ok");
+  }
 }
 function renderTest(){
   const Q=S.quiz;
@@ -515,7 +564,7 @@ function renderTest(){
     if(Q.misses.length){h+=`<h3>To review</h3><div class="tbl">`;
       Q.misses.forEach(m=>{const q=m.q, am=q.type!=="mc"||q.optAm, rom=q.type!=="mc"?q.rom:q.opts[q.ans].r;
         h+=`<div class="miss"><span class="${q.bigAm?"am":""}">${esc(q.big)}</span> → <b class="${am?"am":""}">${esc(qAns(q))}</b>`+(rom?` <span class="rom">${esc(rom)}</span>`:"")+
-           `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"?"built":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
+           `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"?"built":q.type==="slot"?"also tried":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
       h+=`</div>`;}
     return h+`<div class="stack" style="margin-top:16px">${Q.id==="miss"&&!S.miss.length?"":`<button class="btn primary wide" data-act="start" data-v="${Q.id}">${Q.id==="miss"?"More mistakes":Q.id==="daily"?"Another session":"Try again"}</button>`}<button class="btn wide" data-act="quit">Choose another test</button></div>`;
   }
@@ -526,6 +575,8 @@ function renderTest(){
   let ok;
   if(q.type==="type"){
     h+=kbHTML(Q); ok=Q.result==="ok";
+  }else if(q.type==="slot"){
+    ok=Q.result==="ok"; h+=slotHTML(Q,q);
   }else if(q.type==="order"){
     ok=Q.result==="ok";
     h+=`<div class="built ${answered?(ok?"right":"wrong"):""}">`+(Q.built.length?Q.built.map((j,p)=>`<button class="tile am" data-act="o-rem" data-v="${p}" ${answered?"disabled":""}>${esc(q.tiles[j])}</button>`).join(""):`<span class="count">Your sentence appears here</span>`)+`</div>
@@ -541,7 +592,7 @@ function renderTest(){
     h+=`</div>`;
   }
   if(answered){
-    h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="order"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
+    h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="slot"?`Built, with ${Q.slot.errs.length} wrong ${Q.slot.errs.length===1?"pick":"picks"}. The sentence is:`:q.type==="order"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"||q.type==="slot"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
         <button class="btn primary wide" data-act="next" style="margin-top:12px">${Q.i===QN-1?"See result":"Next question"}</button>`;
   }
   return h;
@@ -575,6 +626,7 @@ document.addEventListener("change",e=>{
   else if(id==="vctense"){S.v.ctense=val;vNewCard();render();}
   else if(id==="vsearch"){render();}
   else if(id==="upto"){S.upto=+val;save();render();}
+  else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();} });
 document.addEventListener("click",e=>{
@@ -619,8 +671,13 @@ document.addEventListener("click",e=>{
   else if(a==="o-add"&&Q&&Q.result===null){if(!Q.built.includes(+v))Q.built.push(+v);}
   else if(a==="o-rem"&&Q&&Q.result===null){Q.built.splice(+v,1);}
   else if(a==="o-check"&&Q&&Q.result===null){const q=Q.qs[Q.i], said=Q.built.map(j=>q.tiles[j]).join(" "); Q.result=canon(said)===canon(q.answer)?"ok":"no"; if(Q.result==="ok")Q.score++; else Q.misses.push({q,p:said}); record(q,Q.result==="ok");}
+  else if(a==="s-pick"&&Q&&Q.result===null&&Q.slot){slotPick(Q,+v);}
+  else if(a==="bs-open"){S.bsOpen=!S.bsOpen;}
+  else if(a==="bs-mode"){S.bs.mode=v;bsChanged();}
+  else if(a==="bs-n"){S.bs.n=+v;bsChanged();}
+  else if(a==="bs-tense"){const T0=S.bs.tenses,k=T0.indexOf(v); if(k>=0){if(T0.length>1)T0.splice(k,1);} else T0.push(v); bsChanged();}
   else if(a==="ans"&&Q&&Q.picked===null){Q.picked=+v; const q=Q.qs[Q.i]; if(Q.picked===q.ans)Q.score++; else Q.misses.push({q,p:q.opts[Q.picked].l}); record(q,Q.picked===q.ans);}
-  else if(a==="next"&&Q){ if(Q.i===Q.n-1){Q.done=true; if(Q.id==="daily")S.day=today(); if(Q.id!=="miss"&&(S.best[Q.id]==null||Q.score>S.best[Q.id]))S.best[Q.id]=Q.score; save();} else {Q.i++;Q.picked=null;Q.typed="";Q.built=[];Q.result=null;S.kb.cons=null;} top=true;}
+  else if(a==="next"&&Q){ if(Q.i===Q.n-1){Q.done=true; if(Q.id==="daily")S.day=today(); if(Q.id!=="miss"&&(S.best[Q.id]==null||Q.score>S.best[Q.id]))S.best[Q.id]=Q.score; save();} else {Q.i++;Q.picked=null;Q.typed="";Q.built=[];Q.result=null;Q.slot=null;S.kb.cons=null;} top=true;}
   render();
   if(top) window.scrollTo(0,0);
 });

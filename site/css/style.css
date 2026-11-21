@@ -184,3 +184,17 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .am .say{font-family:var(--f-body);font-size:max(.45em,.7rem);margin-left:.5em}
 .say:hover{background:var(--accent);color:var(--accent-ink)}
 .say.big{width:2.6em;height:2.6em;font-size:1rem;margin:10px auto 0;display:flex}
+/* sentence builder */
+.slots .tile{cursor:default}
+.tile.filled{display:inline-flex;flex-direction:column;align-items:center;border-color:var(--accent)}
+.tile.filled .rom{font-size:.72rem;line-height:1.1}
+.tile.gap{color:var(--muted);min-width:3.2rem;text-align:center;border-style:dashed;font-family:var(--f-body)}
+.tile.gap.now{border-color:var(--gold);color:var(--gold);font-weight:700}
+.slot-opts{margin-top:6px}
+.tile.no{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);opacity:.75}
+.bset{margin-top:12px}
+.bset h4{margin-bottom:4px}
+.bset > .count{margin:10px 0 4px}
+.bset .bhelp{margin:6px 0 0;font-size:.82rem}
+.bset .sel{width:100%}
+.wrapchips{flex-wrap:wrap;overflow:visible;padding:2px 0}
