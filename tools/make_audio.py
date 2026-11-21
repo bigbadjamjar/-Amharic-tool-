@@ -6,6 +6,7 @@
     python3 tools/make_audio.py --voice male    # use the male voice (am-ET-AmehaNeural)
     python3 tools/make_audio.py --list          # only show what would be made
     python3 tools/make_audio.py --course-only   # just the course words and sentences
+    python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
     python3 tools/make_audio.py --only "ሰላም" "ቡና"
     python3 tools/make_audio.py --from words.txt   # one phrase per line
 
@@ -65,6 +66,8 @@ GENERATED = AUDIO / "generated.json"
 def to_tts(text: str) -> str:
     """The exact text sent to the voice."""
     t = "".join(TTS_PUNCT.get(c, c) for c in text)
+    if len(t) == 1:
+        t += "."   # a lone syllable, said on its own rather than run into silence
     t = re.sub(r"\s*([.,;:?!])\s*", r"\1 ", t)   # no space before a mark, one after
     return re.sub(r"\s+", " ", t).strip()
 
@@ -83,6 +86,23 @@ def save_generated(clips: dict) -> None:
                   "yourself) are never replaced.",
         "clips": dict(sorted(clips.items())),
     }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+
+def fidel_letters() -> list:
+    """Every letter in the Fidel chart, built the same way site/js/data/fidel.js builds it."""
+    text = (SITE / "js" / "data" / "fidel.js").read_text(encoding="utf-8")
+    rows = re.findall(r'\["(.)","', re.search(r"const FR = (\[.*?\]);", text).group(1))
+    haswa = re.search(r'const HASWA = "([^"]*)"', text).group(1)
+    lv = {k: int(v, 16) for k, v in re.findall(r'"(.)":0x([0-9A-Fa-f]+)', re.search(r"const LV = \{(.*?)\}", text).group(1))}
+    out = []
+    for r in rows:
+        base = ord(r)
+        out += [chr(base + o) for o in range(7)]
+        if r in haswa:
+            out.append(chr(base + 7))
+        if r in lv:
+            out += [chr(lv[r] + off) for off in (0, 2, 3, 4, 5)]
+    return out
 
 
 async def make(text: str, voice: str, rate: str) -> None:
@@ -110,14 +130,17 @@ def main() -> None:
     ap.add_argument("--redo-all", action="store_true", help="remake every clip, INCLUDING ones you added yourself")
     ap.add_argument("--limit", type=int, default=0, help="stop after this many clips")
     ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences")
+    ap.add_argument("--fidel", action="store_true", help="only the letters of the Fidel chart")
     a = ap.parse_args()
 
     if a.only:
         wanted = a.only
     elif a.src:
         wanted = [l.strip() for l in open(a.src, encoding="utf-8") if l.strip()]
+    elif a.fidel:
+        wanted = fidel_letters()
     else:
-        wanted = phrases_from_data(a.course_only)
+        wanted = phrases_from_data(a.course_only) + ([] if a.course_only else fidel_letters())
 
     have = existing_clips()
     made = load_generated()

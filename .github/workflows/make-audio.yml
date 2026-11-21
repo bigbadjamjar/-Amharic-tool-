@@ -13,6 +13,7 @@ on:
         default: course words and sentences
         options:
           - course words and sentences
+          - fidel letters
           - everything
       voice:
         description: Voice
@@ -48,6 +49,7 @@ jobs:
         run: |
           args=""
           [ "${{ inputs.which }}" = "course words and sentences" ] && args="$args --course-only"
+          [ "${{ inputs.which }}" = "fidel letters" ] && args="$args --fidel"
           case "${{ inputs.voice }}" in male*) args="$args --voice male";; esac
           python3 tools/make_audio.py $args
 

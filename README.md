@@ -52,6 +52,7 @@ republishes the site. Run it again any time new words are added; it only makes c
 pip install edge-tts
 python3 tools/make_audio.py --list          # see what's missing
 python3 tools/make_audio.py --course-only   # just the course words and sentences
+python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
 python3 tools/make_audio.py                 # make them all (female voice, Mekdes)
 python3 tools/make_audio.py --voice male    # Ameha instead
 python3 tools/make_audio.py --only "ቡና" "ሻይ"
