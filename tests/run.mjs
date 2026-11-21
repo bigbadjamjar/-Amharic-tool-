@@ -8,7 +8,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "site
 // Same order as the <script> tags in site/index.html, minus the browser-only files.
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
-  .filter(f => f.startsWith("js/") && !/js\/(app|audio)\.js$/.test(f));
+  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
   "\n;globalThis.X={VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions};", ctx);
@@ -99,6 +99,34 @@ for (const mode of ["forms", "mixed", "any"]) for (const n of [2, 3, 6]) for (co
   }
 }
 for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
+
+// --- profiles: old progress moves into a first profile, and backups survive the round trip
+{
+  const P = vm.createContext({ console, TextEncoder, TextDecoder, CompressionStream, DecompressionStream, Response, Blob, btoa, atob, Uint8Array });
+  vm.runInContext(fs.readFileSync(path.join(root, "js/profiles.js"), "utf8") + "\n;globalThis.X={makeProfiles,memoryStore,backupToCode,readBackup};", P);
+  const Y = P.X, st = Y.memoryStore();
+  st.setItem("amharic-best", JSON.stringify({ L1: 9 })); st.setItem("amharic-rom", "0"); st.setItem("amharic-upto", "4");
+  st.setItem("amharic-miss", JSON.stringify([{ k: "a", q: { big: "x" }, s: 0 }]));
+  const pr = Y.makeProfiles(st), me = pr.cur();
+  ok(pr.list().length === 1 && me && me.name === "Me", "old progress should become one profile called Me");
+  const d = pr.load();
+  ok(d.best.L1 === 9 && d.rom === false && d.upto === 4 && d.miss.length === 1 && d.kbhints === true, "old progress moved across wrongly: " + JSON.stringify(d));
+  ok(Y.makeProfiles(st).list().length === 1, "migration should only happen once");
+  const sam = pr.add("Sam"); pr.add("sam");
+  ok(pr.list().map(p => p.name).join() === "Me,Sam,sam (2)", "names should be made unique: " + pr.list().map(p => p.name).join());
+  ok(pr.cur().name === "sam (2)" && Object.keys(pr.load().best || {}).length === 0, "a new profile starts empty and becomes current");
+  pr.use(me.id); pr.rename(me.id, "  Rob  "); ok(pr.cur().name === "Rob", "rename");
+  pr.save({ best: { L2: 7 } }, sam); ok(pr.load(me.id).best.L1 === 9 && pr.load(sam).best.L2 === 7, "profiles keep separate progress");
+  const b = pr.backup(me.id);
+  for (const code of [await Y.backupToCode(b), JSON.stringify(b)]) {
+    const back = await Y.readBackup(code);
+    ok(back.name === "Rob" && back.data.best.L1 === 9 && back.data.miss.length === 1, "backup round trip failed for " + code.slice(0, 6));
+  }
+  let msg = ""; try { await Y.readBackup("hello"); } catch (e) { msg = e.message; }
+  ok(/doesn't look like a backup/.test(msg), "a bad code should give a plain error");
+  pr.remove(sam); ok(pr.list().length === 2 && pr.load(sam).best === undefined, "remove deletes the profile's data");
+  const fresh = Y.makeProfiles(Y.memoryStore()); ok(fresh.list().length === 0 && fresh.cur() === null, "a new device starts with no profiles");
+}
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);
 process.exit(fails ? 1 : 0);
