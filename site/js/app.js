@@ -187,10 +187,27 @@ const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filt
 const S = {bs:{mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
   fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
   kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
-try{ const b=JSON.parse(localStorage.getItem("amharic-best")||"{}"); if(b&&typeof b==="object") S.best=b;
-     if(localStorage.getItem("amharic-rom")==="0") S.rom=false; const m=JSON.parse(localStorage.getItem("amharic-miss")||"[]"); if(Array.isArray(m)) S.miss=m.filter(x=>x&&x.k&&x.q); const u=+localStorage.getItem("amharic-upto"); if(u&&LMAP[u]) S.upto=u; S.day=localStorage.getItem("amharic-day")||""; if(localStorage.getItem("amharic-kbhints")==="0") S.kb.hints=false;
-     const bs=JSON.parse(localStorage.getItem("amharic-builder")||"null"); if(bs&&typeof bs==="object") Object.assign(S.bs,bs); }catch(e){}
-const save=()=>{try{localStorage.setItem("amharic-best",JSON.stringify(S.best));localStorage.setItem("amharic-rom",S.rom?"1":"0");localStorage.setItem("amharic-miss",JSON.stringify(S.miss));if(S.upto)localStorage.setItem("amharic-upto",S.upto);localStorage.setItem("amharic-day",S.day);localStorage.setItem("amharic-kbhints",S.kb.hints?"1":"0");localStorage.setItem("amharic-builder",JSON.stringify(S.bs));}catch(e){}};
+S.pf={add:"",ren:null,del:false,code:"",msg:"",inText:"",inErr:"",incoming:null};
+/* Saved progress lives in the current profile (see profiles.js). */
+const BS_DEF=JSON.stringify(S.bs);
+const PROF=makeProfiles(safeStore());
+function applyData(d){
+  d=d&&typeof d==="object"?d:{};
+  S.best=d.best&&typeof d.best==="object"?d.best:{};
+  S.rom=d.rom!==false;
+  S.miss=Array.isArray(d.miss)?d.miss.filter(x=>x&&x.k&&x.q):[];
+  S.upto=d.upto&&LMAP[+d.upto]?+d.upto:null;
+  S.day=typeof d.day==="string"?d.day:"";
+  S.kb.hints=d.kbhints!==false;
+  S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
+  S.quiz=null; S.lesson=null; S.fc.key="";
+}
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,builder:S.bs});
+const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
+const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
+applyData(PROF.load());
+// Several people on this device: ask who's practising each time the app opens. Nobody yet: ask for a name.
+if(PROF.list().length!==1) S.mode="who";
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -598,13 +615,67 @@ function renderTest(){
   return h;
 }
 
+/* ---------- profiles and backups ---------- */
+const plural=(n,w)=>n+" "+w+(n===1?"":"s");
+function statLine(d){
+  d=d||{}; const t=Object.keys(d.best||{}).length, m=(d.miss||[]).length;
+  return t||m ? plural(t,"test")+" with scores"+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
+}
+function renderWho(){
+  const L=PROF.list(), P=S.pf;
+  let h=`<h2>${L.length?"Who's practising?":"Welcome"}</h2><p class="lead">${L.length?"Each person has their own scores, mistakes and settings.":"Type your name to start. If other people use this device they can add their own name later, and everyone's progress is kept separately."}</p>`;
+  if(L.length) h+=`<div class="stack" style="margin-top:14px">`+L.map(p=>`<button class="topic" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small></button>`).join("")+`</div><h3>Someone new</h3>`;
+  h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
+  if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? <button class="link" data-act="mode" data-v="me">Restore a backup</button></p>`;
+  return h;
+}
+function renderMe(){
+  const P=S.pf, cur=PROF.cur(), L=PROF.list();
+  let h=`<h2>Profiles</h2><p class="lead">Each person has their own scores, mistakes and settings on this device. ${L.length>1?" Tap a name to switch.":""}</p><div class="stack" style="margin-top:14px">`;
+  L.forEach(p=>{ const on=cur&&p.id===cur.id;
+    h+=`<button class="topic${on?" on":""}" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small><span class="best">${on?"<strong>✓</strong>using now":"switch"}</span></button>`; });
+  h+=`</div>`;
+  if(cur){
+    if(P.ren!==null) h+=`<div class="ntry pfrow" style="margin-top:10px"><input id="pf-ren" type="text" maxlength="30" autocomplete="off" value="${esc(P.ren)}"><button class="btn primary" data-act="pf-ren-ok">Save</button><button class="btn" data-act="pf-ren-x">Cancel</button></div>`;
+    else if(P.del) h+=`<div class="note warn"><p>Delete ${esc(cur.name)} and all their progress from this device? This can't be undone, so download a backup first if you might want it.</p><div class="pfrow" style="margin-top:8px"><button class="btn danger" data-act="pf-del-ok">Delete</button><button class="btn" data-act="pf-del-x">Cancel</button></div></div>`;
+    else h+=`<div class="bar" style="justify-content:flex-start;gap:16px"><button class="link" data-act="pf-ren">Rename ${esc(cur.name)}</button><button class="link" data-act="pf-del">Delete ${esc(cur.name)}</button></div>`;
+  }
+  h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
+  if(cur){
+    h+=`<h3>Back up or move to another device</h3><div class="note"><p>Save ${esc(cur.name)}'s progress as a file or a code. On the other phone or computer, open this app, go to Profiles and restore it.</p>
+      <div class="pfrow" style="margin-top:10px"><button class="btn" data-act="pf-file">Download backup file</button><button class="btn" data-act="pf-code">Show backup code</button></div>`;
+    if(P.code) h+=`<textarea id="pf-codebox" class="codebox" readonly rows="4">${esc(P.code)}</textarea><div class="pfrow"><button class="btn primary" data-act="pf-copy">Copy code</button></div>`;
+    if(P.msg) h+=`<p class="count" role="status">${esc(P.msg)}</p>`;
+    h+=`</div>`;
+  }
+  h+=`<h3>Restore a backup</h3><div class="note">`;
+  if(P.incoming){
+    const b=P.incoming, same=PROF.byName(b.name), when=new Date(b.saved);
+    h+=`<p><b>Backup of ${esc(b.name)}</b>${isNaN(when)?"":", saved "+esc(when.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}))}. ${esc(statLine(b.data))}.</p><div class="pfrow" style="margin-top:10px">`+
+      (same?`<button class="btn primary" data-act="pf-in-replace">Replace ${esc(same.name)}'s progress</button><button class="btn" data-act="pf-in-new">Add as a new profile</button>`:`<button class="btn primary" data-act="pf-in-new">Add ${esc(b.name)}</button>`)+
+      `<button class="btn" data-act="pf-in-x">Cancel</button></div>`;
+  }else{
+    h+=`<p>Paste a backup code, or choose a backup file.</p><textarea id="pf-in" class="codebox" rows="3" placeholder="Paste code here">${esc(P.inText)}</textarea>
+      <div class="pfrow"><button class="btn primary" data-act="pf-in-read">Restore code</button><label class="btn filebtn">Choose file<input type="file" id="pf-infile" accept=".json,.txt,application/json,text/plain"></label></div>`;
+    if(P.inErr) h+=`<p class="count bad" role="alert">${esc(P.inErr)}</p>`;
+  }
+  return h+`</div>`;
+}
+function useProfile(id){ keep(); PROF.use(id); applyData(PROF.load()); S.pf.ren=null; S.pf.del=false; S.pf.code=""; S.pf.msg=""; }
+async function readIncoming(text){
+  try{ S.pf.incoming=await readBackup(text); S.pf.inErr=""; S.pf.inText=""; }
+  catch(e){ S.pf.incoming=null; S.pf.inErr=e.message; }
+  render();
+}
+
 /* ---------- render + events ---------- */
 const MODES=["course","fidel","num","ref","test"];
 function render(){
   document.body.classList.toggle("norom",!S.rom);
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
-  $("#app").innerHTML = S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():renderTest();
+  const cur=PROF.cur(); $("#whobtn").textContent=cur?cur.name:"Profiles"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
+  $("#app").innerHTML = S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():renderTest();
   addSayButtons($("#app"));
 }
 const typing = () => (S.mode==="test"&&S.quiz&&!S.quiz.done&&S.quiz.qs[S.quiz.i].type==="type") ? S.quiz : (S.mode==="fidel"&&S.ftab==="type") ? S.prac : null;
@@ -617,6 +688,9 @@ function check(){
 document.addEventListener("input",e=>{
   if(e.target.id==="nin"){S.num.n=e.target.value;$("#nout").innerHTML=numOut();}
   if(e.target.id==="tin"){const t=typing(); if(t) t.typed=e.target.value;}
+  if(e.target.id==="pf-add") S.pf.add=e.target.value;
+  if(e.target.id==="pf-ren") S.pf.ren=e.target.value;
+  if(e.target.id==="pf-in") S.pf.inText=e.target.value;
   if(e.target.id==="vsearch"){S.v.q=e.target.value;const m=vMatch();if(m.length&&!m.some(x=>x[1]===S.v.sel))S.v.sel=m[0][1];$("#vlist").innerHTML=vListHTML();const p=$("#vpanel");}
 });
 document.addEventListener("change",e=>{
@@ -626,15 +700,35 @@ document.addEventListener("change",e=>{
   else if(id==="vctense"){S.v.ctense=val;vNewCard();render();}
   else if(id==="vsearch"){render();}
   else if(id==="upto"){S.upto=+val;save();render();}
+  else if(id==="pf-infile"&&e.target.files[0]){const f=e.target.files[0]; f.text().then(readIncoming,()=>{S.pf.inErr="Couldn't read that file.";render();});}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();} });
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();}
+  if(e.key==="Enter"&&(e.target.id==="pf-add"||e.target.id==="pf-ren")) document.querySelector(`[data-act="${e.target.id==="pf-add"?"pf-add":"pf-ren-ok"}"]`).click(); });
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
   if(a==="rom"){S.rom=!S.rom;save();}
-  else if(a==="mode"){S.mode=v;top=true;}
+  else if(a==="mode"){S.mode=v;top=true; if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
+  else if(a==="pf-use"){useProfile(v); if(S.mode==="who")S.mode="course"; top=S.mode!=="me";}
+  else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}
+  else if(a==="pf-ren"){S.pf.ren=PROF.cur().name;S.pf.del=false;}
+  else if(a==="pf-ren-ok"){PROF.rename(PROF.cur().id,S.pf.ren||"");S.pf.ren=null;}
+  else if(a==="pf-ren-x"){S.pf.ren=null;}
+  else if(a==="pf-del"){S.pf.del=true;S.pf.ren=null;}
+  else if(a==="pf-del-x"){S.pf.del=false;}
+  else if(a==="pf-del-ok"){PROF.remove(PROF.cur().id); S.pf.del=false; S.pf.code=""; applyData(PROF.load()); if(!PROF.cur())S.mode="who";}
+  else if(a==="pf-file"){save(); const b=PROF.backup(), url=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"})), l=document.createElement("a");
+    l.href=url; l.download="amharic-"+b.name.replace(/[^\w-]+/g,"-").toLowerCase()+"-"+b.saved.slice(0,10)+".json"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+    S.pf.msg="Backup file saved to your downloads.";}
+  else if(a==="pf-code"){save(); backupToCode(PROF.backup()).then(c=>{S.pf.code=c;S.pf.msg="";render();}); return;}
+  else if(a==="pf-copy"){const c=S.pf.code; const done=ok=>{S.pf.msg=ok?"Code copied. Paste it somewhere you can reach from the other device, such as an email or message to yourself.":"Couldn't copy automatically. Select the code above and copy it.";render();};
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(c).then(()=>done(true),()=>done(false)); else done(false); return;}
+  else if(a==="pf-in-read"){readIncoming(S.pf.inText); return;}
+  else if(a==="pf-in-x"){S.pf.incoming=null;}
+  else if(a==="pf-in-replace"){const b=S.pf.incoming, p=PROF.byName(b.name); if(p){PROF.save(b.data,p.id); PROF.use(p.id); applyData(b.data);} S.pf.incoming=null; S.pf.msg=""; S.mode="course"; top=true;}
+  else if(a==="pf-in-new"){const b=S.pf.incoming; keep(); PROF.add(b.name,b.data); applyData(b.data); S.pf.incoming=null; S.mode="course"; top=true;}
   else if(a==="lesson"){S.lesson=v?+v:null;S.lview="notes";top=true;}
   else if(a==="lview"){S.lview=v;}
   else if(a==="ftab"){S.ftab=v;top=true;}
