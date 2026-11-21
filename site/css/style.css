@@ -224,6 +224,8 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .ratebtn,.romtoggle{white-space:nowrap}
 .brand{align-items:center}
 @media (max-width:420px){ .whobtn{max-width:6.5rem} }
+.brand .tools{min-width:0} .brand .tools>button{flex:none} .brand .tools>.whobtn{flex:0 1 auto;min-width:3rem}   /* a long profile name shrinks (with …) instead of pushing off the edge */
+@media (max-width:340px){ .romtoggle{font-size:0;gap:0} .brand .tools{gap:4px} }   /* very narrow phones: just the transcription switch */
 /* listening */
 .lsplay{display:flex;justify-content:center;gap:10px;margin:12px 0 4px;flex-wrap:wrap}
 .lsbtn{display:inline-flex;align-items:center;gap:8px;padding:14px 22px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.05rem;min-height:52px}
