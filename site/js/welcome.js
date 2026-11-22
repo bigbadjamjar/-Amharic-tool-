@@ -81,4 +81,5 @@ function wlStart(){
   return n === 0 || n > 1 ? "who" : "course";
 }
 const wlFirst = () => wlAsked() || !wlSkip.get();
-const wlLink = () => `<p class="count wllink"><button class="link" data-act="mode" data-v="welcome">About this app</button></p>`;
+// shown centred at the bottom of every page except the welcome page itself
+const wlLink = () => `<footer class="wlfoot"><button class="link" data-act="mode" data-v="welcome">About this app</button></footer>`;
