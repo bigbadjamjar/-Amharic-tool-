@@ -45,7 +45,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 h2{font-size:1.15rem;margin:20px 0 4px;text-wrap:balance}
 h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 8px;font-weight:600}
 h3 small{text-transform:none;letter-spacing:0;font-weight:400;font-size:.85rem}
-p{margin:6px 0;max-width:65ch}
+p{margin:6px 0;max-width:65ch;text-wrap:pretty}
+h1,h2,h3{text-wrap:balance}
+small{text-wrap:pretty}
 .lead{color:var(--muted);font-size:.95rem}
 .am{font-family:var(--f-fidel)}
 .rom{color:var(--gold);font-size:.85rem;font-style:italic}
@@ -452,8 +454,20 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .wlfeats{grid-template-columns:repeat(3,minmax(0,1fr))}
   .grid2{grid-template-columns:repeat(4,minmax(0,1fr))}
   .vgrid{max-height:300px}
-  /* the daily session card and notes read better at a measured width */
-  .daily{max-width:760px}
+  /* text and cards flow to the full content width, so they resize with the window */
+  p{max-width:none}
+  /* tab rows and switches spread across the width instead of sitting bunched on the left */
+  .chips{flex-wrap:wrap;overflow:visible}
+  .chips .chip{flex:1 0 auto;text-align:center;padding-left:12px;padding-right:12px}
+  /* long lists (topics, units) line up in an even grid rather than one stretched last row */
+  .chips.many{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  .chips.many .chip{white-space:normal}
+  .bar .mini,.bset .mini,.note .mini{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);flex:1 1 auto;overflow:visible}
+  .bset .mini,.note .mini{width:100%}
+  .bar .mini button,.bset .mini button,.note .mini button{padding:8px 12px}
+  .bar .sel,.bar select{flex:0 0 auto}
+  /* My mistakes and Review: two equal halves */
+  .stack.duo{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .wlhero{padding:34px 40px 28px}
   /* word, sentence and verb tables: two columns of rows */
   .tbl.wl2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}

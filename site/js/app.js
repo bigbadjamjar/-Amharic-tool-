@@ -225,7 +225,7 @@ const A=(am,rom)=>`<span class="am">${esc(am)}</span>`+(rom?`<span class="rom">$
 // Table titles write the transcription in plain text ("ሰበረ sebbere, break", "ቤት (bét)"): mark it so the switch hides it.
 const ttl=s=>esc(s).replace(/^([\u1200-\u137C ]+) ([^,]+),/,'<span class="am">$1</span> <span class="rom">$2</span>,').replace(/([\u1200-\u137C]+) \(([^)]+)\)/g,'<span class="am">$1</span> <span class="rom">$2</span>');
 const fmt=s=>esc(s).replace(/\{([^|}]+)\|([^}]*)\}/g,(_,a,r)=>`<span class="am">${a}</span> <span class="rom">${r}</span>`);
-const chips=(act,items,sel)=>`<div class="chips">`+items.map(([v,l])=>`<button class="chip" data-act="${act}" data-v="${v}" aria-selected="${String(v)===String(sel)}">${l}</button>`).join("")+`</div>`;
+const chips=(act,items,sel)=>`<div class="chips${items.length>9?" many":""}">`+items.map(([v,l])=>`<button class="chip" data-act="${act}" data-v="${v}" aria-selected="${String(v)===String(sel)}">${l}</button>`).join("")+`</div>`;
 const mini=(act,items,sel)=>`<div class="mini">`+items.map(([v,l])=>`<button data-act="${act}" data-v="${v}" aria-selected="${v===sel}">${l}</button>`).join("")+`</div>`;
 
 function tableHTML(t){
@@ -585,13 +585,13 @@ const tItem=id=>{const t=topic(id);return `<button class="topic" data-act="start
 const tStack=ids=>`<div class="stack">${ids.map(tItem).join("")}</div>`;
 function testMenu(){
   const sec=TSECS.find(x=>x[0]===S.tsec);
-  let h=chips("tsec",[["all","Overview"]].concat(TSECS.map(x=>[x[0],x[2]])),sec?sec[0]:"all").replace('class="chips"','class="chips tsecs"');
+  let h=chips("tsec",[["all","Overview"]].concat(TSECS.map(x=>[x[0],x[2]])),sec?sec[0]:"all").replace(/class="chips[^"]*"/,'class="chips tsecs"');
   if(sec){
     return h+`<div class="tsechead"><h2>${sec[2]}</h2><p class="lead">${esc(sec[3])}</p></div>`+sec[5]()+
       `<button class="back" data-act="tsec" data-v="all">‹ All kinds of test</button>`;
   }
   h+=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
-   <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
+   <div class="stack duo" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
    <h3>Choose a kind of test</h3>
    <div class="tgrid">${TSECS.map(([id,icon,name,desc,n])=>`<button class="tcard" data-act="tsec" data-v="${id}"><span class="ticon" aria-hidden="true">${icon}</span><b>${name}</b><small>${esc(desc)}</small><span class="tn">${plural(n(),"test")} ›</span></button>`).join("")}</div>`;
   return h;
