@@ -102,7 +102,7 @@ const drSayBtn = (parts, label) => parts && drCanSay(parts)
   ? `<button class="say ${label ? "drsay" : ""}" data-act="dr-say" data-v="${esc(parts.join("|"))}" aria-label="Listen" title="Listen">▶${label ? " " + esc(label) : ""}</button>` : "";
 
 /* ----- questions ----- */
-const drQ = (q, parts, ansParts) => Object.assign(q, { parts: parts || null, ansParts: ansParts || null });
+const drQ = (q, parts, ansParts, bigRom) => Object.assign(q, { parts: parts || null, ansParts: ansParts || null, bigRom: bigRom || null });
 // 1. Read the time: Western time to Amharic, or Amharic to Western time
 function qTime(){
   const h = ri(24), m = pick(DR_MINS), t = etTime(h, m), said = t.parts.join(" ");
@@ -114,7 +114,7 @@ function qTime(){
     return Object.assign(drQ(mk("Telling the time", wTime(h, m), false, "How do you say this time in Amharic?", { l: said, r: t.rom }, wr, true), null, t.parts), { clock: [h, m] });
   }
   const wr = [6, -6, 1, -1, 12].map(d => ({ l: wTime((h + d + 24) % 24, m) })).concat(DR_MINS.filter(x => x !== m).map(x => ({ l: wTime(h, x) })));
-  return drQ(mk("Telling the time", said, true, "What time is this on a Western clock?", { l: wTime(h, m) }, wr, false), t.parts);
+  return drQ(mk("Telling the time", said, true, "What time is this on a Western clock?", { l: wTime(h, m) }, wr, false), t.parts, null, t.rom);
 }
 // 2. Two clocks: convert between the Western and the Ethiopian clock face
 function qClock(){
@@ -124,7 +124,7 @@ function qClock(){
     return Object.assign(drQ(mk("Two clocks", wTime(h, m), false, "What does an Ethiopian clock say?", { l: e }, wr, false), null, etTime(h, m).parts), { clock: [h, m] });
   }
   const part = p[2], wr = [6, -6, 1, -1, 12].map(d => ({ l: wTime((h + d + 24) % 24, m) }));
-  return drQ(mk("Two clocks", `${e} ${part}`, false, "on the Ethiopian clock. What is it on a Western clock?", { l: wTime(h, m) }, wr, false), etTime(h, m).parts);
+  return drQ(mk("Two clocks", `${e} ${part}`, false, "on the Ethiopian clock. What is it on a Western clock?", { l: wTime(h, m) }, wr, false), etTime(h, m).parts, null, etTime(h, m).rom);
 }
 // 3. Prices: digits to Amharic, Amharic to digits, or "how much is…?"
 function qPrice(){
@@ -132,14 +132,14 @@ function qPrice(){
   const near = priceNear(n, c);
   const r = ri(3);
   if(r === 0) return drQ(mk("Prices", priceStr(n, c), false, "Choose the Amharic", { l: said, r: ps.rom }, near.map(([x, y]) => { const s = priceSay(x, y); return { l: s.parts.join(" "), r: s.rom }; }), true), null, ps.parts);
-  if(r === 1) return drQ(mk("Prices", said, true, "How much is that?", { l: priceStr(n, c) }, near.map(([x, y]) => ({ l: priceStr(x, y) })), false), ps.parts);
+  if(r === 1) return drQ(mk("Prices", said, true, "How much is that?", { l: priceStr(n, c) }, near.map(([x, y]) => ({ l: priceStr(x, y) })), false), ps.parts, null, ps.rom);
   const line = [it[0], ...ps.parts, "ነው"];
-  return drQ(mk("At the shop", line.join(" "), true, `How much is ${it[2]}?`, { l: priceStr(n, c) }, near.map(([x, y]) => ({ l: priceStr(x, y) })), false), line);
+  return drQ(mk("At the shop", line.join(" "), true, `How much is ${it[2]}?`, { l: priceStr(n, c) }, near.map(([x, y]) => ({ l: priceStr(x, y) })), false), line, null, `${it[1]} ${ps.rom} new`);
 }
 // 4. Shopping phrases
 function qShop(){
   const w = pick(EV.shop), others = EV.shop.filter(x => x !== w);
-  if(ri(2)) return drQ(mk("Shopping phrases", w[0], true, "What does this mean?", { l: w[2] }, others.map(x => ({ l: x[2] })), false), [w[0]]);
+  if(ri(2)) return drQ(mk("Shopping phrases", w[0], true, "What does this mean?", { l: w[2] }, others.map(x => ({ l: x[2] })), false), [w[0]], null, w[1]);
   return drQ(mk("Shopping phrases", w[2], false, "Choose the Amharic", { l: w[0], r: w[1] }, others.map(x => ({ l: x[0], r: x[1] })), true), null, [w[0]]);
 }
 // 5. Days of the week and the months
@@ -147,18 +147,18 @@ function qDays(){
   const r = ri(5);
   if(r < 2){
     const i = ri(7), d = EV.days[i], o = EV.days.filter(x => x !== d);
-    if(r === 0) return tag(drQ(mk("Days of the week", d[0], true, "Which day is this?", { l: d[2] }, o.map(x => ({ l: x[2] })), false), [d[0]]), "w:" + d[0]);
+    if(r === 0) return tag(drQ(mk("Days of the week", d[0], true, "Which day is this?", { l: d[2] }, o.map(x => ({ l: x[2] })), false), [d[0]], null, d[1]), "w:" + d[0]);
     const nx = EV.days[(i + 1) % 7];
-    return drQ(mk("Days of the week", d[0], true, "Which day comes next?", { l: nx[0], r: nx[1] }, o.filter(x => x !== nx).map(x => ({ l: x[0], r: x[1] })), true), [d[0]], [nx[0]]);
+    return drQ(mk("Days of the week", d[0], true, "Which day comes next?", { l: nx[0], r: nx[1] }, o.filter(x => x !== nx).map(x => ({ l: x[0], r: x[1] })), true), [d[0]], [nx[0]], d[1]);
   }
   const i = ri(13), mo = EV.months[i], o = EV.months.filter(x => x !== mo);
   if(r === 2){ const nx = EV.months[(i + 1) % 13];
-    return drQ(mk("Months", mo[0], true, "Which month comes next?", { l: nx[0], r: nx[1] }, o.filter(x => x !== nx).map(x => ({ l: x[0], r: x[1] })), true), [mo[0]], [nx[0]]); }
+    return drQ(mk("Months", mo[0], true, "Which month comes next?", { l: nx[0], r: nx[1] }, o.filter(x => x !== nx).map(x => ({ l: x[0], r: x[1] })), true), [mo[0]], [nx[0]], mo[1]); }
   const ord = n => n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th");
   if(r === 3) return drQ(mk("Months", `The ${ord(i + 1)} month`, false, "of the Ethiopian year is…", { l: mo[0], r: mo[1] }, o.map(x => ({ l: x[0], r: x[1] })), true), null, [mo[0]]);
   // roughly when in the Western year
   const y = jdnToE(todayJdn())[0], span = m => { const [, gm, gd] = eToG(y, m + 1, 1), [, em, ed] = eToG(y, m + 1, etMonthDays(y, m + 1)); return `${gShort(gm, gd)} – ${gShort(em, ed)}`; };
-  return drQ(mk("Months", mo[0], true, "When is this month in the Western calendar?", { l: span(i) }, EV.months.map((_, k) => k).filter(k => k !== i).map(k => ({ l: span(k) })), false), [mo[0]]);
+  return drQ(mk("Months", mo[0], true, "When is this month in the Western calendar?", { l: span(i) }, EV.months.map((_, k) => k).filter(k => k !== i).map(k => ({ l: span(k) })), false), [mo[0]], null, mo[1]);
 }
 // 6. Ethiopian dates: convert either way, the year, or the date of a holiday
 function qDate(){
@@ -166,7 +166,7 @@ function qDate(){
   if(r === 0){
     const hd = pick(EV.holidays), o = EV.holidays.filter(x => x !== hd);
     const wr = o.map(x => ({ l: eStr(0, x[3], x[4]), r: eRom(0, x[3], x[4]) })).concat([{ l: eStr(0, hd[3], hd[4] + 10 > 30 ? hd[4] - 10 : hd[4] + 10) }, { l: eStr(0, hd[3] % 13 + 1, hd[4]) }]);
-    return drQ(mk("Holidays", `${hd[0]}`, true, `${hd[2]}: when is it?`, { l: eStr(0, hd[3], hd[4]), r: eRom(0, hd[3], hd[4]) }, wr, true), [hd[0]], eSaid(0, hd[3], hd[4]));
+    return drQ(mk("Holidays", `${hd[0]}`, true, `${hd[2]}: when is it?`, { l: eStr(0, hd[3], hd[4]), r: eRom(0, hd[3], hd[4]) }, wr, true), [hd[0]], eSaid(0, hd[3], hd[4]), hd[1]);
   }
   if(r === 1){
     const [ey] = jdnToE(tj), [gy] = jdnToG(tj);
@@ -176,7 +176,7 @@ function qDate(){
   const nearE = [[y, m % 13 + 1, d], [y, m === 1 ? 12 : m - 1, d], [y + 1, m, d], [y - 1, m, d], [y, m, d <= 20 ? d + 10 : d - 10]].filter(([a, b, c]) => c <= etMonthDays(a, b));
   if(r <= 3) return drQ(mk("Ethiopian dates", gStr(gy, gm, gd), false, "What is this date in the Ethiopian calendar?", { l: eStr(y, m, d), r: eRom(y, m, d) }, nearE.map(([a, b, c]) => ({ l: eStr(a, b, c), r: eRom(a, b, c) })), true), null, eSaid(0, m, d));
   const nearG = nearE.map(([a, b, c]) => { const g = eToG(a, b, c); return { l: gStr(g[0], g[1], g[2]) }; });
-  return drQ(mk("Ethiopian dates", eStr(y, m, d), true, "What is this date in the Western calendar?", { l: gStr(gy, gm, gd) }, nearG, false), eSaid(0, m, d));
+  return drQ(mk("Ethiopian dates", eStr(y, m, d), true, "What is this date in the Western calendar?", { l: gStr(gy, gm, gd) }, nearG, false), eSaid(0, m, d), null, eSaidRom(0, m, d));
 }
 const DR_TESTS = {
   "dr-time":  ["Telling the time", "Say times the Ethiopian way, and understand them when you hear them", qTime],
@@ -199,7 +199,7 @@ function drTimePage(){
   const D = drState(); if(D.h === null){ const t = new Date(); D.h = t.getHours(); D.m = DR_MINS[Math.floor(t.getMinutes() / 15)]; }
   const t = etTime(D.h, D.m);
   const rows = [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6].map(w => {
-    return `<div class="row drrow"><span>${w} am · ${w} pm</span><span class="form"><span class="am nosay norom-auto">${esc(EV.hours[etHour(w) - 1][0])}</span></span><span class="en">${etHour(w)} o'clock</span></div>`; }).join("");
+    return `<div class="row drrow"><span>${w} am · ${w} pm</span><span class="form">${drLine([EV.hours[etHour(w) - 1][0]], EV.hours[etHour(w) - 1][1])}</span><span class="en">${etHour(w)} o'clock</span></div>`; }).join("");
   return `<div class="note"><h4>Two ways to tell the time</h4>
       <p>Ethiopians usually count the hours from sunrise, not from midnight. The first hour of daylight, 7 in the morning, is {አንድ ሰዓት|and se'at} “one o'clock”. Noon is {ስድስት ሰዓት|siddist se'at} “six o'clock”, and 6 in the evening is {አሥራ ሁለት ሰዓት|asra hulett se'at} “twelve o'clock”. Then the night hours start again from one.</p>
       <p><b>The rule:</b> take 6 off the Western time (or add 6, it comes to the same on a 12-hour clock). 9 am is 3 o'clock, 2 pm is 8 o'clock, 8 pm is 2 o'clock.</p>
@@ -216,13 +216,13 @@ function drTimePage(){
       <p>{ተኩል|tekul} half past: {ሦስት ሰዓት ተኩል|sost se'at tekul} 3:30 (9:30 am). {ከሩብ|kerub} quarter past: {ሦስት ሰዓት ከሩብ|sost se'at kerub} 3:15.</p>
       <p>For a quarter to, name the coming hour with {ለ-|le-} “for” and add {ሩብ ጉዳይ|rub gudday} “a quarter short”: {ለአራት ሩብ ጉዳይ|le'aratt rub gudday} is a quarter to four, 3:45 (9:45 am).</p>
       <p>Other minutes use {ደቂቃ|deqiqa} “minute”: {ሦስት ሰዓት ከአሥር ደቂቃ|sost se'at ke'assir deqiqa} “ten past three”.</p></div>
-    <h3>Every hour on both clocks</h3><div class="tbl">${rows}</div>
+    <h3>Every hour on both clocks</h3><div class="tbl wl2">${rows}</div>
     <h3>Useful words</h3>${drWords(EV.timeWords)}`;
 }
 function drMoneyPage(){
   const D = drState(), rnd = (s => () => (s = (s * 9301 + 49297) % 233280) / 233280)(D.seed * 7919);
   const board = EV.items.map(it => { const n = priceRound(it[3] + rnd() * (it[4] - it[3])), ps = priceSay(n, 0);
-    return `<div class="row drprice"><span class="form"><span class="am nosay norom-auto">${esc(it[0])}</span><small class="en">${esc(it[2])}</small></span><span class="drp">${priceStr(n, 0)}</span>${drLine(ps.parts, ps.rom)}</div>`; }).join("");
+    return `<div class="row drprice"><span class="form">${drLine([it[0]], it[1])}<small class="en">${esc(it[2])}</small></span><span class="drp">${priceStr(n, 0)}</span>${drLine(ps.parts, ps.rom)}</div>`; }).join("");
   return `<div class="note"><h4>Birr and santim</h4>
       <p>Ethiopian money is the {ብር|birr}. A birr has 100 {ሳንቲም|santim}. Say the number, then {ብር|birr}: {ሃምሳ ብር|hamsa birr} 50 birr, {መቶ ሃያ ብር|meto haya birr} 120 birr.</p>
       <p>For birr and santim, join the santim on with {ከ-|ke-}: {አሥር ብር ከሃምሳ ሳንቲም|assir birr kehamsa santim} 10.50 birr. Santim are rare in shops now, but you will see them on bills.</p>
@@ -242,9 +242,9 @@ function drDatesPage(){
   if(m){ const j = gToJdn(+m[1], +m[2], +m[3]), [y, mo, d] = jdnToE(j), w = EV.days[weekday(j)];
     conv = `<p class="drbig norom-auto">${esc(eStr(0, mo, d))} <small>${y} ዓ.ም.</small></p>${drLine([w[0]].concat(eSaid(0, mo, d)), w[1] + " " + eSaidRom(0, mo, d))}`; }
   const months = EV.months.map((mo, i) => { const [, gm, gd] = eToG(ey, i + 1, 1);
-    return `<div class="row drrow"><span class="lnum">${i + 1}</span><span class="form">${A(mo[0], mo[1])}</span><span class="en">from ${gShort(gm, gd)}${i === 12 ? ` · ${etMonthDays(ey, 13)} days` : ""}</span></div>`; }).join("");
+    return `<div class="row drrow"><span class="lnum">${i + 1}</span><span class="form">${drLine([mo[0]], mo[1])}</span><span class="en">from ${gShort(gm, gd)}${i === 12 ? ` · ${etMonthDays(ey, 13)} days` : ""}</span></div>`; }).join("");
   const hols = EV.holidays.map(hd => { const g = eToG(ey, hd[3], hd[4]);
-    return `<div class="row drrow"><span class="form">${A(hd[0], hd[1])}</span><span>${esc(hd[2])}</span><span class="en"><span class="am nosay norom-auto">${esc(eStr(0, hd[3], hd[4]))}</span> · ${gShort(g[1], g[2])}</span></div>`; }).join("");
+    return `<div class="row drhol"><span class="form">${drLine([hd[0]], hd[1])}<small class="en">${esc(hd[2])}</small></span><span class="en">${drLine(eSaid(0, hd[3], hd[4]), eSaidRom(0, hd[3], hd[4]))}<small>${gShort(g[1], g[2])}</small></span></div>`; }).join("");
   return `<div class="note drtoday"><h4>Today</h4><p class="count">${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} is</p>
       <p class="drbig norom-auto">${esc(wd[0])}፣ ${esc(eStr(0, em, ed))} <small>${ey} ዓ.ም.</small></p>${drLine(said, wd[1] + " " + eSaidRom(0, em, ed))}</div>
     <div class="note"><h4>Thirteen months of sunshine</h4>
@@ -252,9 +252,9 @@ function drDatesPage(){
       <p>The year starts on {መስከረም|meskerem} 1, which is 11 September (12 September in the year before a Western leap year). The Ethiopian year number is 7 or 8 behind the Western one: 8 behind until New Year in September, then 7. Write {ዓ.ም.|amete mihret} after an Ethiopian year.</p>
       <p>Say the month, then the day: {ኅዳር አሥራ ሦስት|hidar asra sost} “Hidar 13”. {ዛሬ ስንት ነው?|zaré sint new?} asks “what's the date today?”</p></div>
     <div class="note drtry"><h4>Change a date</h4><div class="drpick"><input id="dr-date" class="sel" type="date" value="${esc(D.date || "")}" aria-label="A Western date"></div>${conv || `<p class="count">Pick a Western date to see it in the Ethiopian calendar.</p>`}</div>
-    <h3>The months this year (${ey} ዓ.ም.)</h3><div class="tbl">${months}</div>
+    <h3>The months this year (${ey} <span class="norom-auto">ዓ.ም.</span>)</h3><div class="tbl wl2">${months}</div>
     <h3>Days of the week</h3>${drWords(EV.days)}
-    <h3>Holidays with a fixed date</h3><div class="tbl">${hols}</div>
+    <h3>Holidays with a fixed date</h3><div class="tbl wl2">${hols}</div>
     <h3>Useful words</h3>${drWords(EV.dateWords)}`;
 }
 const DR_PAGE_TESTS = { time: ["dr-time", "dr-clock"], money: ["dr-price", "dr-shop"], dates: ["dr-days", "dr-date"] };
@@ -265,7 +265,8 @@ function drMenu(){
     <h3>Test yourself</h3>${tStack(DR_PAGE_TESTS[D.tab])}${fmtNotes(body)}`;
 }
 // notes above write Amharic examples as {fidel|transcription}, like the course
-const fmtNotes = h => h.replace(/\{([^|}]+)\|([^}]*)\}/g, (_, a, r) => `<span class="am">${a}</span> <span class="rom">${r}</span>`);
+const fmtNotes = h => h.replace(/\{([^|}]+)\|([^}]*)\}/g, (_, a, r) => /^[\u1200-\u137F\s፣።?]+$/.test(a) && drCanSay([a.replace(/[?።፣]/g, "")])
+  ? `<span class="am nosay">${a}</span>${drSayBtn([a.replace(/[?።፣]/g, "")])} <span class="rom">${r}</span>` : `<span class="am">${a}</span> <span class="rom">${r}</span>`);
 
 // clicks and changes from these pages; returns true when it has drawn the screen itself
 function drAct(a, v){

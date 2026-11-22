@@ -70,14 +70,14 @@ function gmPairsTap(v){
 function gmPairsHTML(g){
   const head = `<div class="gmhead"><span class="count">${g.done.size} of ${g.items.length} pairs · ${g.misses} ${g.misses === 1 ? "miss" : "misses"}</span><span class="gmclock" id="gm-clock">${gmFmt(Math.floor(((g.t1 || Date.now()) - g.t0) / 1000))}</span></div>`;
   if(g.t1) return gmEnd(g, `${gmFmt(g.secs)}`, g.misses ? `with ${g.misses} ${g.misses === 1 ? "miss" : "misses"}` : "with no misses", g.record ? "A new best time!" : `Best: ${gmFmt(S.gm.best[g.key])}`,
-    `<div class="tbl wl2">${g.items.map(x => `<div class="row vrow"><span class="form">${x.r ? A(x.a, x.r) : `<span class="am">${esc(x.a)}</span>`}</span><span class="en">${esc(x.e)}</span></div>`).join("")}</div>`);
+    `<div class="tbl wl2">${g.items.map(x => `<div class="row vrow"><span class="form">${drLine([x.a], x.r)}</span><span class="en">${esc(x.e)}</span></div>`).join("")}</div>`);
   if(g.style === "memory"){
     return head + `<div class="gmgrid mem">` + g.cards.map((c, i) => { const up = g.done.has(c.p) || g.open.includes(i), bad = g.lock && g.open.includes(i);
       return `<button class="gmcard ${up ? "up" : ""} ${g.done.has(c.p) ? "ok" : ""} ${bad ? "no" : ""} ${c.side === "a" ? "isam" : ""}" data-act="gm-tap" data-v="${i}" aria-label="${up ? esc(c.t) : "Hidden card"}">${up ? (c.side === "a" ? `<span class="am norom-auto">${esc(c.t)}</span>` : `<span>${esc(c.t)}</span>`) : `<span class="gmback norom-auto" aria-hidden="true">ፊ</span>`}</button>`; }).join("") + `</div>
       <p class="count gmhelp">Turn over two cards. Find each Amharic word and its meaning.</p>`;
   }
   const cell = (side, k) => { const x = g.items[k], on = g.sel && g.sel[0] === side && g.sel[1] === k, bad = g.wrong && g.wrong.some(w => w[0] === side && w[1] === k), ok = g.done.has(k);
-    return `<button class="gmcard up ${side === "a" ? "isam" : ""} ${on ? "on" : ""} ${bad ? "no" : ""} ${ok ? "ok gone" : ""}" data-act="gm-tap" data-v="${side}:${k}" ${ok ? "disabled" : ""}>${side === "a" ? `<span class="am norom-auto">${esc(x.a)}</span>${x.r ? `<span class="rom">${esc(x.r)}</span>` : ""}` : `<span>${esc(x.e)}</span>`}</button>`; };
+    return `<button class="gmcard up ${side === "a" ? "isam" : ""} ${on ? "on" : ""} ${bad ? "no" : ""} ${ok ? "ok gone" : ""}" data-act="gm-tap" data-v="${side}:${k}" ${ok ? "disabled" : ""}>${side === "a" ? `<span class="am norom-auto">${esc(x.a)}</span>` : `<span>${esc(x.e)}</span>`}</button>`; };
   return head + `<div class="gmgrid cols">${g.left.map((k, i) => cell("a", k) + cell("e", g.right[i])).join("")}</div>
     <p class="count gmhelp">Tap an Amharic word, then its meaning.</p>`;
 }
@@ -119,7 +119,7 @@ function gmSpeedPick(v){
 function gmSpeedHTML(g){
   if(g.over === "left") return `<div class="score"><div class="count">Speed round</div><p>The round stopped when you left the page.</p></div><div class="stack"><button class="btn primary wide" data-act="gm-start" data-v="speed">Start again</button><button class="btn wide" data-act="gm-quit">All games</button></div>`;
   if(g.over) return gmEnd(g, String(g.score), `right in ${GM_SECS} seconds` + (g.n > g.score ? `, ${g.n - g.score} wrong` : ""), g.record ? "A new best score!" : S.gm.best[g.key] != null ? `Best: ${S.gm.best[g.key]}` : "",
-    g.missed.length ? `<h3>To look at again</h3><div class="tbl">${g.missed.map(q => `<div class="miss"><span class="${q.bigAm ? "am" : ""}">${esc(q.big)}</span> → <b class="${q.optAm ? "am" : ""}">${esc(q.opts[q.ans].l)}</b>${q.opts[q.ans].r ? ` <span class="rom">${esc(q.opts[q.ans].r)}</span>` : ""}</div>`).join("")}</div>` : "");
+    g.missed.length ? `<h3>To look at again</h3><div class="tbl">${g.missed.map(q => `<div class="miss">${q.bigAm ? drLine([q.big], "") : esc(q.big)} → ${q.optAm ? drLine([q.opts[q.ans].l], q.opts[q.ans].r) : `<b>${esc(q.opts[q.ans].l)}</b>`}</div>`).join("")}</div>` : "");
   const q = g.q, left = Math.max(0, g.end - Date.now());
   return `<div class="gmhead"><span class="gmscore ${g.flash === "good" ? "good" : ""}"><strong>${g.score}</strong> right</span><span class="gmclock" id="gm-left">${Math.ceil(left / 1000)}s</span></div>
     <div class="prog gmprog"><i id="gm-bar" style="width:${left / (GM_SECS * 10)}%"></i></div>

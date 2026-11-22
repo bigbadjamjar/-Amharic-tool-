@@ -360,7 +360,7 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 .romtoggle[aria-pressed="true"] i{background:var(--head-gold)}
 .romtoggle[aria-pressed="true"] i::after{left:14px}
 .romtoggle .short{display:none}
-.ratebtn{font-size:.8rem;font-weight:700;padding:0 10px;min-width:3rem;background:var(--head-soft);font-variant-numeric:tabular-nums}
+.ratebtn{font-size:.8rem;font-weight:700;padding:0;width:4.2rem;flex:none;justify-content:center;text-align:center;background:var(--head-soft);font-variant-numeric:tabular-nums}
 .ratebtn::before{content:"▶";font-size:.6rem;margin-right:4px}
 .ratebtn.slow{background:var(--head-gold);color:var(--head-gold-ink)}
 .findbtn{width:34px}
@@ -478,9 +478,18 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   /* focused screens keep a phone-like width in the middle */
   body.focus .wrap{max-width:720px}
 }
+/* Card lists fill every row: an odd card out on its own row stretches to the full width (two across),
+   and with three across the last one or two cards share the row between them. Four cards sit two by two. */
+@media (min-width:960px) and (max-width:1279px){
+  .stack:has(> .topic) > .topic:last-child:nth-child(odd){grid-column:1 / -1}
+}
 @media (min-width:1280px){
-  .stack:has(> .topic){grid-template-columns:repeat(3,minmax(0,1fr))}
-  .tsechead + .stack:has(> .topic){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stack:has(> .topic){grid-template-columns:repeat(6,minmax(0,1fr))}
+  .stack:has(> .topic) > *{grid-column:span 2}
+  .stack:has(> .topic) > .topic:last-child:nth-child(3n+1){grid-column:span 6}
+  .stack:has(> .topic) > .topic:nth-last-child(2):nth-child(3n+1),.stack:has(> .topic) > .topic:last-child:nth-child(3n+2){grid-column:span 3}
+  .stack:has(> .topic:nth-child(4):last-child) > .topic{grid-column:span 3!important}
+  .stack.duo > *{grid-column:auto!important}
 }
 
 /* ---------- games (games.js) ----------
@@ -568,4 +577,18 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .drboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   .drboard .row:nth-child(2){border-top:0}
   .drboard .row:nth-child(odd){border-right:1px solid var(--line)}
+}
+.drpick .sel{flex:1 1 0;min-width:0}
+.drpick .link{flex:none;padding:0 6px}
+.drhol{grid-template-columns:minmax(0,1fr) auto}
+.drhol .form{display:flex;flex-direction:column;align-items:flex-start}
+.drhol .form .en{text-align:left;font-size:.82rem}
+.drhol>.en{display:flex;flex-direction:column;align-items:flex-end;text-align:right}
+.drhol>.en .drline{justify-content:flex-end}
+.drhol>.en .drline .rom{text-align:right}
+.drhol>.en small{font-size:.8rem}
+@media (min-width:960px){
+  /* no half-empty rows: the last section chip and an odd last row of a two-column list take the spare room */
+  .chips.tsecs .chip:last-child:nth-child(6n+5){grid-column:span 2}
+  .tbl.wl2 .row:last-child:nth-child(odd){grid-column:1 / -1;border-right:0}
 }

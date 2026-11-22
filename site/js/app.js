@@ -686,7 +686,7 @@ function renderTest(){
   }
   if(answered){
     h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="slot"?`Built, with ${Q.slot.errs.length} wrong ${Q.slot.errs.length===1?"pick":"picks"}. The sentence is:`:q.type==="order"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"||q.type==="slot"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
-${q.ansParts?`<p class="drans">${drSayBtn(q.ansParts,"Hear the answer")}</p>`:""}
+${q.parts&&q.bigRom?`<p class="drans"><span class="am nosay norom-auto">${esc(q.parts.join(" "))}</span>${drSayBtn(q.parts)} <span class="rom">${esc(q.bigRom)}</span></p>`:""}${q.ansParts?`<p class="drans">${drSayBtn(q.ansParts,"Hear the answer")}</p>`:""}
         <button class="btn primary wide" data-act="next" style="margin-top:12px">${Q.i===QN-1?"See result":"Next question"}</button>`;
   }
   return h;
