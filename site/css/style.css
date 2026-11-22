@@ -456,6 +456,18 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .vgrid{max-height:300px}
   /* text and cards flow to the full content width, so they resize with the window */
   p{max-width:none}
+  /* tab rows and switches spread across the width instead of sitting bunched on the left */
+  .chips{flex-wrap:wrap;overflow:visible}
+  .chips .chip{flex:1 0 auto;text-align:center;padding-left:12px;padding-right:12px}
+  /* long lists (topics, units) line up in an even grid rather than one stretched last row */
+  .chips.many{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  .chips.many .chip{white-space:normal}
+  .bar .mini,.bset .mini,.note .mini{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);flex:1 1 auto;overflow:visible}
+  .bset .mini,.note .mini{width:100%}
+  .bar .mini button,.bset .mini button,.note .mini button{padding:8px 12px}
+  .bar .sel,.bar select{flex:0 0 auto}
+  /* My mistakes and Review: two equal halves */
+  .stack.duo{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .wlhero{padding:34px 40px 28px}
   /* word, sentence and verb tables: two columns of rows */
   .tbl.wl2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
