@@ -39,11 +39,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: TEMP two more voices for the fidel letters
+      - name: TEMP fidel letters from yourvoic.com
+        env:
+          YOURVOIC_API_KEY: ${{ secrets.YOURVOIC_API_KEY }}
         run: |
-          sudo apt-get install -y -qq ffmpeg espeak-ng >/dev/null
-          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install transformers soundfile numpy edge-tts
-          python3 tools/tmp/alt_voices.py || echo "VOICE STEP FAILED"
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install requests edge-tts
+          python3 tools/tmp/yourvoic.py || echo "YOURVOIC STEP FAILED"
           git config user.name "github-actions[bot]"; git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
-          git add site/audio/try && git commit -qm "TEMP: MMS and re-voiced eSpeak fidel letters" && git push origin HEAD:${{ github.ref_name }}
+          git add site/audio/try && git commit -qm "TEMP: yourvoic fidel letters" && git push origin HEAD:${{ github.ref_name }} || true
