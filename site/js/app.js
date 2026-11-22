@@ -309,7 +309,7 @@ function fidelChart(){
   const p=FID.find(f=>f.ch===S.pick)||FID[0], r=FR[p.row];
   const ordName=p.ord<7?["1st","2nd","3rd","4th","5th","6th","7th"][p.ord]+" order":p.ord===7?"“wa” form":"rounded form";
   let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter to see it up close${Object.keys(AUDIO_FILES).length?", then press ▶ to hear it":""}.</p>
-   <div class="peek"><span class="am nosay">${p.ch}</span><div><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}${p.ord===5?" · also the bare consonant":""}</small></div>${sayBtn(p.ch,"pk")}</div>
+   <div class="peek"><span class="am nosay"><span class="pkch">${p.ch}</span></span><div class="pktxt"><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}</small><small>${p.ord===5?"also the bare consonant":"&nbsp;"}</small></div>${sayBtn(p.ch,"pk")||`<span class="say pk pkgap" aria-hidden="true"></span>`}</div>
    <div class="chartbox"><table class="chart"><tr><th></th>${VOW.map(v=>`<th>${v}</th>`).join("")}<th>wa</th></tr>`;
   FR.forEach(r=>{
     h+=`<tr><td>${r[1]||"–"}</td>`+r.forms.map(f=>`<td><button data-act="pick" data-v="${f.ch}" aria-pressed="${f.ch===S.pick}">${f.ch}</button></td>`).join("");
