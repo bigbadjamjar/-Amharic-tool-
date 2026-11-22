@@ -2,7 +2,10 @@ name: Make audio clips
 
 # Press "Run workflow" on the Actions tab. It makes a clip for every Amharic word and sentence
 # that doesn't have one yet, saves them in site/audio/clips, and republishes the site.
-# Dialogue lines, reading stories and culture notes come with the course words; the men's lines are always made in the male voice.
+# Both voices are used in every run, so there is no voice to pick:
+#   the female voice (Mekdes) for words, sentences, letters and the women's dialogue lines,
+#   the male voice (Ameha) for the men's dialogue lines (saved in site/audio/clips/m).
+# Dialogue lines, reading stories and culture notes come with the course words.
 # Clips it made before are remade if their text in the app has changed (e.g. punctuation fixed).
 # Clips you added yourself are never replaced.
 on:
@@ -16,13 +19,6 @@ on:
           - course words and sentences
           - fidel letters
           - everything
-      voice:
-        description: Voice
-        type: choice
-        default: female (Mekdes)
-        options:
-          - female (Mekdes)
-          - male (Ameha)
 
 permissions:
   contents: write
@@ -51,7 +47,6 @@ jobs:
           args=""
           [ "${{ inputs.which }}" = "course words and sentences" ] && args="$args --course-only"
           [ "${{ inputs.which }}" = "fidel letters" ] && args="$args --fidel"
-          case "${{ inputs.voice }}" in male*) args="$args --voice male";; esac
           python3 tools/make_audio.py $args
 
       # Runs even if the step above stopped part way, so finished clips are kept.
