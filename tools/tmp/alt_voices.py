@@ -15,7 +15,7 @@ def _load(path, normalize=True, **k):
     x, sr = sf.read(path, dtype="float32", always_2d=True)
     return torch.from_numpy(x.T.copy()), sr
 torchaudio.load = _load
-knn = torch.hub.load("bshall/knn-vc", "knn_vc", prematched=True, trust_repo=True, pretrained=True, device="cpu")
+knn = torch.hub.load("bshall/knn-vc", "knn_vc", prematched=True, trust_repo=True, skip_validation=True, pretrained=True, device="cpu")
 refs = sorted(glob.glob("site/audio/clips/*.mp3")); random.seed(0); refs = [r for r in refs if len(os.path.basename(r)) > 8]; random.shuffle(refs)
 ref_w = []
 for i, r in enumerate(refs[:400]):
