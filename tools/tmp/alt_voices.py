@@ -21,6 +21,11 @@ for c in L:
     sf.write("/tmp/m.wav", w, m.config.sampling_rate); mp3("/tmp/m.wav", f"{OUT}/mms/{c}.mp3")
 print("MMS done", flush=True)
 # --- kNN-VC
+import torchaudio
+def _load(path, normalize=True, **k):
+    x, sr = sf.read(path, dtype="float32", always_2d=True)
+    return torch.from_numpy(x.T.copy()), sr
+torchaudio.load = _load
 knn = torch.hub.load("bshall/knn-vc", "knn_vc", prematched=True, trust_repo=True, pretrained=True, device="cpu")
 refs = sorted(glob.glob("site/audio/clips/*.mp3")); random.seed(0); refs = [r for r in refs if len(os.path.basename(r)) > 8]; random.shuffle(refs)
 ref_w = []
