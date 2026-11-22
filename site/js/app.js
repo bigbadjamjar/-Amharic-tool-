@@ -102,6 +102,15 @@ function numWord(n){           // -> [fidel, latin]
   else{ if(t)put(N10[t],N10R[t]); if(u)put(N1[u],N1R[u]); }
   return [a.join(" "),r.join(" ")];
 }
+// The number word in pieces that each have a clip: [thousands, hundreds, the rest], e.g. 2365 -> ሁለት ሺ | ሦስት መቶ | ስልሳ አምስት
+function numParts(n){
+  if(n<1) return [numWord(n)[0]];
+  const th=Math.floor(n/1000), h=Math.floor(n%1000/100), r=n%100, out=[];
+  if(th) out.push(numWord(th*1000)[0]);
+  if(h) out.push(numWord(h*100)[0]);
+  if(r) out.push(numWord(r)[0]);
+  return out;
+}
 const sym2 = n => S10[Math.floor(n/10)]+S1[n%10];
 function numSym(n){            // Ethiopic numerals, 1 to 9999
   if(n<1) return "";
@@ -124,7 +133,8 @@ function numOut(){
   const n=Math.floor(+S.num.n);
   if(S.num.n===""||isNaN(n)||n<0||n>NMAX) return `<p class="count" style="text-align:center">Enter a number from 0 to ${NMAX.toLocaleString("en")}.</p>`;
   const w=numWord(n);
-  return `<div class="q"><div class="kind">${n.toLocaleString("en")}</div><div class="big am">${n?numSym(n):"no symbol"}</div><div class="am" style="font-size:1.5rem;margin-top:6px">${esc(w[0])}</div><div class="rom">${esc(w[1])}</div></div>`;
+  // Played in pieces (thousands, hundreds, the rest), each of which has a clip, so any number can be heard.
+  return `<div class="q"><div class="kind">${n.toLocaleString("en")}</div><div class="big am">${n?numSym(n):"no symbol"}</div><div style="margin-top:6px"><span class="am nosay" style="font-size:1.5rem">${esc(w[0])}</span> ${drSayBtn(numParts(n))}</div><div class="rom">${esc(w[1])}</div></div>`;
 }
 function renderNum(){
   const t=S.num.tab;

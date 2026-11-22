@@ -26,6 +26,7 @@ import argparse
 import asyncio
 import json
 import re
+import subprocess
 import sys
 import time
 from audio_common import AUDIO, CLIPS, ETHIOPIC, MALE_DIR, SITE, existing_clips, normalize
@@ -72,6 +73,18 @@ def note_examples(text: str) -> list:
         if a and ETHIOPIC.match(a) and not LATIN.search(a):
             out.append(a)
     return out
+
+
+def code_phrases(course_only: bool = False) -> list:
+    """Amharic the app builds in code (number words, each verb's "-ing" noun and doer word),
+    listed by tools/code_phrases.mjs. Numbers come with the course run; verb words only with "everything"."""
+    try:
+        out = subprocess.run(["node", str(SITE.parent / "tools" / "code_phrases.mjs")], capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError) as e:
+        print(f"Could not list number words and verb words (needs Node.js): {e}", file=sys.stderr)
+        return []
+    d = json.loads(out)
+    return d["numbers"] + ([] if course_only else d["verbs"])
 
 
 def dialogue_lines() -> list:
@@ -207,7 +220,7 @@ def main() -> None:
         wanted = fidel_letters()
     else:
         dl = dialogue_lines()
-        wanted = phrases_from_data(a.course_only) + [t for t, g in dl if g == "f"] + ([] if a.course_only else fidel_letters())
+        wanted = phrases_from_data(a.course_only) + [t for t, g in dl if g == "f"] + code_phrases(a.course_only) + ([] if a.course_only else fidel_letters())
         male = [t for t, g in dl if g == "m"]
     if a.male_copies:
         male = male + list(wanted)

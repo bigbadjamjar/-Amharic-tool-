@@ -15,7 +15,9 @@ function findVoice(){
   amVoice = speechSynthesis.getVoices().find(v=>/^am(-|_|$)/i.test(v.lang)) || null;
 }
 if(typeof speechSynthesis!=="undefined"){ findVoice(); speechSynthesis.addEventListener?.("voiceschanged",()=>{findVoice(); if(typeof render==="function") render();}); }
-const clipFor = (am, voice) => (voice==="m" && AUDIO_MALE[sayKey(am)]) || AUDIO_FILES[sayKey(am)];
+// Either voice will do when the preferred one has no clip: a man's dialogue line only has a male clip,
+// and it should still play (with a button) in search results, flash cards and tests.
+const clipFor = (am, voice) => { const k = sayKey(am); return voice==="m" ? (AUDIO_MALE[k] || AUDIO_FILES[k]) : (AUDIO_FILES[k] || AUDIO_MALE[k]); };
 const canSay = am => !!(clipFor(am) || amVoice);
 let nowPlaying = null;
 // Playback speed, set from the header (1, 0.75 or 0.5). Saved clips keep their pitch when slowed.

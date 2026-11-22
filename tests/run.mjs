@@ -11,7 +11,7 @@ const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
   .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress|report)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
+  "\n;globalThis.X={romOf,enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -243,6 +243,20 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   ok(byEn("get used to (a place, each other)", "past", 0) === "I got used to", "brackets dropped: " + byEn("get used to (a place, each other)", "past", 0));
   for (const v of X.VLIST) for (const t of Object.keys(X.vforms(v))) if (Array.isArray(X.vforms(v)[t]))
     for (let i = 0; i < 8; i++) { const s = X.enForm(v, t, i).text; ok(s && !/[()]|undefined|  /.test(s.replace("(that) ","")), `English for ${v.en} ${t} ${i}: "${s}"`); }
+}
+
+// --- transcription of a sentence with a comma inside is not left in Amharic letters
+ok(!/[ሀ-፼]/.test(X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመስገን። አንተስ?")), "romOf with inner punctuation: " + X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመስገን። አንተስ?"));
+
+// --- audio: a line with only a male-voice clip (a man's dialogue line) still gets a play button everywhere
+{
+  const actx = vm.createContext({ window: { AUDIO_FILES: { "ሰላም": "clips/ሰላም.mp3" }, AUDIO_MALE: { "ደህና ነኝ": "clips/m/ደህና ነኝ.mp3", "ሰላም": "clips/m/ሰላም.mp3" } } });
+  vm.runInContext(fs.readFileSync(path.join(root, "js/audio.js"), "utf8") + "\n;globalThis.A={clipFor,canSay};", actx);
+  const A = actx.A;
+  ok(A.canSay("ደህና ነኝ።"), "male-only clip: canSay should be true (search results, cards and tests show ▶)");
+  ok(A.clipFor("ደህና ነኝ") === "clips/m/ደህና ነኝ.mp3", "male-only clip: female lookup falls back to the male clip");
+  ok(A.clipFor("ሰላም", "m") === "clips/m/ሰላም.mp3" && A.clipFor("ሰላም") === "clips/ሰላም.mp3", "each voice prefers its own clip");
+  ok(!A.canSay("ውሃ"), "no clip: no button");
 }
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);

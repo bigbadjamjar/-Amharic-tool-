@@ -68,7 +68,7 @@ and “course words and sentences” or “everything” includes the dialogues.
 
 ```bash
 pip install edge-tts
-python3 tools/make_audio.py --list          # see what's missing
+python3 tools/make_audio.py --list          # see what's missing (number words and verb words come from tools/code_phrases.mjs, which needs Node.js)
 python3 tools/make_audio.py --course-only   # just the course words and sentences
 python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
 python3 tools/make_audio.py                 # make them all (Mekdes, and Ameha for the men's dialogue lines)

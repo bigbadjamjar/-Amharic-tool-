@@ -75,7 +75,8 @@ const ROMW = (() => {
 function romOf(s){
   s = String(s).normalize("NFC");
   const whole = s.replace(/[?!.,;:"“”()…።፣፤፥፦፧፨፡]/g, "").trim();
-  if (ROMW[whole]) return s.replace(whole, ROMW[whole]).replace(/[።፣፤፥፦፧፨፡]/g, c => ROM_PUNCT[c]);
+  // (only when the punctuation is all at the ends: "ነኝ፣ እግዚአብሔር" has a comma inside, so it goes word by word)
+  if (ROMW[whole] && s.includes(whole)) return s.replace(whole, ROMW[whole]).replace(/[።፣፤፥፦፧፨፡]/g, c => ROM_PUNCT[c]);
   return s.split(/(\s+)/).map(tok => {
     if (!ETH_RE.test(tok)) return tok;
     const m = tok.match(/^(-?)([ሀ-ፚ]+)(.*)$/);
