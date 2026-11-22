@@ -254,8 +254,9 @@ const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[i
 
 /* ---------- course ---------- */
 function renderCourse(){
+  if(RD.view) return rdHTML();   // reading stories and culture notes (reader.js)
   if(S.lesson) return renderLesson(LMAP[S.lesson]);
-  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}<div class="stack" style="margin-top:14px">`;
+  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}${rdCourseCards()}<div class="stack" style="margin-top:14px">`;
   LESSONS.forEach(l=>{
     h+= l.review
       ? `<button class="topic" data-act="start" data-v="R${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>Mixed test</small>${bestChip("R"+l.n)}</button>`
@@ -276,6 +277,7 @@ function renderLesson(l){
       (nt.show||[]).concat(nt.tables||[]).forEach(k=>{h+=`<h3>${ttl(T[k].title)} <small>· ${ttl(T[k].ex)}</small></h3>`+tableHTML(T[k]);});
       (nt.parts||[]).forEach(k=>{h+=`<h3>${ttl(PARTS[k].title)}</h3>`+partsHTML(PARTS[k]);});
     });
+    h+=rdUnitLinks(l.n);
   }else if(S.lview==="words"){
     h+=wordList(l.vocab);
   }else if(S.lview==="sent"&&sentOf([l.n]).length){
@@ -744,7 +746,7 @@ function render(){
   document.body.classList.toggle("norom",!S.rom);
   document.body.classList.toggle("welcoming",S.mode==="welcome");
   // quizzes, typing practice and dialogues keep a reading width on a wide screen (see "laptop and desktop" in style.css)
-  document.body.classList.toggle("focus",!!(S.mode==="test"&&S.quiz)||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg"));
+  document.body.classList.toggle("focus",!!(S.mode==="test"&&S.quiz)||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg")||rdFocus());
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
@@ -795,6 +797,8 @@ document.addEventListener("click",e=>{
   if(a==="find-back"){dgStop();S.mode="find";render();window.scrollTo(0,0);const i=$("#findq");if(i)i.focus({preventScroll:true});return;}
   if(a==="find-try"){S.find.q=v;const i=$("#findq");if(i)i.value=v;findRefresh();return;}
   if(a.startsWith("dg-")&&a!=="dg-open"){ if(!dgAct(a,v)) render(); return; }
+  if(a.startsWith("rd-")){ if(!rdAct(a,v,b)) render(); return; }
+  if(a==="mode"||a==="lesson"||a==="lesson-go"||a==="dg-open"||a==="start") rdLeave();
   if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
   if(a==="mode"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
   if(a==="dg-open"){S.mode="course";S.lesson=+v;S.lview="dlg";dgReset(+v,true);render();window.scrollTo(0,0);return;}

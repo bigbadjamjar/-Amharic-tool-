@@ -512,3 +512,43 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .stack:has(> .topic){grid-template-columns:repeat(3,minmax(0,1fr))}
   .tsechead + .stack:has(> .topic){grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+/* reading stories and culture notes (js/reader.js) */
+.rdgo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.rdgo .tcard{min-height:0}
+.rdgo .tcard:nth-child(2) .ticon{background:color-mix(in srgb,var(--sun) 55%,var(--surface))}
+.rdh span{margin-right:4px}
+.rdam{margin:2px 0 0}
+.rdam .am{font-size:1.25rem;color:var(--accent);font-weight:700}
+.rdhint{margin-top:10px}
+.story{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.stl{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;transition:border-color .15s,box-shadow .15s}
+.stl.now{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.stam{font-family:var(--f-fidel);font-size:1.35rem;line-height:1.6}
+.stw{font:inherit;color:inherit;padding:0 2px;margin:0 -2px;border-radius:6px;border-bottom:2px dotted color-mix(in srgb,var(--sea) 80%,transparent)}
+.stw:hover{background:var(--tint)}
+.stw[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-bottom-color:transparent}
+.stam .say{margin-left:8px;vertical-align:middle}
+.stl > .en{color:var(--muted);font-size:.92rem}
+.stword{margin-top:8px;background:var(--tint);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:8px 12px;display:flex;flex-direction:column;gap:1px}
+.stwhead{display:flex;align-items:center;gap:10px}
+.stwhead .am{font-size:1.5rem;font-weight:700}
+.stx{margin-left:auto;font-size:1.4rem;line-height:1;color:var(--muted);padding:0 4px}
+.stword .en{font-weight:500}
+.stqs{display:grid;gap:10px}
+.stq{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stq p{margin:0 0 8px}
+.stopts{display:grid;gap:6px}
+.stopts .opt{padding:9px 12px}
+.rdnote p{margin:0 0 10px}
+.rdnote p:last-child{margin:0}
+.rdmore .topic b{font-size:.98rem}
+.rdnext{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.rdnext .btn{flex:1 1 220px}
+@media (max-width:340px){ .rdgo{grid-template-columns:1fr} }
+@media (min-width:960px){
+  .rdgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  /* a few links in a row share the full width rather than bunching on the left */
+  .stack.rdfill:has(> .topic){grid-template-columns:repeat(min(var(--n),3),minmax(0,1fr))}
+  .stopts{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stq p{margin-bottom:10px}
+}
