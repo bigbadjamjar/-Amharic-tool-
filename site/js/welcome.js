@@ -34,6 +34,7 @@ function renderWelcome(){
       <p class="lead">A free practice app for reading, hearing and speaking Amharic, the main language of Ethiopia. It works on your phone or computer, needs no account, and keeps your progress on your own device.</p>
       <button class="btn primary wide wlgo" data-act="wl-start">${back ? "Continue learning" : "Start learning"}</button>
       <label class="wlskip"><input type="checkbox" id="wl-skip" ${wlSkip.get() ? "checked" : ""}> Don't show this page when the app opens</label>
+      <button class="link wlcol" data-act="scheme-jump">🎨 Change the colours</button>
     </section>
 
     <h3>Who it's for</h3>
@@ -60,6 +61,8 @@ function renderWelcome(){
 
     <h3>Put it on your phone</h3>
     <div class="note">${typeof offInstallSteps === "function" ? offInstallSteps() : "<p>Open this page on your phone and add it to your home screen.</p>"}</div>
+
+    ${typeof renderSchemes === "function" ? renderSchemes(S.scheme) : ""}
 
     <h3>Good to know</h3>
     <div class="note wlhonest">
