@@ -212,7 +212,7 @@ const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store 
 applyData(PROF.load());
 // Several people on this device: ask who's practising each time the app opens. Nobody yet: ask for a name.
 if(PROF.list().length!==1) S.mode="who";
-// First time on this device, or opened with #welcome: show the welcome page first.
+// Each time the app opens (unless switched off on the welcome page), or opened with #welcome: show the welcome page first.
 if(wlFirst()) S.mode="welcome";
 
 /* ---------- helpers ---------- */
@@ -766,6 +766,7 @@ document.addEventListener("change",e=>{
   else if(id==="pf-infile"&&e.target.files[0]){const f=e.target.files[0]; f.text().then(readIncoming,()=>{S.pf.inErr="Couldn't read that file.";render();});}
   else if(id==="ls-upto"){S.ls.upto=+val;save();render();}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
+  else if(id==="wl-skip"){wlSkip.set(e.target.checked);}
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();}
   if(e.key==="Enter"&&(e.target.id==="pf-add"||e.target.id==="pf-ren")) document.querySelector(`[data-act="${e.target.id==="pf-add"?"pf-add":"pf-ren-ok"}"]`).click(); });

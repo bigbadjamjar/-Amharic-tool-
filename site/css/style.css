@@ -376,3 +376,5 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 /* fidel chart: the big play button in the letter box (tapping a letter no longer plays it) */
 .peek .say{margin:0 0 0 auto;width:2.6rem;height:2.6rem;font-size:1rem;background:var(--accent);color:var(--accent-ink)}
 .peek .say:hover{filter:brightness(1.1)}
+.wlskip{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:.88rem;color:var(--muted);cursor:pointer}
+.wlskip input{width:18px;height:18px;accent-color:var(--accent);margin:0}
