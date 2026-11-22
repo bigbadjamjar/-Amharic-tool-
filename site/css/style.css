@@ -397,7 +397,12 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 .findbtn[aria-pressed="true"]{background:var(--head-soft)}
 .whobtn{gap:7px;padding:0 10px 0 3px;font-size:.82rem;font-weight:600;background:var(--head-soft);max-width:10rem;flex:0 1 auto!important;min-width:34px}
 .whobtn .av{flex:none;width:28px;height:28px;border-radius:50%;background:var(--head-gold);color:var(--head-gold-ink);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
-.whobtn .nm{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.whobtn .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1;text-align:left}
+/* where the name shows (600px and up) the button is always the same width, so a short or long name
+   never moves the other buttons or the tabs; a long name is cut with "…" and shown in full on hover */
+@media (min-width:600px){ .whobtn{width:6rem;max-width:none;flex:none!important;justify-content:flex-start} }
+@media (min-width:960px){ .whobtn{width:7.5rem} }
+@media (min-width:1200px){ .whobtn{width:9rem} }
 .whobtn[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--head-ink)}
 .seg{display:grid;grid-template-columns:repeat(6,1fr);background:var(--head-soft);border-radius:11px;padding:3px;gap:2px}
 .seg button{padding:8px 2px;border-radius:8px;font-weight:600;color:var(--head-muted);font-size:.86rem}
