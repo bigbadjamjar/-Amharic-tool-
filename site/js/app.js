@@ -188,6 +188,7 @@ const S = {bs:{mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"]
   fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
   find:{q:"",from:false},kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
 S.ls=JSON.parse(JSON.stringify(LS_DEF));
+S.gm=GM_DEF();   // games.js: settings and best scores
 S.pf={add:"",ren:null,del:false,code:"",msg:"",inText:"",inErr:"",incoming:null};
 /* Saved progress lives in the current profile (see profiles.js). */
 const BS_DEF=JSON.stringify(S.bs);
@@ -204,9 +205,10 @@ function applyData(d){
   S.ls=Object.assign({},LS_DEF,d.listen&&typeof d.listen==="object"?d.listen:{});
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
   S.srs=d.srs?srsClean(d.srs):srsMigrate(d);   // spaced repetition (srs.js); profiles from before it get a starting point
+  S.gm=gmClean(d.games); gmStop();
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,games:S.gm});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -436,6 +438,7 @@ function qFidType(f0){
 }
 function topic(id){
   if(id.startsWith("lis-")) return lsTopic(id);
+  if(id.startsWith("dr-")) return drTopic(id);
   if(id==="fid-rec") return {name:"Recognise letters",desc:"See a letter, pick its sound, and the reverse",gen:qFidRec};
   if(id==="fid-type") return {name:"Type letters",desc:"Read a sound, type the letter",gen:qFidType};
   if(id==="fid-words") return {name:"Type words",desc:`Spell words from units 1–${LASTF} in fidel`,gen:()=>qTypeWord(lessonWords(FULL),"Type the word")};
@@ -579,7 +582,9 @@ const TSECS = [
   ["sent","🧩","Sentences","Put the words of a sentence in order, or pick what a sentence means.",()=>2,()=>tStack(["sent-order","sent-mean"])],
   ["dlg","💬","Dialogues","Hear one side of a short conversation and answer as the other person.",()=>DIALOGUES.length,()=>noH3(dgMenu())],
   ["build","🛠️","Sentence builder","Build a sentence one word at a time, from choices that change as you go.",()=>2,()=>tStack(["build-verbs","build-course"])+bsHTML()],
-  ["general","📋","General practice","Pronouns, verbs, verb forms, extra words, and everything mixed.",()=>5,()=>tStack(["pronouns","verbs","verbs-type","extra","mixed"])]
+  ["general","📋","General practice","Pronouns, verbs, verb forms, extra words, and everything mixed.",()=>5,()=>tStack(["pronouns","verbs","verbs-type","extra","mixed"])],
+  ["everyday","🕒","Everyday Amharic","Telling the time the Ethiopian way, prices in birr, dates and the Ethiopian calendar.",()=>Object.keys(DR_TESTS).length,()=>drMenu()],
+  ["games","🎲","Games","Matching pairs, a 60-second speed round and fidel bingo.",()=>3,()=>gmMenu(),"game"]
 ];
 const tItem=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
 const tStack=ids=>`<div class="stack">${ids.map(tItem).join("")}</div>`;
@@ -593,7 +598,7 @@ function testMenu(){
   h+=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
    <div class="stack duo" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
    <h3>Choose a kind of test</h3>
-   <div class="tgrid">${TSECS.map(([id,icon,name,desc,n])=>`<button class="tcard" data-act="tsec" data-v="${id}"><span class="ticon" aria-hidden="true">${icon}</span><b>${name}</b><small>${esc(desc)}</small><span class="tn">${plural(n(),"test")} ›</span></button>`).join("")}</div>`;
+   <div class="tgrid">${TSECS.map(([id,icon,name,desc,n,,unit])=>`<button class="tcard" data-act="tsec" data-v="${id}"><span class="ticon" aria-hidden="true">${icon}</span><b>${name}</b><small>${esc(desc)}</small><span class="tn">${plural(n(),unit||"test")} ›</span></button>`).join("")}</div>`;
   return h;
 }
 function dueButton(){
@@ -641,6 +646,7 @@ function slotPick(Q,j){
 }
 function renderTest(){
   const Q=S.quiz;
+  if(!Q&&G) return gmRender();   // a game (games.js)
   if(!Q) return testMenu();
   const tp=topic(Q.id), QN=Q.n;
   if(Q.done){
@@ -658,7 +664,7 @@ function renderTest(){
   const q=Q.qs[Q.i], answered=q.type==="mc"?Q.picked!==null:Q.result!==null;
   let h=`<div class="prog"><i style="width:${(Q.i+(answered?1:0))/QN*100}%"></i></div>
    <div class="bar" style="margin:0"><span class="count">Question ${Q.i+1} of ${QN}</span><button class="link" data-act="quit">End test</button></div>
-   <div class="q ${q.type==="type"&&!q.listen?"slim":""} ${q.listen?"lsq":""}">`+(q.listen?lsHead(q,answered):`<div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered?"nosay":""}">${esc(q.big)}</div><div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div>`)+`</div>`;
+   <div class="q ${q.type==="type"&&!q.listen?"slim":""} ${q.listen?"lsq":""}">`+(q.listen?lsHead(q,answered):`<div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered||q.parts?"nosay":""}">${esc(q.big)}</div>${q.clock?clockSVG(q.clock[0],q.clock[1],92):""}${q.parts?drSayBtn(q.parts):""}<div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div>`)+`</div>`;
   let ok;
   if(q.type==="type"){
     h+=kbHTML(Q); ok=Q.result==="ok";
@@ -680,6 +686,7 @@ function renderTest(){
   }
   if(answered){
     h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="slot"?`Built, with ${Q.slot.errs.length} wrong ${Q.slot.errs.length===1?"pick":"picks"}. The sentence is:`:q.type==="order"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"||q.type==="slot"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
+${q.ansParts?`<p class="drans">${drSayBtn(q.ansParts,"Hear the answer")}</p>`:""}
         <button class="btn primary wide" data-act="next" style="margin-top:12px">${Q.i===QN-1?"See result":"Next question"}</button>`;
   }
   return h;
@@ -744,7 +751,7 @@ function render(){
   document.body.classList.toggle("norom",!S.rom);
   document.body.classList.toggle("welcoming",S.mode==="welcome");
   // quizzes, typing practice and dialogues keep a reading width on a wide screen (see "laptop and desktop" in style.css)
-  document.body.classList.toggle("focus",!!(S.mode==="test"&&S.quiz)||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg"));
+  document.body.classList.toggle("focus",!!(S.mode==="test"&&(S.quiz||G))||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg"));
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
@@ -783,6 +790,8 @@ document.addEventListener("change",e=>{
   else if(id==="ls-upto"){S.ls.upto=+val;save();render();}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
   else if(id==="wl-skip"){wlSkip.set(e.target.checked);}
+  else if(id.startsWith("dr-")){drChange(id,val);render();}
+  else if(id.startsWith("gm-")){gmChange(id,val);render();}
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="tin"){check();render();}
   if(e.key==="Enter"&&(e.target.id==="pf-add"||e.target.id==="pf-ren")) document.querySelector(`[data-act="${e.target.id==="pf-add"?"pf-add":"pf-ren-ok"}"]`).click(); });
@@ -790,6 +799,8 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
+  if(a.startsWith("gm-")){ if(!gmAct(a,v)) render(); return; }   // games.js
+  if(a.startsWith("dr-")){ if(!drAct(a,v)) render(); return; }   // drills.js
   if(a.startsWith("rec-")){recAct(a,v,b.dataset.g);return;}
   if(a==="find-go"){dgStop();S.find.from=true;findGo(v);return;}
   if(a==="find-back"){dgStop();S.mode="find";render();window.scrollTo(0,0);const i=$("#findq");if(i)i.focus({preventScroll:true});return;}
@@ -850,7 +861,7 @@ document.addEventListener("click",e=>{
   else if(a==="k-del"&&t){t.typed=Array.from(t.typed).slice(0,-1).join("");}
   else if(a==="k-clear"&&t){t.typed="";}
   else if(a==="k-check"){check();}
-  else if(a==="start"){startQuiz(v);if(S.quiz)S.mode="test";top=true;}
+  else if(a==="start"){gmStop();startQuiz(v);if(S.quiz)S.mode="test";top=true;}
   else if(a==="quit"){S.quiz=null;top=true;}
   else if(a==="ntab"){S.num.tab=v;}
   else if(a==="ndeck"){S.num.deck=v;}

@@ -495,3 +495,135 @@ Seble and Tom drive to the shops.
 | Tom (man) | መቼ ይከፈታል? | meché yikkefetal? | When does it open? |  |  |
 | Seble (woman) | ከሰዓት በኋላ ይከፈታል። | kese'at behwala yikkefetal | It opens in the afternoon. |  |  |
 | Tom (man) | እሺ። ቤት ሄደን ሻይ እናፍላ። | ishi. bét héden shay innafla | OK. Let's go home and make some tea. | Check እናፍላ “let's make (tea)”. |  |
+
+## Everyday drills: time, money and dates
+
+The Test tab's “Everyday Amharic” drills build whole phrases from these pieces (for example part of the day + hour + ተኩል). Please check the pieces and the patterns.
+
+### Patterns the app builds
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|
+| ጠዋት ሦስት ሰዓት | t'ewat sost se'at | 9:00 am | Part of the day before the hour. Is ጠዋት or ከጠዋቱ more natural here? |  |
+| ከሰዓት በኋላ ስምንት ሰዓት | kese'at behwala simmint se'at | 2:00 pm | Check ከሰዓት በኋላ for afternoon times. |  |
+| ማታ ሁለት ሰዓት | mata hulett se'at | 8:00 pm | ማታ for 6 pm to midnight; would ምሽት be better? |  |
+| ሌሊት ስምንት ሰዓት | lélit simmint se'at | 2:00 am | ሌሊት for midnight to 6 am. |  |
+| ቀን ስድስት ሰዓት | qen siddist se'at | 12:00 noon | ቀን for the noon hour. |  |
+| ሦስት ሰዓት ተኩል | sost se'at tekul | 3:30 (9:30 am) |  |  |
+| ሦስት ሰዓት ከሩብ | sost se'at kerub | 3:15 (9:15 am) | Check ከሩብ for quarter past. |  |
+| ለአራት ሩብ ጉዳይ | le'aratt rub gudday | quarter to four, 3:45 (9:45 am) | Check the ለ… ሩብ ጉዳይ pattern for quarter to. |  |
+| አሥር ብር ከሃምሳ ሳንቲም | assir birr kehamsa santim | 10.50 birr | Check ከ… ሳንቲም for birr and cents. |  |
+| ቡና ሠላሳ ብር ነው | buna selasa birr new | Coffee is 30 birr |  |  |
+| ኅዳር አሥራ ሦስት | hidar asra sost | Hidar 13 | Month then day as a number word. |  |
+
+### Telling the time
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|
+| ስንት ሰዓት ነው? | sint se'at new? | What time is it? |  |  |
+| ሰዓት | se'at | hour; o'clock; a clock or watch |  |  |
+| ደቂቃ | deqiqa | minute |  |  |
+| ተኩል | tekul | half past |  |  |
+| ከሩብ | kerub | quarter past |  |  |
+| ሩብ ጉዳይ | rub gudday | quarter to |  |  |
+| በስንት ሰዓት? | besint se'at? | At what time? |  |  |
+| በፈረንጅ ሰዓት | beferenj se'at | by the Western clock |  |  |
+| በኢትዮጵያ ሰዓት | be'ityop'ya se'at | by the Ethiopian clock |  |  |
+| ሌሊት | lélit | at night |  |  |
+| ጠዋት | t'ewat | in the morning |  |  |
+| ቀን | qen | at midday |  |  |
+| ከሰዓት በኋላ | kese'at behwala | in the afternoon |  |  |
+| ማታ | mata | in the evening |  |  |
+| አንድ ሰዓት | and se'at | 1 o'clock (Ethiopian) |  |  |
+| ሁለት ሰዓት | hulett se'at | 2 o'clock (Ethiopian) |  |  |
+| ሦስት ሰዓት | sost se'at | 3 o'clock (Ethiopian) |  |  |
+| አራት ሰዓት | aratt se'at | 4 o'clock (Ethiopian) |  |  |
+| አምስት ሰዓት | ammist se'at | 5 o'clock (Ethiopian) |  |  |
+| ስድስት ሰዓት | siddist se'at | 6 o'clock (Ethiopian) |  |  |
+| ሰባት ሰዓት | sebatt se'at | 7 o'clock (Ethiopian) |  |  |
+| ስምንት ሰዓት | simmint se'at | 8 o'clock (Ethiopian) |  |  |
+| ዘጠኝ ሰዓት | zet'egn se'at | 9 o'clock (Ethiopian) |  |  |
+| አሥር ሰዓት | assir se'at | 10 o'clock (Ethiopian) |  |  |
+| አሥራ አንድ ሰዓት | asra and se'at | 11 o'clock (Ethiopian) |  |  |
+| አሥራ ሁለት ሰዓት | asra hulett se'at | 12 o'clock (Ethiopian) |  |  |
+| ለአንድ ሩብ ጉዳይ | le'and rub gudday | quarter to 1 |  |  |
+| ለሁለት ሩብ ጉዳይ | lehulett rub gudday | quarter to 2 |  |  |
+| ለሦስት ሩብ ጉዳይ | lesost rub gudday | quarter to 3 |  |  |
+| ለአራት ሩብ ጉዳይ | le'aratt rub gudday | quarter to 4 |  |  |
+| ለአምስት ሩብ ጉዳይ | le'ammist rub gudday | quarter to 5 |  |  |
+| ለስድስት ሩብ ጉዳይ | lesiddist rub gudday | quarter to 6 |  |  |
+| ለሰባት ሩብ ጉዳይ | lesebatt rub gudday | quarter to 7 |  |  |
+| ለስምንት ሩብ ጉዳይ | lesimmint rub gudday | quarter to 8 |  |  |
+| ለዘጠኝ ሩብ ጉዳይ | lezet'egn rub gudday | quarter to 9 |  |  |
+| ለአሥር ሩብ ጉዳይ | le'assir rub gudday | quarter to 10 |  |  |
+| ለአሥራ አንድ ሩብ ጉዳይ | le'asra and rub gudday | quarter to 11 |  |  |
+| ለአሥራ ሁለት ሩብ ጉዳይ | le'asra hulett rub gudday | quarter to 12 |  |  |
+
+### Money and shopping
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|
+| ስንት ነው? | sint new? | How much is it? |  |  |
+| ይህ ስንት ነው? | yih sint new? | How much is this one? |  |  |
+| ዋጋው ስንት ነው? | wagaw sint new? | What's the price? |  |  |
+| ውድ ነው | wid new | It's expensive |  |  |
+| ርካሽ ነው | rikash new | It's cheap |  |  |
+| ቀንሱልኝ | qenisullign | Bring the price down for me |  |  |
+| የመጨረሻ ዋጋ ስንት ነው? | yemech'eresha waga sint new? | What's your lowest price? |  |  |
+| ዝርዝር አለህ? | zirzir alleh? | Do you have change? (to a man) |  |  |
+| መልስ | mels | change (money back) |  |  |
+| እሺ፣ እወስዳለሁ | ishi, iwesdallehu | OK, I'll take it |  |  |
+| አይ፣ በቃ | ay, beqa | No, never mind |  |  |
+| ሂሳብ | hisab | the bill |  |  |
+| ቡና | buna | a coffee |  |  |
+| ሻይ | shay | a tea |  |  |
+| ዳቦ | dabo | a loaf of bread |  |  |
+| ውሃ | wiha | a bottle of water |  |  |
+| አንድ ኪሎ ሙዝ | and kilo muz | a kilo of bananas |  |  |
+| አንድ ኪሎ ቲማቲም | and kilo timatim | a kilo of tomatoes |  |  |
+| እንቁላል | inqulal | an egg |  |  |
+| ሽሮ | shiro | a plate of shiro |  |  |
+| ታክሲ | taksi | a minibus ride |  |  |
+| መጽሐፍ | mets'haf | a book |  |  |
+| ጫማ | ch'amma | a pair of shoes |  |  |
+| ከሃያ አምስት ሳንቲም | kehaya ammist santim | and 25 santim |  |  |
+| ከሃምሳ ሳንቲም | kehamsa santim | and 50 santim |  |  |
+| ከሰባ አምስት ሳንቲም | keseba ammist santim | and 75 santim |  |  |
+
+### Dates and the calendar
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|
+| ዛሬ ስንት ነው? | zaré sint new? | What's the date today? |  |  |
+| ዛሬ ምን ቀን ነው? | zaré min qen new? | What day is it today? |  |  |
+| ቀን | qen | day; date |  |  |
+| ሳምንት | samint | week |  |  |
+| ወር | wer | month |  |  |
+| ዓመት | amet | year |  |  |
+| ዓ.ም. | amete mihret | Ethiopian year (after a date) |  |  |
+| የልደት ቀን | yelidet qen | birthday |  |  |
+| በዓል | be'al | holiday, festival |  |  |
+| መስከረም | meskerem | month 1 |  |  |
+| ጥቅምት | t'iqimt | month 2 |  |  |
+| ኅዳር | hidar | month 3 |  |  |
+| ታኅሣሥ | tahsas | month 4 |  |  |
+| ጥር | t'ir | month 5 |  |  |
+| የካቲት | yekatit | month 6 |  |  |
+| መጋቢት | megabit | month 7 |  |  |
+| ሚያዝያ | miyazya | month 8 |  |  |
+| ግንቦት | ginbot | month 9 |  |  |
+| ሰኔ | sené | month 10 |  |  |
+| ሐምሌ | hamlé | month 11 |  |  |
+| ነሐሴ | nehasé | month 12 |  |  |
+| ጳጉሜ | p'agumé | month 13 |  |  |
+| እሑድ | ihud | Sunday |  |  |
+| ሰኞ | segno | Monday |  |  |
+| ማክሰኞ | maksegno | Tuesday |  |  |
+| ረቡዕ | rebu' | Wednesday |  |  |
+| ሐሙስ | hamus | Thursday |  |  |
+| ዓርብ | arb | Friday |  |  |
+| ቅዳሜ | qidamé | Saturday |  |  |
+| እንቁጣጣሽ | inqut'at'ash | New Year |  |  |
+| መስቀል | meskel | Meskel (Finding of the True Cross) |  |  |
+| ገና | genna | Christmas |  |  |
+| ጥምቀት | t'imqet | Timket (Epiphany) |  |  |
