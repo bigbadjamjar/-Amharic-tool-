@@ -39,33 +39,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install the voice tool
-        run: pip install edge-tts
-
-      - name: Make missing clips
+      - name: TEMP check fidel clips by ear (speech recogniser)
         run: |
-          args=""
-          [ "${{ inputs.which }}" = "course words and sentences" ] && args="$args --course-only"
-          [ "${{ inputs.which }}" = "fidel letters" ] && args="$args --fidel"
-          python3 tools/make_audio.py $args
-
-      # Runs even if the step above stopped part way, so finished clips are kept.
-      - name: Save the clips
-        if: always()
-        run: |
-          python3 tools/audio_manifest.py
-          git add site/audio
-          if git diff --cached --quiet; then echo "No new clips."; exit 0; fi
-          n=$(git diff --cached --name-only --diff-filter=A -- site/audio/clips | wc -l)
-          m=$(git diff --cached --name-only --diff-filter=M -- site/audio/clips | wc -l)
-          git -c user.name="github-actions[bot]" -c user.email="41898099+github-actions[bot]@users.noreply.github.com" \
-            commit -q -m "Audio: $n new clips, $m remade"
-          git push
-          echo "Saved $n new clips and remade $m whose text had changed." >> "$GITHUB_STEP_SUMMARY"
-
-      # A push made by a workflow doesn't start other workflows, so start the deploy directly.
-      - name: Republish the site
-        if: always() && github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run deploy.yml --ref main
+          pip install edge-tts torch --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
+          pip install transformers numpy
+          python3 tools/tmp/asr_fidel.py
