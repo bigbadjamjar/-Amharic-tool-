@@ -42,17 +42,6 @@ jobs:
       - name: Install the voice tool
         run: pip install edge-tts
 
-      - name: AUDITION (temporary)
-        run: |
-          sudo apt-get install -y -qq ffmpeg >/dev/null || true
-          cd tools && python3 fidel_audition.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: audition
-          path: tools/audition
-      - name: stop
-        run: exit 1
-
       - name: Make missing clips
         run: |
           args=""

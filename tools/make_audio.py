@@ -88,21 +88,49 @@ PUNCT_COUNT = re.compile(r"[።፣፤፥፦፧?!.,;:]")
 GENERATED = AUDIO / "generated.json"
 
 
-# A few rare Fidel letters make the voice return an empty clip. On their own they are sent
-# as a common spelling of the same sound instead (the clip keeps the letter's own name).
+# Fidel letters said on their own. Sent exactly as written, many come out wrong or nearly silent:
+#  - the 6th column (ህ ል ስ ት ...) was said as a bare consonant, often just a breath or a click;
+#  - some rare letters gave an empty or almost empty clip (ጺ ጴ ፄ ኟ ዧ ...).
+# Measured on every letter in Nov 2026 (loudness and whether a vowel is heard), so each letter
+# is now sent as a spelling the voice says clearly. The clip keeps the letter's own name.
+LETTER_TWIN = {"ሐ": "ሀ", "ኀ": "ሀ", "ኸ": "ሀ", "ሠ": "ሰ", "ዐ": "አ"}   # rows that sound the same as a common row
+SIXTH_VOWEL = "እ"   # 6th column: the consonant plus እ, so the short "i" sound is heard (ህ -> ህእ, said "hi")
 TTS_LETTER = {
+    # rounded k/q/h/g letters: the voice gives an empty clip, so they are spelled out
     "ቈ": "ቅወ", "ቊ": "ቅዊ", "ቌ": "ቅዌ", "ቍ": "ቅው",
     "ኈ": "ህወ", "ኊ": "ህዊ", "ኌ": "ህዌ", "ኍ": "ህው",
     "ኰ": "ክወ", "ኲ": "ክዊ", "ኴ": "ክዌ", "ኵ": "ክው",
     "ጐ": "ግወ", "ጒ": "ግዊ", "ጔ": "ግዌ", "ጕ": "ግው",
-    "ሢ": "ሲ", "ኆ": "ሆ",
+    # ts letters: two spellings of the same sound; use whichever the voice says clearly
+    "ጺ": "ፂ", "ፄ": "ጼ", "ጾ": "ፆ",
+    # -wa letters that came out silent
+    "ኟ": "ኝዋ", "ዧ": "ዥዋ",
+    # nearly silent or no vowel heard: the consonant, then the vowel on its own
+    "ሺ": "ሽኢ", "ቩ": "ቭኡ", "ዢ": "ዥኢ", "ጂ": "ጅኢ", "ጴ": "ጵኤ",
 }
+ROUND_ROWS = {0x1248: "ቀ", 0x1288: "ኀ", 0x12B0: "ከ", 0x1310: "ገ"}
+
+
+def letter_tts(ch: str) -> str:
+    """What the voice is sent for one Fidel letter said on its own."""
+    if ch in TTS_LETTER:
+        return TTS_LETTER[ch]
+    n = ord(ch)
+    if not 0x1200 <= n < 0x1380 or any(b <= n < b + 8 for b in ROUND_ROWS):
+        return ch
+    row, k = chr(0x1200 + (n - 0x1200) // 8 * 8), (n - 0x1200) % 8
+    row = LETTER_TWIN.get(row, row)
+    if k == 0 and row in "ሀአ":   # ሀ and አ on their own are said "ha" and "a", like ሃ and ኣ
+        k = 3
+    if k == 5:
+        return chr(ord(row) + 5) + SIXTH_VOWEL
+    return chr(ord(row) + k)
 
 
 def to_tts(text: str) -> str:
     """The exact text sent to the voice."""
     lone = len(text) == 1
-    t = "".join(TTS_PUNCT.get(c, c) for c in TTS_LETTER.get(text, text))
+    t = "".join(TTS_PUNCT.get(c, c) for c in (letter_tts(text) if lone else text))
     if lone:
         t += "."   # a lone syllable, said on its own rather than run into silence
     t = re.sub(r"\s*([.,;:?!])\s*", r"\1 ", t)   # no space before a mark, one after
