@@ -35,7 +35,7 @@ function pgCalendar(st, today){
 }
 function pgForecast(st, today){
   const f = srsForecast(st, 7, today), max = Math.max(1, ...f);
-  return `<div class="pgfc">`+f.map((n,i)=>`<div><span class="n">${n||""}</span><i style="height:${Math.round(n/max*56)}px"></i><small>${i===0?"Today":PG_DAYS[pgDate(today+i).getDay()]}</small></div>`).join("")+`</div>`;
+  return `<div class="pgfc" role="img" aria-label="Reviews due: ${f.map((n,i)=>(i===0?"today":PG_DAYS[pgDate(today+i).getDay()])+" "+n).join(", ")}">`+f.map((n,i)=>`<div class="${i===0?"today":""}"><span class="n">${n||""}</span><i style="height:${Math.round(n/max*56)}px"></i><small>${i===0?"Today":PG_DAYS[pgDate(today+i).getDay()]}</small></div>`).join("")+`</div>`;
 }
 // "12 known, 30 learning": short, so it fits beside the name on a phone
 const pgSum = (c, short) => { const k=c.mastered+c.known; return k||!c.learning ? `${k} known`+(c.learning&&!short?`, ${c.learning} learning`:short&&c.learning?` · ${c.learning} learning`:"") : `${c.learning} learning`; };
@@ -53,8 +53,9 @@ function renderProgress(){
    <div class="stack" style="margin-top:12px">`+
    (due?`<button class="btn primary wide" data-act="start" data-v="due">Review ${plural(due,"item")} now</button>`:"")+
    `<button class="btn${due?"":" primary"} wide" data-act="start" data-v="daily">${S.day===today()?"Another session":"Start today's session"}</button></div>
-   <h3>Last five weeks</h3>${pgCalendar(st, d0)}<p class="count">${sk.today?"You've practised today.":sk.now?"Practise today to keep your streak going.":"Practise on any day to start a streak."} Any answered question counts.</p>
-   <h3>Coming up for review</h3>${seen?pgForecast(st, d0):`<p class="count">Nothing yet.</p>`}
+   <div class="pgpair"><div>
+   <h3>Days you practised <small>· last five weeks</small></h3><div class="pgcard">${pgCalendar(st, d0)}<p class="count">${sk.today?"You've practised today.":sk.now?"Practise today to keep your streak going.":"Practise on any day to start a streak."} Darker squares mean more questions answered.</p></div></div><div>
+   <h3>Reviews due <small>· next 7 days</small></h3><div class="pgcard"><p class="pgintro">Words, sentences and letters you've already met come back for a quick check just before you're likely to forget them. Each bar is how many come back that day. ${due?`Today's ${plural(due,"review")} ${due===1?"is":"are"} ready now.`:""}</p>${seen?pgForecast(st, d0):`<p class="count">Nothing yet. Answer some questions and your reviews appear here.</p>`}</div></div></div>
    <h3>What you know</h3>${pgKey}<div class="pglist">`;
   groups.forEach(([name, keys])=>{ if(!keys.length) return; const c=srsCount(st,keys);
     h += `<div class="pgrow"><div class="pgname"><b>${esc(name)}</b><span>${pgSum(c)} of ${c.total}</span></div>${pgBar(c)}</div>`; });
