@@ -55,11 +55,23 @@ def phrases_from_data(course_only: bool = False) -> list:
             s = m.group(1)
             if s and ETHIOPIC.match(s) and not LATIN.search(s):
                 found.append(s)
-        # notes write examples as {fidel|transcription}
-        for m in re.finditer(r"\{([^|}]+)\|", text):
-            if ETHIOPIC.match(m.group(1)) and not LATIN.search(m.group(1)):
-                found.append(m.group(1))
+        found += note_examples(text)
+    # the everyday drill pages (site/js/drills.js) write their examples the same way
+    found += note_examples((SITE / "js" / "drills.js").read_text(encoding="utf-8"))
     return [s for s in found if "✗" not in s]
+
+
+def note_examples(text: str) -> list:
+    """Notes write examples as {fidel|transcription}. The fidel part may not contain braces or quotes,
+    so an opening { of a data object is never mistaken for the start of an example."""
+    out = []
+    for m in re.finditer(r'\{([^|{}"]+)\|', text):
+        a = re.sub(r"[?።፣]", "", m.group(1)).strip()
+        if re.search(r"[-…_.]", a):   # word parts (ለ-, -ኝ) and frames with a gap (ስሜ … ነው) are not said on their own
+            continue
+        if a and ETHIOPIC.match(a) and not LATIN.search(a):
+            out.append(a)
+    return out
 
 
 def dialogue_lines() -> list:
