@@ -73,11 +73,11 @@ function gmPairsHTML(g){
     `<div class="tbl wl2">${g.items.map(x => `<div class="row vrow"><span class="form">${drLine([x.a], x.r)}</span><span class="en">${esc(x.e)}</span></div>`).join("")}</div>`);
   if(g.style === "memory"){
     return head + `<div class="gmgrid mem">` + g.cards.map((c, i) => { const up = g.done.has(c.p) || g.open.includes(i), bad = g.lock && g.open.includes(i);
-      return `<button class="gmcard ${up ? "up" : ""} ${g.done.has(c.p) ? "ok" : ""} ${bad ? "no" : ""} ${c.side === "a" ? "isam" : ""}" data-act="gm-tap" data-v="${i}" aria-label="${up ? esc(c.t) : "Hidden card"}">${up ? (c.side === "a" ? `<span class="am norom-auto">${esc(c.t)}</span>` : `<span>${esc(c.t)}</span>`) : `<span class="gmback norom-auto" aria-hidden="true">ፊ</span>`}</button>`; }).join("") + `</div>
+      return `<button class="gmcard ${up ? "up" : ""} ${g.done.has(c.p) ? "ok" : ""} ${bad ? "no" : ""} ${c.side === "a" ? "isam" : ""}" data-act="gm-tap" data-v="${i}" aria-label="${up ? esc(c.t) : "Hidden card"}">${up ? (c.side === "a" ? `<span class="am norom-auto">${esc(c.t)}</span>${romTag(c.r)}` : `<span>${esc(c.t)}</span>`) : `<span class="gmback norom-auto" aria-hidden="true">ፊ</span>`}</button>`; }).join("") + `</div>
       <p class="count gmhelp">Turn over two cards. Find each Amharic word and its meaning.</p>`;
   }
   const cell = (side, k) => { const x = g.items[k], on = g.sel && g.sel[0] === side && g.sel[1] === k, bad = g.wrong && g.wrong.some(w => w[0] === side && w[1] === k), ok = g.done.has(k);
-    return `<button class="gmcard up ${side === "a" ? "isam" : ""} ${on ? "on" : ""} ${bad ? "no" : ""} ${ok ? "ok gone" : ""}" data-act="gm-tap" data-v="${side}:${k}" ${ok ? "disabled" : ""}>${side === "a" ? `<span class="am norom-auto">${esc(x.a)}</span>` : `<span>${esc(x.e)}</span>`}</button>`; };
+    return `<button class="gmcard up ${side === "a" ? "isam" : ""} ${on ? "on" : ""} ${bad ? "no" : ""} ${ok ? "ok gone" : ""}" data-act="gm-tap" data-v="${side}:${k}" ${ok ? "disabled" : ""}>${side === "a" ? `<span class="am norom-auto">${esc(x.a)}</span>${romTag(x.r)}` : `<span>${esc(x.e)}</span>`}</button>`; };
   return head + `<div class="gmgrid cols">${g.left.map((k, i) => cell("a", k) + cell("e", g.right[i])).join("")}</div>
     <p class="count gmhelp">Tap an Amharic word, then its meaning.</p>`;
 }
@@ -123,9 +123,9 @@ function gmSpeedHTML(g){
   const q = g.q, left = Math.max(0, g.end - Date.now());
   return `<div class="gmhead"><span class="gmscore ${g.flash === "good" ? "good" : ""}"><strong>${g.score}</strong> right</span><span class="gmclock" id="gm-left">${Math.ceil(left / 1000)}s</span></div>
     <div class="prog gmprog"><i id="gm-bar" style="width:${left / (GM_SECS * 10)}%"></i></div>
-    <div class="q gmq"><div class="big ${q.bigAm ? "am" : ""} nosay">${esc(q.big)}</div><div class="sub">${esc(q.sub)}</div></div>
+    <div class="q gmq"><div class="big ${q.bigAm ? "am" : ""} nosay">${esc(q.big)}</div>${q.bigAm && !qNoRom(q) && tRom(q.big) ? `<div class="rom bigrom">${esc(tRom(q.big))}</div>` : ""}<div class="sub">${esc(q.sub)}</div></div>
     <div class="gmopts">${q.opts.map((o, j) => { const cls = g.picked !== null ? (j === q.ans ? " right" : j === g.picked ? " wrong" : "") : "";
-      return `<button class="opt${cls}" data-act="gm-pick" data-v="${j}" ${g.picked !== null ? "disabled" : ""}>${q.optAm ? `<span class="am">${esc(o.l)}</span>` + (g.picked !== null && o.r ? `<span class="rom">${esc(o.r)}</span>` : "") : `<span>${esc(o.l)}</span>`}</button>`; }).join("")}</div>`;
+      return `<button class="opt${cls}" data-act="gm-pick" data-v="${j}" ${g.picked !== null ? "disabled" : ""}>${q.optAm ? `<span class="am">${esc(o.l)}</span>` + ((g.picked !== null || !qNoRom(q)) && o.r ? `<span class="rom">${esc(o.r)}</span>` : "") : `<span>${esc(o.l)}</span>`}</button>`; }).join("")}</div>`;
 }
 
 /* ----- 3. fidel bingo -----
@@ -199,7 +199,7 @@ function gmRender(){
   const top = `<div class="bar" style="margin:14px 0 4px"><b>${{ pairs: g.style === "memory" ? "Memory pairs" : "Matching pairs", speed: "Speed round", bingo: "Fidel bingo" }[g.kind]}</b><button class="link" data-act="gm-quit">End game</button></div>`;
   return top + (g.kind === "pairs" ? gmPairsHTML(g) : g.kind === "speed" ? gmSpeedHTML(g) : gmBingoHTML(g));
 }
-function gmBest(k, fmt){ const b = S.gm.best[k]; return b != null ? `<span class="best"><strong>${fmt(b)}</strong>best</span>` : `<span class="best">not tried</span>`; }
+function gmBest(k, fmt){ const b = S.gm.best[k]; return b != null ? `<span class="best"><strong>${fmt(b)}</strong>best</span>` : `<span class="best untried">not tried</span>`; }
 function gmMenu(){
   const M = S.gm, n = gmItems(M.src).length;
   const card = (id, name, desc, best) => `<button class="topic" data-act="gm-start" data-v="${id}" ${id !== "bingo" && n < 4 ? "disabled" : ""}><b>${name}</b><small>${desc}</small>${best}</button>`;

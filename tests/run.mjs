@@ -11,7 +11,7 @@ const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
   .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress|report)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
+  "\n;globalThis.X={enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -132,6 +132,9 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   ok(pr.list().map(p => p.name).join() === "Me,Sam,sam (2)", "names should be made unique: " + pr.list().map(p => p.name).join());
   ok(pr.cur().name === "sam (2)" && Object.keys(pr.load().best || {}).length === 0, "a new profile starts empty and becomes current");
   pr.use(me.id); pr.rename(me.id, "  Rob  "); ok(pr.cur().name === "Rob", "rename");
+  const lg = pr.add("Christopher Robin"); ok(pr.cur().name.length <= 10 && pr.cur().name === "Christophe", "long names are cut to 10 letters: " + pr.cur().name);
+  pr.add("Christopher"); ok(pr.cur().name === "Christ (2)", "a unique long name still fits 10 letters: " + pr.cur().name);
+  pr.remove && pr.remove(pr.cur().id); pr.remove && pr.remove(lg);
   pr.save({ best: { L2: 7 } }, sam); ok(pr.load(me.id).best.L1 === 9 && pr.load(sam).best.L2 === 7, "profiles keep separate progress");
   const b = pr.backup(me.id);
   for (const code of [await Y.backupToCode(b), JSON.stringify(b)]) {
@@ -221,6 +224,25 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   ok(X.etTime(20, 30).parts.join(" ") === "ማታ ሁለት ሰዓት ተኩል", "8:30 pm is ማታ ሁለት ሰዓት ተኩል");
   ok(X.etTime(9, 45).parts.join(" ") === "ጠዋት ለአራት ሩብ ጉዳይ", "9:45 am names the coming hour");
   ok(X.EV.hours.length === 12 && X.EV.qto.length === 12 && X.EV.months.length === 13 && X.EV.days.length === 7, "everyday word lists are complete");
+}
+
+// --- English meaning beside each verb form
+{
+  const en = (head, t, i) => X.enForm(verb(head), t, i).text;
+  const byEn = (g, t, i) => X.enForm(X.VLIST.find(v => v.en === g), t, i).text;
+  ok(byEn("eat", "past", 0) === "I ate", "English past of eat: " + byEn("eat", "past", 0));
+  ok(byEn("eat", "pres", 3) === "he eats / will eat", "English present of eat: " + byEn("eat", "pres", 3));
+  ok(byEn("study", "pastNeg", 5) === "we did not study", "English past negative: " + byEn("study", "pastNeg", 5));
+  ok(byEn("be tired", "past", 6) === "you were tired", "English past of be: " + byEn("be tired", "past", 6));
+  ok(byEn("be tired", "presNeg", 0) === "I am not tired / won't be tired", "English negative of be: " + byEn("be tired", "presNeg", 0));
+  ok(byEn("go, leave, walk", "perf", 4) === "she has gone", "English has done: " + byEn("go, leave, walk", "perf", 4));
+  ok(byEn("open", "cmd", 1) === "open!" && byEn("open", "cmd", 5) === "let us open", "English commands");
+  ok(byEn("open", "cmdNeg", 2) === "don't open!" && byEn("open", "cmdNeg", 7) === "let them not open", "English negative commands");
+  ok(byEn("wash oneself", "past", 0) === "I washed myself", "English oneself: " + byEn("wash oneself", "past", 0));
+  ok(byEn("quarrel", "past", 7) === "they quarrelled", "British doubling: " + byEn("quarrel", "past", 7));
+  ok(byEn("get used to (a place, each other)", "past", 0) === "I got used to", "brackets dropped: " + byEn("get used to (a place, each other)", "past", 0));
+  for (const v of X.VLIST) for (const t of Object.keys(X.vforms(v))) if (Array.isArray(X.vforms(v)[t]))
+    for (let i = 0; i < 8; i++) { const s = X.enForm(v, t, i).text; ok(s && !/[()]|undefined|  /.test(s.replace("(that) ","")), `English for ${v.en} ${t} ${i}: "${s}"`); }
 }
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);

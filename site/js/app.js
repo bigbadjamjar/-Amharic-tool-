@@ -20,9 +20,19 @@ function vPanel(){
   let h=`<div class="note" id="vpanel"><h4><span class="am" style="font-size:1.5rem">${esc(v.am)}</span> <span class="rom">${esc(modern(v.rom))}</span></h4>
     <p><b>${esc(v.en)}</b> ${LMAP[v.lesson]?`<span class="count">· unit ${v.lesson}</span>`:""}</p>
     ${f.vn?`<p class="count">“-ing” noun: <span class="am">${esc(f.vn.am)}</span> <span class="rom">${esc(f.vn.rom)}</span> · doer: <span class="am">${esc(f.part.am)}</span> <span class="rom">${esc(f.part.rom)}</span></p>`:`<p class="count">This verb has only the forms below. For “will be” use <span class="am">ሆነ</span>; for commands use <span class="am">ሁን</span> “be!”.</p>`}</div>`;
-  h+=chips("vtense",av.map(x=>[x[0],x[1]]),t)+`<p class="count" style="margin:6px 0 8px">${esc(info[2])}</p><div class="tbl">`;
-  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(f[t][i].am,f[t][i].rom)}</span><span class="en">${esc(t==="cmd"||t==="cmdNeg"?(i===0?"let me":i===3?"let him":i===4?"let her":i===5?"let us":i===7?"let them":subj(i)+"!"):subj(i))}</span></div>`;});
-  return h+`</div>`;
+  h+=chips("vtense",av.map(x=>[x[0],x[1]]),t)+`<p class="count" style="margin:6px 0 8px">${esc(info[2])}</p><div class="tbl vtbl">`;
+  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(f[t][i].am,f[t][i].rom)}</span>${enCell(v,t,i)}</div>`;});
+  return h+`</div><p class="count" style="margin-top:6px">The English on the right shows what each form means${t==="pres"||t==="presNeg"?". This tense covers both now and the future":""}. <span class="ptag">m</span> <span class="ptag">f</span> <span class="ptag">pl</span> mark “you” said to a man, a woman, or more than one person.</p>`;
+}
+// make an over-long name (from an old profile or backup) smaller until it fits its fixed box
+function fitName(el){
+  if(!el) return; el.style.fontSize="";
+  for(let f=0.8; f>=0.6 && el.scrollWidth>el.clientWidth+1; f-=0.05) el.style.fontSize=f.toFixed(2)+"rem";
+}
+addEventListener("resize",()=>fitName(document.querySelector("#whobtn .nm")));
+function enCell(v,t,i){
+  const e=enForm(v,t,i);
+  return `<span class="en">${esc(e.text)}${e.tag?` <span class="ptag">${e.tag}</span>`:""}</span>`;
 }
 function vNewCard(){
   const C=S.v, pool=VLIST.filter(v=>inLesson(v,C.clesson));
@@ -44,7 +54,7 @@ function vCards(){
     const f=vforms(v)[t][i];
     h+=`<button class="flash" data-act="vflip" aria-label="Flip card"><span class="count">${esc(TNAME[t])}</span>
       <span class="am" style="font-size:1.7rem">${PR[i].am} · ${esc(v.am)}</span><span class="count">${esc(subj(i))} · ${esc(v.en)}</span>`+
-      (C.flip?`<span class="am" style="margin-top:8px">${esc(f.am)}</span><span class="rom">${esc(f.rom)}</span>`:`<span class="hint">Say the form, then tap to check</span>`)+`</button>`+(C.flip?sayBtn(f.am,"big"):"");
+      (C.flip?`<span class="am" style="margin-top:8px">${esc(f.am)}</span><span class="rom">${esc(f.rom)}</span><span class="en">${esc(enForm(v,t,i).text)}</span>`:`<span class="hint">Say the form, then tap to check</span>`)+`</button>`+(C.flip?sayBtn(f.am,"big"):"");
   }
   return h+`<div class="btns" style="grid-template-columns:1fr 2fr"><button class="btn" data-act="vflip">${C.flip?"Hide":"Show"}</button><button class="btn primary" data-act="vnext">Next card</button></div>
     <p class="count" style="text-align:center;margin-top:10px">Cards are drawn at random from ${C.clesson==="all"?"all "+VLIST.length+" verbs":"unit "+C.clesson}. Only units that teach verbs are listed.</p>`;
@@ -184,7 +194,7 @@ const tEn = (t,i) => t.full ? t.en[i] : subj(i)+" "+t.en[i];
 const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filter(l=>!l.review).map(l=>l.n));
 
 /* ---------- state ---------- */
-const S = {bs:{mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
+const S = {bs:{how:"step",mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
   fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
   find:{q:"",from:false},kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
 S.ls=JSON.parse(JSON.stringify(LS_DEF));
@@ -252,7 +262,7 @@ function flashHTML(words,key){
     <button class="btn primary" data-act="card" data-v="1">Next</button></div>
     <p class="count" style="text-align:center;margin-top:10px">Card ${F.i%words.length+1} of ${words.length}</p>`;
 }
-const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[id]}/${id==="daily"?20:10}</strong>best</span>` : `<span class="best">not tried</span>`;
+const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[id]}/${id==="daily"?20:10}</strong>best</span>` : `<span class="best untried">not tried</span>`;
 
 /* ---------- course ---------- */
 function renderCourse(){
@@ -450,8 +460,8 @@ function topic(id){
   if(id==="pronouns") return {name:"Pronouns",desc:"Who, to be, to have, my / your / his",gen:qPronoun};
   if(id==="verbs-type") return {name:"Type verb forms",desc:"Read the person and tense, type the form in fidel",gen:()=>qVerbType()};
   if(id==="sent-order") return {name:"Build sentences",desc:`Put the words in order · ${SENT.length} sentences`,gen:()=>qOrder(SENT)};
-  if(id==="build-verbs") return {name:"Verbs in sentences",desc:"Build a sentence word by word: pick the right person, tense and verb",gen:()=>qBuildVerb()};
-  if(id==="build-course") return {name:"Course sentences, word by word",desc:"Build each sentence from choices that change as you go",gen:()=>qBuildCourse(SENT.filter(x=>!S.bs.upto||x.l<=S.bs.upto))};
+  if(id==="build-verbs") return {name:"Verbs in sentences",desc:"Made-up sentences that practise verbs: get the right person, tense and verb",gen:()=>qBuildVerb()};
+  if(id==="build-course") return {name:"Course sentences",desc:`Build the sentences from the course units · ${SENT.length} sentences`,gen:()=>qBuildCourse(SENT.filter(x=>!S.bs.upto||x.l<=S.bs.upto))};
   if(id==="sent-mean") return {name:"Sentence meanings",desc:"Read a whole sentence and pick its meaning",gen:()=>qSentMean(SENT)};
   if(id==="num-words") return {name:"Number words",desc:"Match numbers and their Amharic words",gen:()=>qNumWord()};
   if(id==="num-sym") return {name:"Number symbols",desc:"Read and choose the Amharic numerals",gen:qNumSym};
@@ -473,9 +483,9 @@ const sWords = x => x.am.replace(/[?!።፣፤]/g,"").split(" ").filter(Boolean)
 function qOrder(pool,kind,x0){
   const long=pool.filter(x=>sWords(x).length>=3); if(!x0&&!long.length) return qSentMean(pool,kind);
   if(x0&&sWords(x0).length<3) return qSentMean(pool,kind,x0);
-  const x=x0||pick(long), w=sWords(x); let tiles=shuffle(w.slice()), g=0;
-  while(tiles.join(" ")===w.join(" ")&&g++<20) tiles=shuffle(w.slice());
-  return {type:"order",kind:kind||"Build the sentence",big:x.en,sub:"Tap the words in the right order",answer:w.join(" "),rom:x.rom,tiles,srs:"s:"+x.am};
+  const x=x0||pick(long), w=sWords(x), rw=x.rom.replace(/[?!.,;:"“”()…]/g,"").split(/\s+/).filter(Boolean);
+  const t=orderTiles(w.map((am,j)=>({am,rom:rw.length===w.length?rw[j]:""})));
+  return {type:"order",kind:kind||"Build the sentence",big:x.en,sub:"Tap the words in the right order",answer:w.join(" "),rom:x.rom,tiles:t.tiles,tileRom:t.tileRom,srs:"s:"+x.am};
 }
 function qSentMean(pool,kind,x0){
   const x=x0||pick(pool), rest=SENT.filter(y=>y.am!==x.am&&y.en!==x.en), near=rest.filter(y=>Math.abs(y.l-x.l)<=6);
@@ -483,7 +493,26 @@ function qSentMean(pool,kind,x0){
   if(ri(2)) return tag(mk(kind||"Sentences",x.am,true,"What does this mean?",{l:x.en},others.map(y=>({l:y.en})),false),"s:"+x.am);
   return tag(mk(kind||"Sentences",x.en,false,"Choose the Amharic",{l:x.am,r:x.rom},others.map(y=>({l:y.am,r:y.rom})),true),"s:"+x.am);
 }
-/* sentence builder (builder.js): one word at a time, from choices that change after each word */
+// shuffle the words of a sentence into tiles (never left in the right order), each with its transcription
+function orderTiles(words){
+  let p=shuffle(words.slice()), g=0;
+  while(words.length>1&&p.map(x=>x.am).join(" ")===words.map(x=>x.am).join(" ")&&g++<20) p=shuffle(words.slice());
+  return {tiles:p.map(x=>x.am),tileRom:p.map(x=>tRom(x.am,x.rom))};
+}
+/* Transcription in tests follows the Transcription switch at the top, like everywhere else.
+   Exceptions: tests of reading the letters themselves (fidel, hear a letter), where the sound is the
+   answer, so it only appears once you've answered. */
+const tRom = (am,rom) => rom || (ETH_RE.test(am||"") ? romOf(am) : "");
+const romTag = r => r ? `<small class="rom">${esc(r)}</small>` : "";
+const qNoRom = q => !!(q.noRom || /Fidel|letters/i.test(q.kind||""));
+// Amharic inside an English line (like "ሄደ · go"): each run of fidel followed by its transcription
+const romRuns = s => esc(s).replace(/[ሀ-ፚ][ሀ-ፚ\s]*[ሀ-ፚ]|[ሀ-ፚ]/g, run => `<span class="am nosay">${run}</span> <span class="rom">${esc(romOf(run))}</span>`);
+/* sentence builder (builder.js): one word at a time, from choices that change after each word,
+   or (setting "All the words") every word of the sentence at once, to put in order */
+const bsAll = q => q.type==="slot" && S.bs.how==="all";
+function slotAsOrder(q){
+  if(!q.tiles){ const t=orderTiles(q.words.map(w=>({am:w.am,rom:w.rom}))); q.tiles=t.tiles; q.tileRom=t.tileRom; }
+}
 function qBuild(x,kind){
   return {type:"slot",kind,big:x.en,sub:"Choose each word in turn",words:x.words,answer:x.words.map(w=>w.am).join(" "),rom:x.words.map(w=>w.rom).join(" ")};
 }
@@ -581,9 +610,8 @@ const TSECS = [
   ["fidel","<span class=\"am nosay\">ፊ</span>","Fidel","Read and type the letters of the alphabet, then whole words.",()=>3,()=>tStack(["fid-rec","fid-type","fid-words"])],
   ["units","📘","Units","A test for each course unit, the review units, and one across the whole course.",()=>LESSONS.length+1,()=>tStack(LESSONS.map(l=>(l.review?"R":"L")+l.n).concat("Lall"))],
   ["num","🔢","Numbers","Number words and the Amharic numerals, both ways round.",()=>NTESTS.length,()=>tStack(NTESTS)],
-  ["sent","🧩","Sentences","Put the words of a sentence in order, or pick what a sentence means.",()=>2,()=>tStack(["sent-order","sent-mean"])],
+  ["sent","🧩","Sentences","Build Amharic sentences word by word, or pick what a sentence means.",()=>3,()=>bsIntro()+tStack(["build-course","build-verbs","sent-mean"])+bsHTML(true)],
   ["dlg","💬","Dialogues","Hear one side of a short conversation and answer as the other person.",()=>DIALOGUES.length,()=>noH3(dgMenu())],
-  ["build","🛠️","Sentence builder","Build a sentence one word at a time, from choices that change as you go.",()=>2,()=>tStack(["build-verbs","build-course"])+bsHTML()],
   ["general","📋","General practice","Pronouns, verbs, verb forms, extra words, and everything mixed.",()=>5,()=>tStack(["pronouns","verbs","verbs-type","extra","mixed"])],
   ["everyday","🕒","Everyday Amharic","Telling the time the Ethiopian way, prices in birr, dates and the Ethiopian calendar.",()=>Object.keys(DR_TESTS).length,()=>drMenu()],
   ["games","🎲","Games","Matching pairs, a 60-second speed round and fidel bingo.",()=>3,()=>gmMenu(),"game"]
@@ -607,15 +635,38 @@ function dueButton(){
   const n=srsDue(S.srs).length, f=srsForecast(S.srs,2)[1];
   return `<button class="topic" data-act="start" data-v="due" ${n?"":"disabled"}><b>Review</b><small>${n?"Words, sentences and letters due to come back today. Up to "+QN+" at a time.":"Nothing due right now."+(f?" "+plural(f,"item")+" tomorrow.":"")}</small><span class="best"><strong>${n}</strong>due</span></button>`;
 }
-/* sentence builder settings: what the wrong choices are, how many, which units and tenses */
+/* sentence builder: what it is, then its settings (how the words are given, what the wrong choices are,
+   how many, which units and tenses, and the Transcription switch) */
+const BS_HOW=[["all","All the words","Every word of the sentence is there from the start, mixed up. Tap them in the right order."],
+  ["step","One word at a time","Choose each word in turn from a few choices, which change after every word. Harder: you have to recall each word, not just order them."]];
 const BS_MODES=[["forms","Same word","Only other forms of the right word: the verb in other persons and tenses. Good for learning how forms change."],
   ["mixed","Mixed","Other forms of the word, plus other words of the same kind (other verbs, pronouns, nouns)."],
   ["any","Any word","Words from anywhere in the course, so you need to know what each one means."]];
-function bsHTML(){
-  const B=S.bs, m=BS_MODES.find(x=>x[0]===B.mode)||BS_MODES[1];
-  return `<div class="note bset"><h4>Sentence builder settings</h4>
-    <p class="count">Wrong choices</p>${mini("bs-mode",BS_MODES.map(x=>[x[0],x[1]]),B.mode)}<p class="count bhelp">${esc(m[2])}</p>
-    <p class="count">Tiles to choose from</p>${mini("bs-n",[2,3,4,6].map(n=>[String(n),String(n)]),String(B.n))}
+function bsIntro(){
+  const tried=["build-course","build-verbs","sent-order"].some(k=>S.best[k]!=null);
+  return `<details class="note bintro"${tried?"":" open"}><summary><b>How sentence building works</b></summary>
+    <p>You see a sentence in English and make it in Amharic by tapping the Amharic words in the right order. After each sentence you see and can hear the whole thing.</p>
+    <p><b>Why it helps:</b> Amharic puts words in a different order from English (the verb comes last: <i>I coffee drink</i>), and one verb changes its ending for who does it and when. Building sentences yourself practises both, and pulls together the words, verbs and grammar from the units.</p>
+    <ul>
+      <li><b>Course sentences</b> are the sentences from the course units.</li>
+      <li><b>Verbs in sentences</b> are new sentences made for you each time, so you have to get the verb right for the person (I, you, she…) and the tense (did, does, will, don't).</li>
+      <li><b>Sentence meanings</b> shows a whole sentence: pick what it means.</li>
+    </ul>
+    <p><b>Make it easier or harder</b> with the settings below:</p>
+    <ul>
+      <li><b>All the words</b> (easier): every word is there, you just put them in order.</li>
+      <li><b>One word at a time</b> (harder): pick each word from a few choices that change after every word. <b>Wrong choices</b> and <b>Choices for each word</b> set how tricky those are.</li>
+      <li><b>Transcription</b> shows each Amharic word in English letters too. Turn it off when you can read fidel. It is the same switch as at the top of the app, and it works in every test.</li>
+      <li><b>Units</b> keeps to the units you've reached. <b>Tenses</b> picks which verb forms you practise.</li>
+    </ul></details>`;
+}
+function bsHTML(page){
+  const B=S.bs, h0=BS_HOW.find(x=>x[0]===B.how)||BS_HOW[1], m=BS_MODES.find(x=>x[0]===B.mode)||BS_MODES[1];
+  return `<div class="note bset"><h4>${page?"Settings for building sentences":"Settings"}</h4>
+    <p class="count">How the words are given</p>${mini("bs-how",BS_HOW.map(x=>[x[0],x[1]]),B.how)}<p class="count bhelp">${esc(h0[2])}</p>`+
+    (B.how==="step"?`<p class="count">Wrong choices</p>${mini("bs-mode",BS_MODES.map(x=>[x[0],x[1]]),B.mode)}<p class="count bhelp">${esc(m[2])}</p>
+    <p class="count">Choices for each word</p>${mini("bs-n",[2,3,4,6].map(n=>[String(n),String(n)]),String(B.n))}`:"")+`
+    <p class="count">Transcription</p>${mini("bs-rom",[["on","Show"],["off","Hide"]],S.rom?"on":"off")}<p class="count bhelp">${S.rom?"Each Amharic word also shows in English letters. Easier if you're still learning to read fidel.":"Amharic shows in fidel only. Harder: you read the letters yourself."} Same as the Transcription switch at the top.</p>
     <p class="count">Units</p><select id="bs-upto" class="sel" aria-label="Units"><option value="0">All units</option>${FULL.map(n=>`<option value="${n}" ${B.upto===n?"selected":""}>Units 1 to ${n}</option>`).join("")}</select>
     <p class="count">Tenses</p><div class="chips wrapchips">${TENSES.filter(t=>B_TENSES.includes(t[0])).map(t=>`<button class="chip" data-act="bs-tense" data-v="${t[0]}" aria-selected="${B.tenses.includes(t[0])}">${esc(t[1])}</button>`).join("")}</div>
     <p class="count bhelp">Tenses set which verb forms the made-up sentences use, and which tenses appear as wrong choices.</p></div>`;
@@ -627,11 +678,11 @@ function slotHTML(Q,q){
   if(!Q.slot) Q.slot={n:0,opts:null,bad:[],errs:[]};
   const st=Q.slot; if(!done&&!st.opts) st.opts=bOptions(W[st.n],S.bs);
   let h=`<div class="built slots ${done?(Q.result==="ok"?"right":"wrong"):""}">`+W.map((w,j)=>
-    j<st.n?`<span class="tile am filled">${esc(w.am)}${w.rom?`<small class="rom">${esc(w.rom)}</small>`:""}</span>`
+    j<st.n?`<span class="tile am filled">${esc(w.am)}${romTag(tRom(w.am,w.rom))}</span>`
     :`<span class="tile gap ${j===st.n&&!done?"now":""}" aria-label="${j===st.n?"next word":"word to come"}">${j===st.n&&!done?"?":"…"}</span>`).join("")+`</div>`;
   if(!done){
     h+=`<div class="bar" style="margin:10px 0 0"><span class="count">Word ${st.n+1} of ${W.length}</span><button class="link" data-act="bs-open">${S.bsOpen?"Hide settings":"Settings"}</button></div><div class="tiles slot-opts">`+st.opts.map((o,j)=>{const bad=st.bad.includes(j);
-      return `<button class="tile am ${bad?"no":""}" data-act="s-pick" data-v="${j}" ${bad?"disabled":""}>${esc(o.am)}</button>`;}).join("")+`</div>`;
+      return `<button class="tile am ${bad?"no":""}" data-act="s-pick" data-v="${j}" ${bad?"disabled":""}>${esc(o.am)}${romTag(tRom(o.am,o.rom))}</button>`;}).join("")+`</div>`;
   }
   if(!done&&S.bsOpen) h+=bsHTML();
   return h;
@@ -659,36 +710,41 @@ function renderTest(){
         if(q.listen){ h+=`<div class="miss">🔊 <span class="am">${esc(q.listen)}</span>`+(q.heardRom?` <span class="rom">${esc(q.heardRom)}</span>`:"")+(q.heardEn?` · ${esc(q.heardEn)}`:"")+
           `<br><span class="count">You ${q.type==="type"?"typed":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`; return; }
         h+=`<div class="miss"><span class="${q.bigAm?"am":""}">${esc(q.big)}</span> → <b class="${am?"am":""}">${esc(qAns(q))}</b>`+(rom?` <span class="rom">${esc(rom)}</span>`:"")+
-           `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"?"built":q.type==="slot"?"also tried":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
+           `<br><span class="count">You ${q.type==="type"?"typed":q.type==="order"||m.built?"built":q.type==="slot"?"also tried":"chose"} <s class="${am?"am":""}">${esc(m.p||"nothing")}</s></span></div>`;});
       h+=`</div>`;}
     return h+`<div class="stack" style="margin-top:16px">${Q.id==="miss"&&!S.miss.length||Q.id==="due"&&!srsDue(S.srs).length?"":`<button class="btn primary wide" data-act="start" data-v="${Q.id}">${Q.id==="miss"?"More mistakes":Q.id==="due"?"Review more":Q.id==="daily"?"Another session":"Try again"}</button>`}<button class="btn wide" data-act="mode" data-v="prog">See my progress</button><button class="btn wide" data-act="quit">Choose another test</button></div>`;
   }
   const q=Q.qs[Q.i], answered=q.type==="mc"?Q.picked!==null:Q.result!==null;
+  const bigR=!q.listen&&!qNoRom(q)&&q.bigAm?tRom(q.big,q.bigRom):"";
+  if(bsAll(q)) slotAsOrder(q);
   let h=`<div class="prog"><i style="width:${(Q.i+(answered?1:0))/QN*100}%"></i></div>
    <div class="bar" style="margin:0"><span class="count">Question ${Q.i+1} of ${QN}</span><button class="link" data-act="quit">End test</button></div>
-   <div class="q ${q.type==="type"&&!q.listen?"slim":""} ${q.listen?"lsq":""}">`+(q.listen?lsHead(q,answered):`<div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered||q.parts?"nosay":""}">${esc(q.big)}</div>${q.clock?clockSVG(q.clock[0],q.clock[1],92):""}${q.parts?drSayBtn(q.parts):""}<div class="sub ${q.subRom?"rom":""}">${esc(q.sub)}</div>`)+`</div>`;
+   <div class="q ${q.type==="type"&&!q.listen?"slim":""} ${q.listen?"lsq":""}">`+(q.listen?lsHead(q,answered):`<div class="kind">${esc(q.kind)}</div><div class="big ${q.bigAm?"am":""} ${q.kind==="Fidel"&&!answered||q.parts?"nosay":""}">${esc(q.big)}</div>${bigR?`<div class="rom bigrom">${esc(bigR)}</div>`:""}${q.clock?clockSVG(q.clock[0],q.clock[1],92):""}${q.parts?drSayBtn(q.parts):""}<div class="sub ${q.subRom?"rom":""}">${bsAll(q)?"Tap the words in the right order":!q.subRom&&!qNoRom(q)&&ETH_RE.test(q.sub||"")?romRuns(q.sub):esc(q.sub)}</div>`)+`</div>`;
   let ok;
   if(q.type==="type"){
     h+=kbHTML(Q); ok=Q.result==="ok";
-  }else if(q.type==="slot"){
+  }else if(q.type==="slot"&&!bsAll(q)){
     ok=Q.result==="ok"; h+=slotHTML(Q,q);
-  }else if(q.type==="order"){
+  }else if(q.type==="order"||q.type==="slot"){
     ok=Q.result==="ok";
-    h+=`<div class="built ${answered?(ok?"right":"wrong"):""}">`+(Q.built.length?Q.built.map((j,p)=>`<button class="tile am" data-act="o-rem" data-v="${p}" ${answered?"disabled":""}>${esc(q.tiles[j])}</button>`).join(""):`<span class="count">Your sentence appears here</span>`)+`</div>
-       <div class="tiles">`+q.tiles.map((w,j)=>`<button class="tile am ${Q.built.includes(j)?"used":""}" data-act="o-add" data-v="${j}" ${answered||Q.built.includes(j)?"disabled":""}>${esc(w)}</button>`).join("")+`</div>`;
+    const tr=j=>romTag(q.tileRom?q.tileRom[j]:tRom(q.tiles[j]));
+    h+=`<div class="built ${answered?(ok?"right":"wrong"):""}">`+(Q.built.length?Q.built.map((j,p)=>`<button class="tile am" data-act="o-rem" data-v="${p}" ${answered?"disabled":""}>${esc(q.tiles[j])}${tr(j)}</button>`).join(""):`<span class="count">Your sentence appears here</span>`)+`</div>`;
+    if(q.type==="slot"&&!answered) h+=`<div class="bar" style="margin:10px 0 0"><span class="count">Put the ${q.tiles.length} words in order</span><button class="link" data-act="bs-open">${S.bsOpen?"Hide settings":"Settings"}</button></div>`;
+    h+=`<div class="tiles">`+q.tiles.map((w,j)=>`<button class="tile am ${Q.built.includes(j)?"used":""}" data-act="o-add" data-v="${j}" ${answered||Q.built.includes(j)?"disabled":""}>${esc(w)}${tr(j)}</button>`).join("")+`</div>`;
     if(!answered) h+=`<button class="btn primary wide" data-act="o-check" style="margin-top:14px" ${Q.built.length===q.tiles.length?"":"disabled"}>Check</button>`;
+    if(q.type==="slot"&&!answered&&S.bsOpen) h+=bsHTML();
   }else{
     h+=`<div class="stack">`; ok=Q.picked===q.ans;
     q.opts.forEach((o,j)=>{
       const cls=answered?(j===q.ans?" right":j===Q.picked?" wrong":""):"";
       h+=`<button class="opt${cls}" data-act="ans" data-v="${j}" ${answered?"disabled":""}>`+
-         (q.optAm?`<span class="am">${esc(o.l)}</span>`+((answered&&o.r)?`<span class="rom">${esc(o.r)}</span>`:""):`<span>${esc(o.l)}</span>`)+`</button>`;
+         (q.optAm?`<span class="am">${esc(o.l)}</span>`+(answered?(o.r?`<span class="rom">${esc(o.r)}</span>`:""):qNoRom(q)?"":(r=>r?`<span class="rom">${esc(r)}</span>`:"")(tRom(o.l,o.r))):`<span>${esc(o.l)}</span>`)+`</button>`;
     });
     h+=`</div>`;
   }
   if(answered){
-    h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="slot"?`Built, with ${Q.slot.errs.length} wrong ${Q.slot.errs.length===1?"pick":"picks"}. The sentence is:`:q.type==="order"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"||q.type==="slot"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
-${q.parts&&q.bigRom?`<p class="drans"><span class="am nosay norom-auto">${esc(q.parts.join(" "))}</span>${drSayBtn(q.parts)} <span class="rom">${esc(q.bigRom)}</span></p>`:""}${q.ansParts?`<p class="drans">${drSayBtn(q.ansParts,"Hear the answer")}</p>`:""}
+    h+=`<p class="fb ${ok?"good":"bad"}">${ok?"Correct":q.type==="slot"&&Q.slot&&!bsAll(q)?`Built, with ${Q.slot.errs.length} wrong ${Q.slot.errs.length===1?"pick":"picks"}. The sentence is:`:q.type==="order"||q.type==="slot"?"Not quite. The right order is:":q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"||q.type==="slot"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
+${q.parts&&q.bigRom?`<p class="drans"><span class="am nosay norom-auto">${esc(q.parts.join(" "))}</span>${drSayBtn(q.parts)}${bigR?"":` <span class="rom">${esc(q.bigRom)}</span>`}</p>`:""}${q.ansParts?`<p class="drans">${drSayBtn(q.ansParts,"Hear the answer")}</p>`:""}
         <button class="btn primary wide" data-act="next" style="margin-top:12px">${Q.i===QN-1?"See result":"Next question"}</button>`;
   }
   return h;
@@ -704,7 +760,7 @@ function renderWho(){
   const L=PROF.list(), P=S.pf;
   let h=`<h2>${L.length?"Who's practising?":"What's your name?"}</h2><p class="lead">${L.length?"Each person has their own scores, mistakes and settings.":"Type your name to start. If other people use this device they can add their own name later, and everyone's progress is kept separately."}</p>`;
   if(L.length) h+=`<div class="stack" style="margin-top:14px">`+L.map(p=>`<button class="topic" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small></button>`).join("")+`</div><h3>Someone new</h3>`;
-  h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
+  h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
   if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? <button class="link" data-act="mode" data-v="me">Restore a backup</button></p>`;
   return h;
 }
@@ -715,11 +771,11 @@ function renderMe(){
     h+=`<button class="topic${on?" on":""}" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small><span class="best">${on?"<strong>✓</strong>using now":"switch"}</span></button>`; });
   h+=`</div>`;
   if(cur){
-    if(P.ren!==null) h+=`<div class="ntry pfrow" style="margin-top:10px"><input id="pf-ren" type="text" maxlength="30" autocomplete="off" value="${esc(P.ren)}"><button class="btn primary" data-act="pf-ren-ok">Save</button><button class="btn" data-act="pf-ren-x">Cancel</button></div>`;
+    if(P.ren!==null) h+=`<div class="ntry pfrow" style="margin-top:10px"><input id="pf-ren" type="text" maxlength="${NAME_MAX}" autocomplete="off" value="${esc(P.ren)}"><button class="btn primary" data-act="pf-ren-ok">Save</button><button class="btn" data-act="pf-ren-x">Cancel</button></div>`;
     else if(P.del) h+=`<div class="note warn"><p>Delete ${esc(cur.name)} and all their progress from this device? This can't be undone, so download a backup first if you might want it.</p><div class="pfrow" style="margin-top:8px"><button class="btn danger" data-act="pf-del-ok">Delete</button><button class="btn" data-act="pf-del-x">Cancel</button></div></div>`;
     else h+=`<div class="bar" style="justify-content:flex-start;gap:16px"><button class="link" data-act="pf-ren">Rename ${esc(cur.name)}</button><button class="link" data-act="pf-del">Delete ${esc(cur.name)}</button></div>`;
   }
-  h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
+  h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
   if(cur){
     h+=`<h3>Back up or move to another device</h3><div class="note"><p>Save ${esc(cur.name)}'s progress as a file or a code. On the other phone or computer, open this app, go to Profiles and restore it.</p>
       <div class="pfrow" style="margin-top:10px"><button class="btn" data-act="pf-file">Download backup file</button><button class="btn" data-act="pf-code">Show backup code</button></div>`;
@@ -757,7 +813,7 @@ function render(){
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
-  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
+  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
   $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
@@ -872,13 +928,15 @@ document.addEventListener("click",e=>{
   else if(a==="nrand"){S.num.n=String(pick([ri(100),ri(100),ri(1000),ri(NMAX+1)]));}
   else if(a==="o-add"&&Q&&Q.result===null){if(!Q.built.includes(+v))Q.built.push(+v);}
   else if(a==="o-rem"&&Q&&Q.result===null){Q.built.splice(+v,1);}
-  else if(a==="o-check"&&Q&&Q.result===null){const q=Q.qs[Q.i], said=Q.built.map(j=>q.tiles[j]).join(" "); Q.result=canon(said)===canon(q.answer)?"ok":"no"; if(Q.result==="ok")Q.score++; else Q.misses.push({q,p:said}); record(q,Q.result==="ok");}
+  else if(a==="o-check"&&Q&&Q.result===null){const q=Q.qs[Q.i], said=Q.built.map(j=>q.tiles[j]).join(" "); Q.result=canon(said)===canon(q.answer)?"ok":"no"; if(Q.result==="ok")Q.score++; else Q.misses.push({q,p:said,built:1}); record(q,Q.result==="ok");}
   else if(a==="s-pick"&&Q&&Q.result===null&&Q.slot){slotPick(Q,+v);}
   else if(a==="ls-hint"&&Q){Q.hint=Q.i;}
   else if(a==="ls-what"){S.ls.what=v;save();}
   else if(a==="bs-open"){S.bsOpen=!S.bsOpen;}
   else if(a==="tsec"){S.tsec=v==="all"?null:v;top=true;}
   else if(a==="bs-mode"){S.bs.mode=v;bsChanged();}
+  else if(a==="bs-how"){S.bs.how=v==="all"?"all":"step"; if(Q&&Q.result===null){Q.slot=null;Q.built=[];} save();}
+  else if(a==="bs-rom"){S.rom=v==="on";save();}
   else if(a==="bs-n"){S.bs.n=+v;bsChanged();}
   else if(a==="bs-tense"){const T0=S.bs.tenses,k=T0.indexOf(v); if(k>=0){if(T0.length>1)T0.splice(k,1);} else T0.push(v); bsChanged();}
   else if(a==="ans"&&Q&&Q.picked===null){Q.picked=+v; const q=Q.qs[Q.i]; if(Q.picked===q.ans)Q.score++; else Q.misses.push({q,p:q.opts[Q.picked].l}); record(q,Q.picked===q.ans);}

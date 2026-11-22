@@ -1,3 +1,5 @@
+/* longest profile name allowed (it has to fit the button in the header) */
+const NAME_MAX=10;
 /* Profiles: each person on this device gets their own saved progress and settings,
    and a profile can be saved as a backup (file or code) and loaded on another device.
    Everything stays in this browser's localStorage; nothing is sent anywhere.
@@ -22,7 +24,8 @@ function makeProfiles(st){
   const get=(k,d)=>{ try{ const v=st.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } };
   const put=(k,v)=>{ try{ st.setItem(k,JSON.stringify(v)); }catch(e){} };
   const newId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  const clean=n=>String(n||"").replace(/\s+/g," ").trim().slice(0,30);
+  // names are kept short so they always fit the profile button in the header
+  const clean=n=>String(n||"").replace(/\s+/g," ").trim().slice(0,NAME_MAX).trim();
 
   let idx=get(PKEY,null);
   if(!idx||!Array.isArray(idx.list)){
@@ -39,12 +42,12 @@ function makeProfiles(st){
   idx.list=idx.list.filter(p=>p&&p.id);
   if(!idx.list.some(p=>p.id===idx.cur)) idx.cur=idx.list.length?idx.list[0].id:null;
   const saveIdx=()=>put(PKEY,idx);
-  const uniq=(name,except)=>{ let n=clean(name)||"Learner", b=n, i=2; while(idx.list.some(p=>p.id!==except&&p.name.toLowerCase()===n.toLowerCase())) n=b+" ("+(i++)+")"; return n; };
+  const uniq=(name,except)=>{ let n=clean(name)||"Learner", b=n, i=2; while(idx.list.some(p=>p.id!==except&&p.name.toLowerCase()===n.toLowerCase())) { const t=" ("+(i++)+")"; n=b.slice(0,NAME_MAX-t.length).trim()+t; } return n; };
 
   return {
     list:()=>idx.list.slice(),
     cur:()=>idx.list.find(p=>p.id===idx.cur)||null,
-    byName:n=>idx.list.find(p=>p.name.toLowerCase()===clean(n).toLowerCase())||null,
+    byName:n=>idx.list.find(p=>clean(p.name).toLowerCase()===clean(n).toLowerCase())||null,
     use(id){ if(idx.list.some(p=>p.id===id)){ idx.cur=id; saveIdx(); } },
     add(name,data){ const id=newId(); idx.list.push({id,name:uniq(name)}); idx.cur=id; put(DKEY+id,data||{}); saveIdx(); return id; },
     rename(id,name){ const p=idx.list.find(x=>x.id===id); if(p&&clean(name)){ p.name=uniq(name,id); saveIdx(); } },

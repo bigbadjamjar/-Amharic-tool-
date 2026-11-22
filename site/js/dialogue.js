@@ -58,8 +58,8 @@ function dialogueHTML(l){
   }else{
     if(!DG.opts) DG.opts = dgTiles(line[1]);
     const done = DG.result==="ok", shown = DG.result==="shown";
-    h += `<div class="built ${done?"right":DG.result==="no"?"wrong":""}">${DG.built.map((t,j)=>`<button class="tile" data-act="dg-unbuild" data-v="${j}" ${DG.result&&DG.result!=="no"?"disabled":""}>${esc(DG.opts[t])}</button>`).join("")||`<span class="count">Tap the words in order</span>`}</div>
-      <div class="tiles">${DG.opts.map((w,j)=>`<button class="tile ${DG.built.includes(j)?"used":""}" data-act="dg-build" data-v="${j}" ${DG.built.includes(j)||(DG.result&&DG.result!=="no")?"disabled":""}>${esc(w)}</button>`).join("")}</div>`;
+    h += `<div class="built ${done?"right":DG.result==="no"?"wrong":""}">${DG.built.map((t,j)=>`<button class="tile" data-act="dg-unbuild" data-v="${j}" ${DG.result&&DG.result!=="no"?"disabled":""}>${esc(DG.opts[t])}${romTag(tRom(DG.opts[t]))}</button>`).join("")||`<span class="count">Tap the words in order</span>`}</div>
+      <div class="tiles">${DG.opts.map((w,j)=>`<button class="tile ${DG.built.includes(j)?"used":""}" data-act="dg-build" data-v="${j}" ${DG.built.includes(j)||(DG.result&&DG.result!=="no")?"disabled":""}>${esc(w)}${romTag(tRom(w))}</button>`).join("")}</div>`;
     if(DG.result==="no") h += `<p class="fb bad">Not quite. Tap a word in the box to take it out.</p>`;
     if(DG.missed && !done && !shown) h += `<p class="count"><button class="link" data-act="dg-show">Show me the answer</button></p>`;
     if(!done && !shown) h += `<div class="btns"><button class="btn primary wide" data-act="dg-check" ${DG.built.length===DG.opts.length?"":"disabled"}>Check</button></div>`;
