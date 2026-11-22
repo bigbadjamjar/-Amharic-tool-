@@ -9,17 +9,6 @@ OUT = "site/audio/try"; os.makedirs(f"{OUT}/mms", exist_ok=True); os.makedirs(f"
 def wav16(src, dst): subprocess.run(["ffmpeg","-v","quiet","-y","-i",src,"-ac","1","-ar","16000",dst], check=True)
 def mp3(src, dst): subprocess.run(["ffmpeg","-v","quiet","-y","-i",src,"-af","silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,apad=pad_dur=0.1","-ar","24000","-b:a","48k",dst], check=True)
 import soundfile as sf
-# --- MMS
-from transformers import VitsModel, AutoTokenizer
-tok = AutoTokenizer.from_pretrained("facebook/mms-tts-amh"); m = VitsModel.from_pretrained("facebook/mms-tts-amh")
-print("uroman needed:", getattr(tok, "is_uroman", None), flush=True)
-torch.manual_seed(1)
-for c in L:
-    ids = tok(c, return_tensors="pt")
-    if ids["input_ids"].shape[1] == 0: print("MMS empty", c); continue
-    with torch.no_grad(): w = m(**ids).waveform[0].numpy()
-    sf.write("/tmp/m.wav", w, m.config.sampling_rate); mp3("/tmp/m.wav", f"{OUT}/mms/{c}.mp3")
-print("MMS done", flush=True)
 # --- kNN-VC
 import torchaudio
 def _load(path, normalize=True, **k):
@@ -31,11 +20,11 @@ refs = sorted(glob.glob("site/audio/clips/*.mp3")); random.seed(0); refs = [r fo
 ref_w = []
 for i, r in enumerate(refs[:400]):
     p = f"/tmp/ref{i}.wav"; wav16(r, p); ref_w.append(p)
-mset = knn.get_matching_set(ref_w)
+mset = knn.get_matching_set(ref_w, vad_trigger_level=0)
 for c in L:
     subprocess.run(["espeak-ng","-v","am","-s","110","-p","45","-w","/tmp/es/e.wav",c], check=True)
     wav16("/tmp/es/e.wav", "/tmp/es/e16.wav")
-    q = knn.get_features("/tmp/es/e16.wav")
+    q = knn.get_features("/tmp/es/e16.wav", vad_trigger_level=0)
     out = knn.match(q, mset, topk=4)
     sf.write("/tmp/v.wav", out.numpy(), 16000); mp3("/tmp/v.wav", f"{OUT}/vc/{c}.mp3")
 print("VC done", flush=True)
