@@ -23,9 +23,12 @@ site/
     verbs.js          the verb list fed to the conjugation engine
     vocab.js          extra vocabulary by theme
     fidel.js          the Fidel rows
+    everyday.js       words for the Everyday drills: telling the time, prices, dates, the Ethiopian calendar
   js/engine.js        the verb engine: works out every tense from a verb's dictionary form
   js/audio.js         plays saved clips
   js/dialogue.js      the Dialogue tab: read, play it all, or take one part
+  js/drills.js        Test tab > Everyday Amharic: time, money and dates, with the Ethiopian clock and calendar
+  js/games.js         Test tab > Games: matching pairs, speed round, fidel bingo
   js/app.js           the screens and quizzes
   audio/clips/        saved sound files
   audio/manifest.js   list of clips (generated)

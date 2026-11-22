@@ -11,7 +11,7 @@ const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
   .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress|report)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount};", ctx);
+  "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -207,6 +207,20 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
     for (const p of c.p) for (const m of p.matchAll(/\{([^|}]+)\|([^}]*)\}/g)) ok(m[2].trim() && !/[A-Za-z]/.test(m[1]), `culture ${c.id}: example ${m[0]} needs fidel and a transcription`);
     for (const [am, rom, en] of c.phrases) ok(am && rom && en && !/[A-Za-z]/.test(am), `culture ${c.id}: bad phrase ${am}`);
   }
+}
+
+// --- everyday drills: the Ethiopian calendar and clock
+{
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  ok(same(X.gToE(2026, 11, 22), [2019, 3, 13]), "22 Nov 2026 is Hidar 13, 2019");
+  ok(same(X.gToE(2026, 9, 11), [2019, 1, 1]), "New Year 2019 is 11 Sep 2026");
+  ok(same(X.gToE(2027, 9, 12), [2020, 1, 1]) && same(X.gToE(2027, 9, 11), [2019, 13, 6]), "New Year moves to 12 Sep before a leap year, after a 6-day Pagume");
+  ok(same(X.gToE(2027, 1, 7), [2019, 4, 29]), "Genna (Christmas) is 7 January");
+  ok(same(X.eToG(2019, 3, 13), [2026, 11, 22]), "Ethiopian to Western date");
+  ok(X.etTime(9, 0).parts.join(" ") === "ጠዋት ሦስት ሰዓት", "9 am is ጠዋት ሦስት ሰዓት");
+  ok(X.etTime(20, 30).parts.join(" ") === "ማታ ሁለት ሰዓት ተኩል", "8:30 pm is ማታ ሁለት ሰዓት ተኩል");
+  ok(X.etTime(9, 45).parts.join(" ") === "ጠዋት ለአራት ሩብ ጉዳይ", "9:45 am names the coming hour");
+  ok(X.EV.hours.length === 12 && X.EV.qto.length === 12 && X.EV.months.length === 13 && X.EV.days.length === 7, "everyday word lists are complete");
 }
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);

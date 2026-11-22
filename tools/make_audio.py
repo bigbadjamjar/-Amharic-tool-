@@ -34,9 +34,9 @@ STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
 
 # Course words and sentences first, so a partial run still covers what matters most.
-ORDER = ["course.js", "sentences.js", "stories.js", "culture.js", "tables.js", "vocab.js", "verbs.js"]
-# The "course words and sentences" run: the course itself, plus the reading stories and culture notes.
-COURSE_FILES = ("course.js", "sentences.js", "stories.js", "culture.js")
+ORDER = ["course.js", "sentences.js", "stories.js", "culture.js", "everyday.js", "tables.js", "vocab.js", "verbs.js"]
+# The "course words and sentences" run: the course itself, plus the reading stories, culture notes and everyday drills.
+COURSE_FILES = ("course.js", "sentences.js", "stories.js", "culture.js", "everyday.js")   # everyday: the time, price and date drills
 LATIN = re.compile(r"[A-Za-z]")
 
 
