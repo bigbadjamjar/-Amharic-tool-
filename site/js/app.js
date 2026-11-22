@@ -255,7 +255,7 @@ const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[i
 /* ---------- course ---------- */
 function renderCourse(){
   if(S.lesson) return renderLesson(LMAP[S.lesson]);
-  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}<div class="stack" style="margin-top:14px">`;
+  let h=`<div class="intro"><h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}</div><div class="stack" style="margin-top:14px">`;
   LESSONS.forEach(l=>{
     h+= l.review
       ? `<button class="topic" data-act="start" data-v="R${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>Mixed test</small>${bestChip("R"+l.n)}</button>`
@@ -590,8 +590,8 @@ function testMenu(){
     return h+`<div class="tsechead"><h2>${sec[2]}</h2><p class="lead">${esc(sec[3])}</p></div>`+sec[5]()+
       `<button class="back" data-act="tsec" data-v="all">‹ All kinds of test</button>`;
   }
-  h+=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
-   <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
+  h+=`<div class="intro"><h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
+   <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div></div>
    <h3>Choose a kind of test</h3>
    <div class="tgrid">${TSECS.map(([id,icon,name,desc,n])=>`<button class="tcard" data-act="tsec" data-v="${id}"><span class="ticon" aria-hidden="true">${icon}</span><b>${name}</b><small>${esc(desc)}</small><span class="tn">${plural(n(),"test")} ›</span></button>`).join("")}</div>`;
   return h;
