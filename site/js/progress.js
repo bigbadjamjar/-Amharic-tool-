@@ -53,8 +53,9 @@ function renderProgress(){
    <div class="stack" style="margin-top:12px">`+
    (due?`<button class="btn primary wide" data-act="start" data-v="due">Review ${plural(due,"item")} now</button>`:"")+
    `<button class="btn${due?"":" primary"} wide" data-act="start" data-v="daily">${S.day===today()?"Another session":"Start today's session"}</button></div>
-   <h3>Days you practised <small>· last five weeks</small></h3><div class="pgcard">${pgCalendar(st, d0)}<p class="count">${sk.today?"You've practised today.":sk.now?"Practise today to keep your streak going.":"Practise on any day to start a streak."} Darker squares mean more questions answered.</p></div>
-   <h3>Reviews due <small>· next 7 days</small></h3><div class="pgcard"><p class="pgintro">Words, sentences and letters you've already met come back for a quick check just before you're likely to forget them. Each bar is how many come back that day. ${due?`Today's ${plural(due,"review")} ${due===1?"is":"are"} ready now.`:""}</p>${seen?pgForecast(st, d0):`<p class="count">Nothing yet. Answer some questions and your reviews appear here.</p>`}</div>
+   <div class="pgpair"><div>
+   <h3>Days you practised <small>· last five weeks</small></h3><div class="pgcard">${pgCalendar(st, d0)}<p class="count">${sk.today?"You've practised today.":sk.now?"Practise today to keep your streak going.":"Practise on any day to start a streak."} Darker squares mean more questions answered.</p></div></div><div>
+   <h3>Reviews due <small>· next 7 days</small></h3><div class="pgcard"><p class="pgintro">Words, sentences and letters you've already met come back for a quick check just before you're likely to forget them. Each bar is how many come back that day. ${due?`Today's ${plural(due,"review")} ${due===1?"is":"are"} ready now.`:""}</p>${seen?pgForecast(st, d0):`<p class="count">Nothing yet. Answer some questions and your reviews appear here.</p>`}</div></div></div>
    <h3>What you know</h3>${pgKey}<div class="pglist">`;
   groups.forEach(([name, keys])=>{ if(!keys.length) return; const c=srsCount(st,keys);
     h += `<div class="pgrow"><div class="pgname"><b>${esc(name)}</b><span>${pgSum(c)} of ${c.total}</span></div>${pgBar(c)}</div>`; });

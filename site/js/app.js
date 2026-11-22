@@ -237,7 +237,7 @@ function partsHTML(p){
   return `<div class="tbl">`+PL.map((l,i)=>`<div class="row" style="grid-template-columns:8.6rem 1fr"><span class="count">${l}</span><span class="form">${A(p.am[i],p.rom[i])}</span></div>`).join("")+`</div>`;
 }
 function wordList(words){
-  return `<div class="tbl canrec">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span></div>`).join("")+`</div>`;
+  return `<div class="tbl canrec wl2">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span></div>`).join("")+`</div>`;
 }
 function flashHTML(words,key){
   const F=S.fc;
@@ -743,6 +743,8 @@ const MODES=["course","fidel","num","ref","test","prog"];
 function render(){
   document.body.classList.toggle("norom",!S.rom);
   document.body.classList.toggle("welcoming",S.mode==="welcome");
+  // quizzes, typing practice and dialogues keep a reading width on a wide screen (see "laptop and desktop" in style.css)
+  document.body.classList.toggle("focus",!!(S.mode==="test"&&S.quiz)||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg"));
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
