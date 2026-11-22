@@ -2,7 +2,7 @@ name: Make audio clips
 
 # Press "Run workflow" on the Actions tab. It makes a clip for every Amharic word and sentence
 # that doesn't have one yet, saves them in site/audio/clips, and republishes the site.
-# Dialogue lines come with the course words; the men's lines are always made in the male voice.
+# Dialogue lines, reading stories and culture notes come with the course words; the men's lines are always made in the male voice.
 # Clips it made before are remade if their text in the app has changed (e.g. punctuation fixed).
 # Clips you added yourself are never replaced.
 on:

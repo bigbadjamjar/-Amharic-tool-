@@ -34,7 +34,9 @@ STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
 
 # Course words and sentences first, so a partial run still covers what matters most.
-ORDER = ["course.js", "sentences.js", "tables.js", "vocab.js", "verbs.js"]
+ORDER = ["course.js", "sentences.js", "stories.js", "culture.js", "tables.js", "vocab.js", "verbs.js"]
+# The "course words and sentences" run: the course itself, plus the reading stories and culture notes.
+COURSE_FILES = ("course.js", "sentences.js", "stories.js", "culture.js")
 LATIN = re.compile(r"[A-Za-z]")
 
 
@@ -43,7 +45,7 @@ def phrases_from_data(course_only: bool = False) -> list:
     files = sorted((SITE / "js" / "data").glob("*.js"), key=lambda f: (ORDER.index(f.name) if f.name in ORDER else 99, f.name))
     files = [f for f in files if f.name not in ("fidel.js", "dialogues.js")]  # letters; dialogues are read below
     if course_only:
-        files = [f for f in files if f.name in ("course.js", "sentences.js")]
+        files = [f for f in files if f.name in COURSE_FILES]
     found = []
     for f in files:
         text = f.read_text(encoding="utf-8")
@@ -150,7 +152,7 @@ def main() -> None:
     ap.add_argument("--redo", action="store_true", help="remake every automatically made clip, even if its text is unchanged")
     ap.add_argument("--redo-all", action="store_true", help="remake every clip, INCLUDING ones you added yourself")
     ap.add_argument("--limit", type=int, default=0, help="stop after this many clips")
-    ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences")
+    ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences, the reading stories and the culture notes")
     ap.add_argument("--fidel", action="store_true", help="only the letters of the Fidel chart")
     a = ap.parse_args()
 
