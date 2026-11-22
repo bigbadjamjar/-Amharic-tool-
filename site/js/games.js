@@ -199,7 +199,7 @@ function gmRender(){
   const top = `<div class="bar" style="margin:14px 0 4px"><b>${{ pairs: g.style === "memory" ? "Memory pairs" : "Matching pairs", speed: "Speed round", bingo: "Fidel bingo" }[g.kind]}</b><button class="link" data-act="gm-quit">End game</button></div>`;
   return top + (g.kind === "pairs" ? gmPairsHTML(g) : g.kind === "speed" ? gmSpeedHTML(g) : gmBingoHTML(g));
 }
-function gmBest(k, fmt){ const b = S.gm.best[k]; return b != null ? `<span class="best"><strong>${fmt(b)}</strong>best</span>` : `<span class="best">not tried</span>`; }
+function gmBest(k, fmt){ const b = S.gm.best[k]; return b != null ? `<span class="best"><strong>${fmt(b)}</strong>best</span>` : `<span class="best untried">not tried</span>`; }
 function gmMenu(){
   const M = S.gm, n = gmItems(M.src).length;
   const card = (id, name, desc, best) => `<button class="topic" data-act="gm-start" data-v="${id}" ${id !== "bingo" && n < 4 ? "disabled" : ""}><b>${name}</b><small>${desc}</small>${best}</button>`;

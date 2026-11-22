@@ -20,9 +20,19 @@ function vPanel(){
   let h=`<div class="note" id="vpanel"><h4><span class="am" style="font-size:1.5rem">${esc(v.am)}</span> <span class="rom">${esc(modern(v.rom))}</span></h4>
     <p><b>${esc(v.en)}</b> ${LMAP[v.lesson]?`<span class="count">· unit ${v.lesson}</span>`:""}</p>
     ${f.vn?`<p class="count">“-ing” noun: <span class="am">${esc(f.vn.am)}</span> <span class="rom">${esc(f.vn.rom)}</span> · doer: <span class="am">${esc(f.part.am)}</span> <span class="rom">${esc(f.part.rom)}</span></p>`:`<p class="count">This verb has only the forms below. For “will be” use <span class="am">ሆነ</span>; for commands use <span class="am">ሁን</span> “be!”.</p>`}</div>`;
-  h+=chips("vtense",av.map(x=>[x[0],x[1]]),t)+`<p class="count" style="margin:6px 0 8px">${esc(info[2])}</p><div class="tbl">`;
-  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(f[t][i].am,f[t][i].rom)}</span><span class="en">${esc(t==="cmd"||t==="cmdNeg"?(i===0?"let me":i===3?"let him":i===4?"let her":i===5?"let us":i===7?"let them":subj(i)+"!"):subj(i))}</span></div>`;});
-  return h+`</div>`;
+  h+=chips("vtense",av.map(x=>[x[0],x[1]]),t)+`<p class="count" style="margin:6px 0 8px">${esc(info[2])}</p><div class="tbl vtbl">`;
+  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(f[t][i].am,f[t][i].rom)}</span>${enCell(v,t,i)}</div>`;});
+  return h+`</div><p class="count" style="margin-top:6px">The English on the right shows what each form means${t==="pres"||t==="presNeg"?". This tense covers both now and the future":""}. <span class="ptag">m</span> <span class="ptag">f</span> <span class="ptag">pl</span> mark “you” said to a man, a woman, or more than one person.</p>`;
+}
+// make an over-long name (from an old profile or backup) smaller until it fits its fixed box
+function fitName(el){
+  if(!el) return; el.style.fontSize="";
+  for(let f=0.8; f>=0.6 && el.scrollWidth>el.clientWidth+1; f-=0.05) el.style.fontSize=f.toFixed(2)+"rem";
+}
+addEventListener("resize",()=>fitName(document.querySelector("#whobtn .nm")));
+function enCell(v,t,i){
+  const e=enForm(v,t,i);
+  return `<span class="en">${esc(e.text)}${e.tag?` <span class="ptag">${e.tag}</span>`:""}</span>`;
 }
 function vNewCard(){
   const C=S.v, pool=VLIST.filter(v=>inLesson(v,C.clesson));
@@ -44,7 +54,7 @@ function vCards(){
     const f=vforms(v)[t][i];
     h+=`<button class="flash" data-act="vflip" aria-label="Flip card"><span class="count">${esc(TNAME[t])}</span>
       <span class="am" style="font-size:1.7rem">${PR[i].am} · ${esc(v.am)}</span><span class="count">${esc(subj(i))} · ${esc(v.en)}</span>`+
-      (C.flip?`<span class="am" style="margin-top:8px">${esc(f.am)}</span><span class="rom">${esc(f.rom)}</span>`:`<span class="hint">Say the form, then tap to check</span>`)+`</button>`+(C.flip?sayBtn(f.am,"big"):"");
+      (C.flip?`<span class="am" style="margin-top:8px">${esc(f.am)}</span><span class="rom">${esc(f.rom)}</span><span class="en">${esc(enForm(v,t,i).text)}</span>`:`<span class="hint">Say the form, then tap to check</span>`)+`</button>`+(C.flip?sayBtn(f.am,"big"):"");
   }
   return h+`<div class="btns" style="grid-template-columns:1fr 2fr"><button class="btn" data-act="vflip">${C.flip?"Hide":"Show"}</button><button class="btn primary" data-act="vnext">Next card</button></div>
     <p class="count" style="text-align:center;margin-top:10px">Cards are drawn at random from ${C.clesson==="all"?"all "+VLIST.length+" verbs":"unit "+C.clesson}. Only units that teach verbs are listed.</p>`;
@@ -252,7 +262,7 @@ function flashHTML(words,key){
     <button class="btn primary" data-act="card" data-v="1">Next</button></div>
     <p class="count" style="text-align:center;margin-top:10px">Card ${F.i%words.length+1} of ${words.length}</p>`;
 }
-const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[id]}/${id==="daily"?20:10}</strong>best</span>` : `<span class="best">not tried</span>`;
+const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[id]}/${id==="daily"?20:10}</strong>best</span>` : `<span class="best untried">not tried</span>`;
 
 /* ---------- course ---------- */
 function renderCourse(){
@@ -750,7 +760,7 @@ function renderWho(){
   const L=PROF.list(), P=S.pf;
   let h=`<h2>${L.length?"Who's practising?":"What's your name?"}</h2><p class="lead">${L.length?"Each person has their own scores, mistakes and settings.":"Type your name to start. If other people use this device they can add their own name later, and everyone's progress is kept separately."}</p>`;
   if(L.length) h+=`<div class="stack" style="margin-top:14px">`+L.map(p=>`<button class="topic" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small></button>`).join("")+`</div><h3>Someone new</h3>`;
-  h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
+  h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
   if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? <button class="link" data-act="mode" data-v="me">Restore a backup</button></p>`;
   return h;
 }
@@ -761,11 +771,11 @@ function renderMe(){
     h+=`<button class="topic${on?" on":""}" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small><span class="best">${on?"<strong>✓</strong>using now":"switch"}</span></button>`; });
   h+=`</div>`;
   if(cur){
-    if(P.ren!==null) h+=`<div class="ntry pfrow" style="margin-top:10px"><input id="pf-ren" type="text" maxlength="30" autocomplete="off" value="${esc(P.ren)}"><button class="btn primary" data-act="pf-ren-ok">Save</button><button class="btn" data-act="pf-ren-x">Cancel</button></div>`;
+    if(P.ren!==null) h+=`<div class="ntry pfrow" style="margin-top:10px"><input id="pf-ren" type="text" maxlength="${NAME_MAX}" autocomplete="off" value="${esc(P.ren)}"><button class="btn primary" data-act="pf-ren-ok">Save</button><button class="btn" data-act="pf-ren-x">Cancel</button></div>`;
     else if(P.del) h+=`<div class="note warn"><p>Delete ${esc(cur.name)} and all their progress from this device? This can't be undone, so download a backup first if you might want it.</p><div class="pfrow" style="margin-top:8px"><button class="btn danger" data-act="pf-del-ok">Delete</button><button class="btn" data-act="pf-del-x">Cancel</button></div></div>`;
     else h+=`<div class="bar" style="justify-content:flex-start;gap:16px"><button class="link" data-act="pf-ren">Rename ${esc(cur.name)}</button><button class="link" data-act="pf-del">Delete ${esc(cur.name)}</button></div>`;
   }
-  h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
+  h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
   if(cur){
     h+=`<h3>Back up or move to another device</h3><div class="note"><p>Save ${esc(cur.name)}'s progress as a file or a code. On the other phone or computer, open this app, go to Profiles and restore it.</p>
       <div class="pfrow" style="margin-top:10px"><button class="btn" data-act="pf-file">Download backup file</button><button class="btn" data-act="pf-code">Show backup code</button></div>`;
@@ -803,7 +813,7 @@ function render(){
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
-  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
+  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
   $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
