@@ -47,8 +47,13 @@ async def one(text, rate, path):
         except Exception as ex:
             await asyncio.sleep(2 + t * 3)
 
+CARRIER = "አኡኢኣኤእኦ"
+def cands(c):
+    base, k = row_base(c); six = chr(ord(base) + 5)
+    return [("cur", to_tts(c), "-10%"), ("carrier", six + CARRIER[k] + ".", "-10%"), ("q", c + "?", "-10%"),
+            ("excl", c + "!", "-10%"), ("rep", c + "፣ " + c + ".", "-10%"), ("slow50", c + ".", "-50%")]
 rows = []
-for i, c in enumerate(fidel_letters()):
+for i, c in enumerate("ሺቀቩዢጂጨጴጫጳጣዣጀጄቸፑሀ"):
     for name, text, rate in cands(c):
         p = OUT / f"{ord(c):04X}-{name}.mp3"
         asyncio.run(one(text, rate, p))
