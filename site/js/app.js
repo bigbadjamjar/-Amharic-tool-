@@ -263,7 +263,7 @@ function renderCourse(){
   });
   h+=`</div>`;
   if(LATER.length){h+=`<h3>Still to add</h3><div class="stack">`;LATER.forEach(([n,t])=>{h+=`<button class="topic" disabled><b><span class="lnum">${n}</span>${esc(t)}</b></button>`;});h+=`</div>`;}
-  return h+wlLink();
+  return h;
 }
 function renderLesson(l){
   let h=`<button class="back" data-act="lesson" data-v="">‹ All units</button>
@@ -697,7 +697,7 @@ function renderWho(){
   if(L.length) h+=`<div class="stack" style="margin-top:14px">`+L.map(p=>`<button class="topic" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small></button>`).join("")+`</div><h3>Someone new</h3>`;
   h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="30" autocomplete="off" placeholder="Name" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
   if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? <button class="link" data-act="mode" data-v="me">Restore a backup</button></p>`;
-  return h+wlLink();
+  return h;
 }
 function renderMe(){
   const P=S.pf, cur=PROF.cur(), L=PROF.list();
@@ -729,7 +729,7 @@ function renderMe(){
       <div class="pfrow"><button class="btn primary" data-act="pf-in-read">Restore code</button><label class="btn filebtn">Choose file<input type="file" id="pf-infile" accept=".json,.txt,application/json,text/plain"></label></div>`;
     if(P.inErr) h+=`<p class="count bad" role="alert">${esc(P.inErr)}</p>`;
   }
-  return h+`</div>`+recHTML()+offlineHTML()+wlLink();
+  return h+`</div>`+recHTML()+offlineHTML();
 }
 function useProfile(id){ recCount=null; keep(); PROF.use(id); applyData(PROF.load()); S.pf.ren=null; S.pf.del=false; S.pf.code=""; S.pf.msg=""; }
 async function readIncoming(text){
@@ -750,7 +750,7 @@ function render(){
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
-  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest());
+  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
   addSayButtons($("#app"));
   // listening questions play by themselves, once, when they first appear
