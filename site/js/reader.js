@@ -62,7 +62,7 @@ function rdNoteHTML(c){
 function rdStoryHTML(s){
   if(!s) return "";
   const all = RD.playing>=0, i = STORIES.indexOf(s), next = STORIES[i+1];
-  let h = rdBack() + `<h2>${esc(s.title)}</h2><p class="rdam"><span class="am">${esc(s.am)}</span> <span class="rom">${esc(s.rom||"")}</span></p>
+  let h = rdBack() + `<h2>${esc(s.title)}</h2><p class="rdam"><span class="am nosay">${esc(s.am)}</span>${sayBtn(s.am)} <span class="rom">${esc(s.rom||"")}</span></p>
     <p class="lead">After unit ${s.after}. ${esc(s.intro)}</p>
     <div class="dbar"><button class="btn ${all?"":"primary"}" data-act="${all?"rd-stop":"rd-all"}">${all?"■ Stop":"▶ Read it to me"}</button><button class="link" data-act="rd-en">${RD.en?"Hide English":"Show English"}</button></div>
     <p class="count rdhint">Tap any word to see what it means.</p>
