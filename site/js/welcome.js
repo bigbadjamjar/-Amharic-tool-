@@ -82,4 +82,4 @@ function wlStart(){
 }
 const wlFirst = () => wlAsked() || !wlSkip.get();
 // shown centred at the bottom of every page except the welcome page itself
-const wlLink = () => `<footer class="wlfoot"><button class="link" data-act="mode" data-v="welcome">About this app</button></footer>`;
+const wlLink = () => `<footer class="wlfoot"><button class="link" data-act="mode" data-v="welcome">About this app</button>${typeof repOpen==="function"?`<span aria-hidden="true">·</span><button class="link" data-rep="open">Report a problem</button>`:""}</footer>`;

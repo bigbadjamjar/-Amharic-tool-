@@ -8,7 +8,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "site
 // Same order as the <script> tags in site/index.html, minus the browser-only files.
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
-  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress)\.js$/.test(f));
+  .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress|report)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
   "\n;globalThis.X={DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
@@ -183,6 +183,32 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   const n = X.findIndex().length; ok(n > 1000, `search index looks too small (${n})`);
 }
 
+// --- reading stories and culture notes: every word of a story can be tapped, units exist
+{
+  const rc = vm.createContext({});
+  vm.runInContext(["stories.js", "culture.js"].map(f => fs.readFileSync(path.join(root, "js/data", f), "utf8")).join("\n;\n") + ";globalThis.R={STORIES,STWORDS,CULTURE};", rc);
+  const { STORIES, STWORDS, CULTURE } = rc.R, P = /[።፣፤፥፦፧?!.,;:«»"“”]/g, ids = new Set();
+  for (const s of STORIES) {
+    ok(s.id && !ids.has(s.id) && s.title && s.am && s.rom && s.intro && lessonNums.has(s.after), `story ${s.id}: needs a unique id, title, Amharic title, intro and a real unit`);
+    ids.add(s.id);
+    ok(s.lines.length >= 5 && s.lines.length <= 12, `story ${s.id}: should have 5 to 12 lines`);
+    for (const [am, rom, en] of s.lines) {
+      ok(am && rom && en && !/[A-Za-z]/.test(am), `story ${s.id}: bad line ${am}`);
+      const a = am.replace(P, " ").split(/\s+/).filter(Boolean), r = rom.replace(/[?!.,;:]/g, " ").split(/\s+/).filter(Boolean);
+      ok(a.length === r.length, `story ${s.id}: ${a.length} Amharic words but ${r.length} in the transcription: ${am}`);
+      for (const w of a) ok(STWORDS[w], `story ${s.id}: no meaning for the word ${w}`);
+    }
+    for (const [q, opts, a] of s.qs) ok(q && opts.length === 3 && opts[a], `story ${s.id}: bad question ${q}`);
+  }
+  for (const c of CULTURE) {
+    ok(c.id && !ids.has(c.id + "-c") && c.title && c.intro && c.icon && c.p.length, `culture ${c.id}: needs id, title, intro, icon, text`);
+    ids.add(c.id + "-c");
+    ok(c.units.length && c.units.every(n => lessonNums.has(n)), `culture ${c.id}: links to a unit that doesn't exist`);
+    for (const p of c.p) for (const m of p.matchAll(/\{([^|}]+)\|([^}]*)\}/g)) ok(m[2].trim() && !/[A-Za-z]/.test(m[1]), `culture ${c.id}: example ${m[0]} needs fidel and a transcription`);
+    for (const [am, rom, en] of c.phrases) ok(am && rom && en && !/[A-Za-z]/.test(am), `culture ${c.id}: bad phrase ${am}`);
+  }
+}
+
 // --- everyday drills: the Ethiopian calendar and clock
 {
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -196,5 +222,6 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   ok(X.etTime(9, 45).parts.join(" ") === "ጠዋት ለአራት ሩብ ጉዳይ", "9:45 am names the coming hour");
   ok(X.EV.hours.length === 12 && X.EV.qto.length === 12 && X.EV.months.length === 13 && X.EV.days.length === 7, "everyday word lists are complete");
 }
+
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);
 process.exit(fails ? 1 : 0);

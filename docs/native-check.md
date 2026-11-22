@@ -496,6 +496,331 @@ Seble and Tom drive to the shops.
 | Seble (woman) | ከሰዓት በኋላ ይከፈታል። | kese'at behwala yikkefetal | It opens in the afternoon. |  |  |
 | Tom (man) | እሺ። ቤት ሄደን ሻይ እናፍላ። | ishi. bét héden shay innafla | OK. Let's go home and make some tea. | Check እናፍላ “let's make (tea)”. |  |
 
+## Reading stories
+
+9 short stories (82 lines). Please check each line reads naturally. 6 lines have a specific doubt.
+
+### Story lines with a specific doubt
+
+| Story | Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| Meet Almaz | ይህ ውሻችን ነው። ስሙ ቦቢ ነው። | yih wishachin new. simu bobi new. | This is our dog. His name is Bobby. | -አችን “our” is not taught until later; check ውሻችን. |  |
+| At Grandmother's | ለምሳ እንጀራ በሽሮ እንበላለን። | lemisa injera beshiro inbelallen. | For lunch we eat injera with shiro. | Check the በ “with” construction for food (as in the unit 7 sentences). |  |
+| The train station | ሴትዮዋ፦ ቀጥ ብለህ ሂድ፤ ጣቢያው ባንኩ አጠገብ ነው። | sétiyowa: qet' bileh hid; t'abiyaw banku at'egeb new. | The woman: Go straight on; the station is next to the bank. | ቀጥ ብለህ (to a man) rather than the word-list form ቀጥ ብሎ; check this is how directions are given. |  |
+| Where are my keys? | ቶሎ ሮጬ አውቶቡሱን ያዝኩ። | tolo roch'é awtobusun yazku. | I ran fast and caught the bus. | ያዘ “catch” for a bus: check this is natural. |  |
+| Who's who at the wedding | መነጽር ያደረገው አጭር ሰው አባቷ ነው። | menets'ir yaderregew ach'ir sew abbatwa new. | The short man wearing glasses is her father. | መነጽር ያደረገ “wearing glasses”: check the verb (አደረገ or ለበሰ?). |  |
+| The car broke down | ከአንድ ሰዓት በኋላ መኪናው ተሠራ። | ke'and se'at behwala mekinaw teserra. | After an hour the car was mended. | ተሠራ for “was repaired”: check (or ተጠገነ?). |  |
+
+### Meet Almaz (አልማዝ), after unit 3
+
+Almaz shows us her family.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ሰላም! ስሜ አልማዝ ነው። | selam! simé almaz new. | Hello! My name is Almaz. |  |  |
+| እኔ ተማሪ ነኝ። | iné temari negn. | I am a student. |  |  |
+| ይህ ቤቴ ነው። | yih bété new. | This is my home. |  |  |
+| አባቴ ሐኪም ነው፤ እናቴ አስተማሪ ናት። | abbaté hakim new; innaté astemari nat. | My father is a doctor; my mother is a teacher. |  |  |
+| ታላቅ ወንድሜ ሹፌር ነው። | talaq wendimé shufér new. | My elder brother is a driver. |  |  |
+| ታናሽ እህቴ ትንሽ ልጅ ናት። | tanash ihté tinnish lij nat. | My younger sister is a little child. |  |  |
+| አያቴ ደግ ናት። | ayaté deg nat. | My grandmother is kind. |  |  |
+| ይህ ውሻችን ነው። ስሙ ቦቢ ነው። | yih wishachin new. simu bobi new. | This is our dog. His name is Bobby. | -አችን “our” is not taught until later; check ውሻችን. |  |
+| ቆንጆ ውሻ ነው! | qonjo wisha new! | He's a good-looking dog! |  |  |
+
+### Who has more? (ዳዊትና ሳሙኤል), after unit 4
+
+Two friends: one has a lot of things, the other has a lot of time.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ዳዊት ነጋዴ ነው። | dawit negadé new. | Dawit is a businessman. |  |  |
+| ዳዊት ትልቅ ቤት አለው። | dawit tilliq bét allew. | Dawit has a big house. |  |  |
+| ሁለት መኪና እና ሦስት ስልክ አለው። | hulet mekina inna sost silk allew. | He has two cars and three phones. |  |  |
+| አራት ልጆች አሉት። | arat lijoch allut. | He has four children. |  |  |
+| ብዙ ገንዘብ አለው፤ ግን ጊዜ የለውም። | bizu genzeb allew; gin gizé yellewim. | He has a lot of money, but he doesn't have time. |  |  |
+| ጓደኛው ሳሙኤል ትንሽ ቤት አለው። | gwadegnaw samu'él tinnish bét allew. | His friend Samuel has a small house. |  |  |
+| ሳሙኤል መኪና የለውም፤ ገንዘቡ ጥቂት ነው። | samu'él mekina yellewim; genzebu t'iqit new. | Samuel doesn't have a car; he has only a little money. |  |  |
+| አንድ ድመት እና አንድ ውሻ አለው። | and dimmet inna and wisha allew. | He has one cat and one dog. |  |  |
+| ግን ሳሙኤል ብዙ ጊዜ አለው። | gin samu'él bizu gizé allew. | But Samuel has a lot of time. |  |  |
+| ማን ደስተኛ ነው? | man destegna new? | Who is happy? |  |  |
+
+### At Grandmother's (አያቴ ቤት), after unit 7
+
+Coffee and lunch at grandmother's house.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ይህ የአያቴ ቤት ነው። | yih ye'ayaté bét new. | This is my grandmother's house. |  |  |
+| ቤቱ ውስጥ ጀበና አለ። | bétu wist' jebena alle. | In the house there's a coffee pot. |  |  |
+| ጠረጴዛው ላይ ስኒዎች አሉ። | t'erep'ézaw lay siniwoch allu. | On the table there are little cups. |  |  |
+| እኔ ቡና በስኳር እጠጣለሁ። | iné bunna besikkwar it'et'allehu. | I drink coffee with sugar. |  |  |
+| አያቴ ቡና ያለ ስኳር ትጠጣለች። | ayaté bunna yale sikkwar tit'et'allech. | My grandmother drinks coffee without sugar. |  |  |
+| ታናሽ እህቴ ቡና አትጠጣም፤ ወተት ትፈልጋለች። | tanash ihté bunna atit'et'am; wetet tifeligallech. | My younger sister doesn't drink coffee; she wants milk. |  |  |
+| ለምሳ እንጀራ በሽሮ እንበላለን። | lemisa injera beshiro inbelallen. | For lunch we eat injera with shiro. | Check the በ “with” construction for food (as in the unit 7 sentences). |  |
+| ሽሮው ጣፋጭ ነው! | shirow t'afach' new! | The shiro is tasty! |  |  |
+| አያቴ፦ ብሉ፣ ብሉ! | ayaté: bilu, bilu! | Grandmother: Eat, eat! |  |  |
+
+### A long day (ረጅም ቀን), after unit 9
+
+Someone tells us about yesterday.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ትናንት ጠዋት ተነሣሁ፤ ቁርስ በላሁ፤ ቡና ጠጣሁ። | tinant t'ewat tenessahu; qurs bellahu; bunna t'et'ahu. | Yesterday morning I got up, ate breakfast and drank coffee. |  |  |
+| ወደ ሥራ ሄድኩ። | wede sira hédku. | I went to work. |  |  |
+| ሥራ ብዙ ነበር። | sira bizu nebber. | There was a lot of work. |  |  |
+| ከሰዓት በኋላ እናቴ ደወለች። | kese'at behwala innaté dewwelech. | In the afternoon my mother rang. |  |  |
+| ማታ ወደ ገበያ ሄድኩ፤ ዳቦ እና ወተት ገዛሁ። | mata wede gebeya hédku; dabbo inna wetet gezzahu. | In the evening I went to the market and bought bread and milk. |  |  |
+| ወደ ቤት ተመለስኩ። | wede bét temelesku. | I came back home. |  |  |
+| ፊልም አየሁ፤ ግን ፊልሙን አልጨረስኩም። | film ayyehu; gin filmun alch'erreskum. | I watched a film, but I didn't finish it. |  |  |
+| ሶፋው ላይ ተኛሁ! | sofaw lay tegnahu! | I fell asleep on the sofa! |  |  |
+
+### The train station (ባቡር ጣቢያ), after unit 12
+
+Tom is looking for the train station.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ቶም ባቡር ጣቢያ ይፈልጋል። | tom babur t'abiya yifeligal. | Tom is looking for the train station. |  |  |
+| ቶም፦ ይቅርታ፣ ባቡር ጣቢያ የት ነው? | tom: yiqirta, babur t'abiya yet new? | Tom: Excuse me, where is the train station? |  |  |
+| ሴትዮዋ፦ ቀጥ ብለህ ሂድ፤ ጣቢያው ባንኩ አጠገብ ነው። | sétiyowa: qet' bileh hid; t'abiyaw banku at'egeb new. | The woman: Go straight on; the station is next to the bank. | ቀጥ ብለህ (to a man) rather than the word-list form ቀጥ ብሎ; check this is how directions are given. |  |
+| ቶም፦ ሩቅ ነው? | tom: ruq new? | Tom: Is it far? |  |  |
+| ሴትዮዋ፦ አይ፣ ቅርብ ነው። | sétiyowa: ay, qirb new. | The woman: No, it's near. |  |  |
+| ቶም በእግሩ ሄደ። | tom be'igru héde. | Tom went on foot. |  |  |
+| ጣቢያው ደረሰ፤ ቲኬት ገዛ። | t'abiyaw derrese; tikét gezza. | He reached the station and bought a ticket. |  |  |
+| ግን ባቡሩ ሄዶ ነበር! | gin baburu hédo nebber! | But the train had gone! |  |  |
+| ቶም፦ ሌላ ባቡር መቼ ይመጣል? | tom: léla babur meché yimet'al? | Tom: When does another train come? |  |  |
+| ሰውዬው፦ ነገ! | sewiyew: nege! | The man: Tomorrow! |  |  |
+
+### Plans for Meskel (የመስቀል ዕቅድ), after unit 14
+
+Sara and Yonas make plans for the Meskel festival.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ነገ መስቀል ነው። | nege meskel new. | Tomorrow is Meskel. |  |  |
+| መስቀል ትልቅ በዓል ነው። | meskel tilliq beal new. | Meskel is a big festival. |  |  |
+| ሳራ፦ ማታ ደመራ ማየት እፈልጋለሁ። | sara: mata demera mayet ifeligallehu. | Sara: In the evening I want to see the Demera bonfire. |  |  |
+| ዮናስ፦ በእርግጥ! እንሂድ። | yonas: be'irgit'! innihid. | Yonas: Of course! Let's go. |  |  |
+| ሳራ፦ የት እንገናኝ? | sara: yet innigenagn? | Sara: Where shall we meet? |  |  |
+| ዮናስ፦ ቤተ ክርስቲያኑ አጠገብ እንገናኝ። | yonas: béte kristiyanu at'egeb innigenagn. | Yonas: Let's meet next to the church. |  |  |
+| ሳራ፦ እናቴ ዶሮ ወጥ ትሠራለች። ቤታችን መምጣት ትችላለህ? | sara: innaté doro wet' tiserallech. bétachin memt'at tichilalleh? | Sara: My mother is making chicken stew. Can you come to our house? |  |  |
+| ዮናስ፦ ምናልባት፤ ነገ ጠዋት መሥራት አለብኝ። | yonas: minalbat; nege t'ewat mesrat allebbign. | Yonas: Maybe; I have to work tomorrow morning. |  |  |
+| ሳራ፦ እሺ። መልካም በዓል! | sara: ishi. melkam beal! | Sara: OK. Happy holiday! |  |  |
+| ዮናስ፦ እንኳን አደረሰሽ! | yonas: inkwan aderresesh! | Yonas: Happy holiday to you too! |  |  |
+
+### Where are my keys? (ቁልፌ የት ነው?), after unit 16
+
+A morning that goes wrong, told with the “and then” verb forms from unit 16.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ትናንት ጠዋት ተነሥቼ ታጠብኩ። | tinant t'ewat tenesché tat'ebku. | Yesterday morning I got up and washed. |  |  |
+| ልብሴን ለብሼ ቁርስ በላሁ። | libsén lebshé qurs bellahu. | I got dressed and ate breakfast. |  |  |
+| ከዚያ ቁልፌን ፈለግኩ። | keziya qulfén felegku. | Then I looked for my key. |  |  |
+| ጠረጴዛው ላይ የለም። ቦርሳዬ ውስጥ የለም። | t'erep'ézaw lay yellem. borsayé wist' yellem. | It isn't on the table. It isn't in my bag. |  |  |
+| መጀመሪያ ወደ መኝታ ቤት ሄጄ ፈለግኩ። | mejemmerya wede megnta bét héjé felegku. | First I went to the bedroom and looked. |  |  |
+| ከዚያ ወደ ኩሽና ሮጬ ፈለግኩ። | keziya wede kushina roch'é felegku. | Then I ran to the kitchen and looked. |  |  |
+| በመጨረሻ ቁልፌን አገኘሁ፤ ኪሴ ውስጥ ነበር! | bemech'ersha qulfén agegnyehu; kisé wist' nebber! | In the end I found my key: it was in my pocket! |  |  |
+| ቶሎ ሮጬ አውቶቡሱን ያዝኩ። | tolo roch'é awtobusun yazku. | I ran fast and caught the bus. | ያዘ “catch” for a bus: check this is natural. |  |
+
+### Who's who at the wedding (ሠርጉ ላይ), after unit 19
+
+Pointing people out at a wedding, with the “the one who…” forms from unit 19.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ትናንት ሠርግ ላይ ነበርኩ። | tinant serg lay nebberku. | Yesterday I was at a wedding. |  |  |
+| ብዙ ሰዎች መጥተው ነበር። | bizu sewoch met'tew nebber. | Lots of people had come. |  |  |
+| ነጭ ቀሚስ የለበሰችው ሴት ሙሽሪት ናት። | nech' qemis yelebbesechiw sét mushirit nat. | The woman wearing a white dress is the bride. |  |  |
+| ጥቁር ኮት የለበሰው ረጅም ሰው ሙሽራው ነው። | t'iqur kot yelebbesew rejjim sew mushiraw new. | The tall man wearing a black coat is the groom. |  |  |
+| መነጽር ያደረገው አጭር ሰው አባቷ ነው። | menets'ir yaderregew ach'ir sew abbatwa new. | The short man wearing glasses is her father. | መነጽር ያደረገ “wearing glasses”: check the verb (አደረገ or ለበሰ?). |  |
+| ሰማያዊ ቀሚስ የለበሰችው ሴት እናቷ ናት። | semayawi qemis yelebbesechiw sét innatwa nat. | The woman in the blue dress is her mother. |  |  |
+| እናቷ ለሙሽሪት ስጦታ ሰጠቻት። | innatwa lemushirit sit'ota set'echat. | Her mother gave the bride a present. |  |  |
+| ስጦታው ምንድን ነው? ቀይ ጀበና ነበር! | sit'otaw mindin new? qey jebena nebber! | What's the present? It was a red coffee pot! |  |  |
+| እኔ የገዛሁት ስጦታም ጀበና ነው! | iné yegezzahut sit'otam jebena new! | The present I bought is a coffee pot too! |  |  |
+
+### The car broke down (መኪናው ተበላሸ), after unit 21
+
+A trip to Hawassa doesn't go to plan.
+
+| Amharic | Transcription | English | Why it's flagged | OK? / correction |
+|---|---|---|---|---|---|
+| ቅዳሜ ወደ ሀዋሳ ሄድን። | qidamé wede hawassa hédin. | On Saturday we went to Hawassa. |  |  |
+| መንገድ ላይ መኪናችን ተበላሸ። | menged lay mekinachin tebelashe. | On the way our car broke down. |  |  |
+| አባቴ መኪናውን መንገዱ ዳር አቆመው። | abbaté mekinawn mengedu dar aqomew. | My father stopped the car at the side of the road. |  |  |
+| አንድ ሹፌር ቆሞ ረዳን። | and shufér qomo reddan. | A driver stopped and helped us. |  |  |
+| ወደ ጋራዥ ወሰደን። | wede garazh wesseden. | He took us to a garage. |  |  |
+| ጋራዡ ትንሽ ነበር፤ ግን ሰውዬው ጎበዝ ነበር። | garazhu tinnish nebber; gin sewiyew gobez nebber. | The garage was small, but the man was very good at his job. |  |  |
+| ሚስቱ ቡና አፈላችልን። | mistu bunna afelachillin. | His wife made coffee for us. |  |  |
+| ከአንድ ሰዓት በኋላ መኪናው ተሠራ። | ke'and se'at behwala mekinaw teserra. | After an hour the car was mended. | ተሠራ for “was repaired”: check (or ተጠገነ?). |  |
+| ማታ ሀዋሳ ደረስን። | mata hawassa derresin. | In the evening we reached Hawassa. |  |  |
+
+## Culture notes
+
+The Amharic examples and phrases in the culture notes. Please check the spelling, the transcription and that the meaning given is right.
+
+### Greetings take time
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| እርስዎ | irswo | (in the text) |  |
+| አንተ | ante | (in the text) |  |
+| አንቺ | anchi | (in the text) |  |
+| ጤና ይስጥልኝ | t'éna yist'illign | hello (polite) |  |
+| እንደምን አደሩ? | indemin aderu? | good morning (to someone older: “how did you spend the night?”) |  |
+| ቤተሰብ ደህና ነው? | béteseb dehna new? | is the family well? |  |
+| ሥራ እንዴት ነው? | sira indét new? | how is work? |  |
+| እግዚአብሔር ይመስገን | igziabhér yimesgen | thank God (the usual answer) |  |
+
+### Names and titles
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| አቶ አበበ | ato abebe | (in the text) |  |
+| አቶ | ato | (in the text) |  |
+| ወይዘሮ | weyzero | (in the text) |  |
+| ወይዘሪት | weyzerit | (in the text) |  |
+| አበበ | abebe | (in the text) |  |
+| ፍቅር | fikir | (in the text) |  |
+| ሰላም | selam | (in the text) |  |
+| አልማዝ | almaz | (in the text) |  |
+| አቶ | ato | Mr |  |
+| ወይዘሮ | weyzero | Mrs |  |
+| ወይዘሪት | weyzerit | Miss |  |
+| ስምህ ምን ማለት ነው? | simih min malet new? | what does your name mean? (to a man) |  |
+| ስምሽ ምን ማለት ነው? | simish min malet new? | what does your name mean? (to a woman) |  |
+
+### The coffee ceremony
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ጀበና | jebena | (in the text) |  |
+| ስኒ | sini | (in the text) |  |
+| ዕጣን | it'an | (in the text) |  |
+| ፈንዲሻ | fendisha | (in the text) |  |
+| ቆሎ | qolo | (in the text) |  |
+| አቦል | abol | (in the text) |  |
+| ቶና | tona | (in the text) |  |
+| በረካ | bereka | (in the text) |  |
+| ቡና ጠጡ | bunna t'et'u | have some coffee (an invitation, to a group) |  |
+| በጣም ጣፋጭ ነው | bet'am t'afach' new | it's very good |  |
+| ይበቃኛል | yibeqagnal | that's enough for me |  |
+| አመሰግናለሁ | ameseginallehu | thank you |  |
+
+### Eating together
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| እንጀራ | injera | (in the text) |  |
+| ወጥ | wet' | (in the text) |  |
+| ጉርሻ | gursha | (in the text) |  |
+| ብላ | bila | (in the text) |  |
+| ብዪ | biyi | (in the text) |  |
+| ብሉ | bilu | (in the text) |  |
+| የጾም ምግብ | yets'om migib | (in the text) |  |
+| ሽሮ | shiro | (in the text) |  |
+| ምስር ወጥ | misir wet' | (in the text) |  |
+| ብላ | bila | eat! (to a man) |  |
+| ብዪ | biyi | eat! (to a woman) |  |
+| ጠግቤአለሁ | t'egbéallehu | I'm full |  |
+| በቃኝ | beqagn | that's enough for me |  |
+
+### Ethiopian time
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| አንድ ሰዓት | and se'at | (in the text) |  |
+| ስድስት ሰዓት | siddist se'at | (in the text) |  |
+| በፈረንጅ | beferenj | (in the text) |  |
+| ስንት ሰዓት ነው? | sint se'at new? | what time is it? |  |
+| ከጠዋቱ ሦስት ሰዓት | ket'ewatu sost se'at | 3 o'clock in the morning (9 a.m.) |  |
+| ከቀኑ ሰባት ሰዓት | keqenu sebat se'at | 7 o'clock in the day (1 p.m.) |  |
+| ከምሽቱ ሁለት ሰዓት | kemishitu hulet se'at | 2 o'clock in the evening (8 p.m.) |  |
+
+### The Ethiopian calendar
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ጳጉሜ | p'agumé | (in the text) |  |
+| እንቁጣጣሽ | inqut'at'ash | (in the text) |  |
+| አደይ አበባ | adey abeba | (in the text) |  |
+| መልካም አዲስ ዓመት | melkam addis amet | happy new year |  |
+| መስከረም | meskerem | Meskerem, the first month |  |
+| ጳጉሜ | p'agumé | Pagume, the thirteenth month |  |
+| ዛሬ ስንት ነው? | zaré sint new? | what's the date today? |  |
+
+### Holidays and holiday greetings
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| መስቀል | meskel | (in the text) |  |
+| ደመራ | demera | (in the text) |  |
+| ገና | genna | (in the text) |  |
+| ጥምቀት | t'imqet | (in the text) |  |
+| ፋሲካ | fasika | (in the text) |  |
+| ኢድ አልፈጥር | id alfet'ir | (in the text) |  |
+| አረፋ | arefa | (in the text) |  |
+| እንኳን አደረሰህ | inkwan aderreseh | (in the text) |  |
+| እንኳን አደረሰሽ | inkwan aderresesh | (in the text) |  |
+| እንኳን አደረሳችሁ | inkwan aderresachihu | (in the text) |  |
+| እንኳን አብሮ አደረሰን | inkwan abro aderresen | (in the text) |  |
+| መልካም በዓል | melkam beal | happy holiday |  |
+| እንኳን አደረሰህ | inkwan aderreseh | happy holiday (to a man) |  |
+| እንኳን አደረሰሽ | inkwan aderresesh | happy holiday (to a woman) |  |
+| እንኳን አደረሳችሁ | inkwan aderresachihu | happy holiday (to a group) |  |
+| እንኳን አብሮ አደረሰን | inkwan abro aderresen | and to you (the answer) |  |
+
+### Bargaining at the market
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| መርካቶ | merkato | (in the text) |  |
+| ብር | birr | (in the text) |  |
+| ሳንቲም | santim | (in the text) |  |
+| ስንት ነው? | sint new? | how much is it? |  |
+| ዋጋው ስንት ነው? | wagaw sint new? | what's the price? |  |
+| ውድ ነው | wid new | it's expensive |  |
+| ቀንሱልኝ | qenisullign | lower the price for me |  |
+| የመጨረሻ ዋጋ ስንት ነው? | yemech'ersha waga sint new? | what's your last price? |  |
+
+### Minibus taxis
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ወያላ | weyala | (in the text) |  |
+| ወራጅ አለ! | werraj alle! | (in the text) |  |
+| ባጃጅ | bajaj | (in the text) |  |
+| መናኸሪያ | menahariya | (in the text) |  |
+| ወራጅ አለ | werraj alle | someone's getting off (please stop) |  |
+| ወዴት ነው? | wedét new? | where is it going? |  |
+| እዚህ አቁም | izzih aqum | stop here (to a man) |  |
+| ሂሳብ ስንት ነው? | hisab sint new? | how much is the fare? |  |
+
+### When someone is ill
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| እግዚአብሔር ይማርህ | igziabhér yimarih | (in the text) |  |
+| እግዚአብሔር ይማርሽ | igziabhér yimarish | (in the text) |  |
+| ለቅሶ | leqso | (in the text) |  |
+| እድር | idir | (in the text) |  |
+| እግዚአብሔር ይማርህ | igziabhér yimarih | get well (to a man: “may God heal you”) |  |
+| እግዚአብሔር ይማርሽ | igziabhér yimarish | get well (to a woman) |  |
+| ቶሎ ይሻልህ | tolo yishalih | get better soon (to a man) |  |
+| ምን ሆንክ? | min honk? | what's wrong? what happened to you? (to a man) |  |
+
+### Proverbs
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ምሳሌ | misalé | (in the text) |  |
+| ቀስ በቀስ እንቁላል በእግሩ ይሄዳል | qess beqess inqulal be'igru yihédal | slowly, slowly, an egg will walk on its own legs (be patient) |  |
+| ድር ቢያብር አንበሳ ያስር | dir biyabir anbessa yasir | when spider webs join together, they can tie up a lion (unity is strength) |  |
+| ሲሮጡ የታጠቁት ሲሮጡ ይፈታል | sirot'u yetat'equt sirot'u yifetal | what you tie on while running comes undone while running (more haste, less speed) |  |
+| ያልጠረጠረ ተመነጠረ | yalt'eret'ere temenet'ere | whoever didn't suspect got plucked (be careful) |  |
+| የማያውቁት አገር አይናፍቅም | yemayawqut ager aynafqim | you don't miss a country you have never known |  |
+
 ## Everyday drills: time, money and dates
 
 The Test tab's “Everyday Amharic” drills build whole phrases from these pieces (for example part of the day + hour + ተኩል). Please check the pieces and the patterns.
