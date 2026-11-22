@@ -216,9 +216,11 @@ function applyData(d){
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
   S.srs=d.srs?srsClean(d.srs):srsMigrate(d);   // spaced repetition (srs.js); profiles from before it get a starting point
   S.gm=gmClean(d.games); gmStop();
+  // colour scheme (schemes.js): this profile's own choice, or else the one last picked on this device
+  S.schemePicked=schemeOk(d.scheme); S.scheme=S.schemePicked?d.scheme:schemeDevice.get();
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,games:S.gm});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,games:S.gm,...(S.schemePicked?{scheme:S.scheme}:{})});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -806,6 +808,7 @@ async function readIncoming(text){
 /* ---------- render + events ---------- */
 const MODES=["course","fidel","num","ref","test","prog"];
 function render(){
+  schemeApply(S.scheme);
   document.body.classList.toggle("norom",!S.rom);
   document.body.classList.toggle("welcoming",S.mode==="welcome");
   // quizzes, typing practice and dialogues keep a reading width on a wide screen (see "laptop and desktop" in style.css)
@@ -874,6 +877,8 @@ document.addEventListener("click",e=>{
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
   else if(a==="mode"){S.mode=v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
   else if(a==="wl-start"){S.mode=wlStart();top=true;}
+  else if(a==="scheme"){S.scheme=v; S.schemePicked=true; schemeDevice.set(v); if(PROF.cur()) save();}
+  else if(a==="scheme-jump"){const el=$("#colours"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return;}
   else if(a==="pf-use"){useProfile(v); if(S.mode==="who")S.mode="course"; top=S.mode!=="me";}
   else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}
   else if(a==="pf-ren"){S.pf.ren=PROF.cur().name;S.pf.del=false;}
