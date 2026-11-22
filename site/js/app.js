@@ -568,18 +568,32 @@ function startQuiz(id){
   S.quiz={id,qs,n:qs.length,i:0,score:0,picked:null,typed:"",built:[],result:null,misses:[],done:false,slot:null};
   S.kb.cons=null;
 }
+/* The Test tab: an overview (today's session, mistakes, review, then a card for each kind of test),
+   and one page per kind. The sections are also listed across the top, so you can jump between them. */
+const noH3 = h => h.replace(/^\s*<h3[^>]*>.*?<\/h3>/, "");
+const TSECS = [
+  ["listen","🎧","Listening","Hear Amharic and pick the meaning, choose what you heard, type it, or name a letter.",()=>LS_TESTS.length,()=>noH3(lsMenu())],
+  ["fidel","<span class=\"am nosay\">ፊ</span>","Fidel","Read and type the letters of the alphabet, then whole words.",()=>3,()=>tStack(["fid-rec","fid-type","fid-words"])],
+  ["units","📘","Units","A test for each course unit, the review units, and one across the whole course.",()=>LESSONS.length+1,()=>tStack(LESSONS.map(l=>(l.review?"R":"L")+l.n).concat("Lall"))],
+  ["num","🔢","Numbers","Number words and the Amharic numerals, both ways round.",()=>NTESTS.length,()=>tStack(NTESTS)],
+  ["sent","🧩","Sentences","Put the words of a sentence in order, or pick what a sentence means.",()=>2,()=>tStack(["sent-order","sent-mean"])],
+  ["dlg","💬","Dialogues","Hear one side of a short conversation and answer as the other person.",()=>DIALOGUES.length,()=>noH3(dgMenu())],
+  ["build","🛠️","Sentence builder","Build a sentence one word at a time, from choices that change as you go.",()=>2,()=>tStack(["build-verbs","build-course"])+bsHTML()],
+  ["general","📋","General practice","Pronouns, verbs, verb forms, extra words, and everything mixed.",()=>5,()=>tStack(["pronouns","verbs","verbs-type","extra","mixed"])]
+];
+const tItem=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
+const tStack=ids=>`<div class="stack">${ids.map(tItem).join("")}</div>`;
 function testMenu(){
-  const item=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
-  let h=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
+  const sec=TSECS.find(x=>x[0]===S.tsec);
+  let h=chips("tsec",[["all","Overview"]].concat(TSECS.map(x=>[x[0],x[2]])),sec?sec[0]:"all").replace('class="chips"','class="chips tsecs"');
+  if(sec){
+    return h+`<div class="tsechead"><h2>${sec[2]}</h2><p class="lead">${esc(sec[3])}</p></div>`+sec[5]()+
+      `<button class="back" data-act="tsec" data-v="all">‹ All kinds of test</button>`;
+  }
+  h+=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${dailyCard()}
    <div class="stack" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
-   ${lsMenu()}
-   <h3>Fidel</h3><div class="stack">${["fid-rec","fid-type","fid-words"].map(item).join("")}</div>
-   <h3>Units</h3><div class="stack">${LESSONS.map(l=>item((l.review?"R":"L")+l.n)).join("")}${item("Lall")}</div>
-   <h3>Numbers</h3><div class="stack">${NTESTS.map(item).join("")}</div>
-   <h3>Sentences</h3><div class="stack">${["sent-order","sent-mean"].map(item).join("")}</div>
-   ${dgMenu()}
-   <h3>Sentence builder</h3><div class="stack">${["build-verbs","build-course"].map(item).join("")}</div>${bsHTML()}
-   <h3>General practice</h3><div class="stack">${["pronouns","verbs","verbs-type","extra","mixed"].map(item).join("")}</div>`;
+   <h3>Choose a kind of test</h3>
+   <div class="tgrid">${TSECS.map(([id,icon,name,desc,n])=>`<button class="tcard" data-act="tsec" data-v="${id}"><span class="ticon" aria-hidden="true">${icon}</span><b>${name}</b><small>${esc(desc)}</small><span class="tn">${plural(n(),"test")} ›</span></button>`).join("")}</div>`;
   return h;
 }
 function dueButton(){
@@ -846,6 +860,7 @@ document.addEventListener("click",e=>{
   else if(a==="ls-hint"&&Q){Q.hint=Q.i;}
   else if(a==="ls-what"){S.ls.what=v;save();}
   else if(a==="bs-open"){S.bsOpen=!S.bsOpen;}
+  else if(a==="tsec"){S.tsec=v==="all"?null:v;top=true;}
   else if(a==="bs-mode"){S.bs.mode=v;bsChanged();}
   else if(a==="bs-n"){S.bs.n=+v;bsChanged();}
   else if(a==="bs-tense"){const T0=S.bs.tenses,k=T0.indexOf(v); if(k>=0){if(T0.length>1)T0.splice(k,1);} else T0.push(v); bsChanged();}

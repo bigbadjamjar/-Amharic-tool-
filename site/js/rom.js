@@ -88,7 +88,7 @@ function romOf(s){
 // Left alone: the fidel chart, keyboards and typing boxes (the letters are what you practise), quiz
 // questions and answer choices (their transcription appears once you answer), number symbols, and
 // anything inside .norom-auto.
-const ROM_SKIP = ".chart,.keys,.forms,.kbd,.tin,input,textarea,select,.rom,.say,.sbtns,.q,.opt,.tiles,.tile,.built,.slots,.peek,.wlicon,.ncard .sym,.norom-auto,header";
+const ROM_SKIP = ".chart,.keys,.forms,.kbd,.tin,input,textarea,select,.rom,.say,.sbtns,.q,.opt,.tiles,.tile,.built,.slots,.peek,.wlicon,.ticon,.ncard .sym,.norom-auto,header";
 function romHasNext(el){
   let n = el.nextSibling;
   while (n && ((n.nodeType === 3 && !n.nodeValue.trim()) || (n.nodeType === 1 && n.matches(".say,.sbtns,.mic,br")))) n = n.nextSibling;
