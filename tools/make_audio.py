@@ -3,7 +3,7 @@
 
     pip install edge-tts
     python3 tools/make_audio.py                 # every word and sentence that has no clip yet
-    python3 tools/make_audio.py --voice male    # use the male voice (am-ET-AmehaNeural)
+    python3 tools/make_audio.py --male-copies   # also a male-voice copy of everything, in clips/m/
     python3 tools/make_audio.py --list          # only show what would be made
     python3 tools/make_audio.py --course-only   # just the course words and sentences
     python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
@@ -11,8 +11,10 @@
     python3 tools/make_audio.py --from words.txt   # one phrase per line
 
 Clips are saved to site/audio/clips/<the Amharic>.mp3 and the manifest is rebuilt.
-Dialogue lines (site/js/data/dialogues.js) come with the course: lines spoken by a woman use the
-voice chosen for the run, and lines spoken by a man always use the male voice and go in clips/m/.
+Both Amharic voices are used in every run, so there is nothing to choose:
+  - clips/      the female voice (Mekdes): all words, sentences, letters, and the women's dialogue lines
+  - clips/m/    the male voice (Ameha): the men's dialogue lines (site/js/data/dialogues.js)
+With --male-copies, every phrase also gets a male-voice copy in clips/m/ (for a voice switch later).
 Clips this script made are listed in site/audio/generated.json with the exact text spoken.
 If that text changes in the app (say, a comma is added), the clip is remade. Clips you made
 yourself (for example on ttsfree.com) are not in that list and are never replaced, unless you
@@ -144,7 +146,7 @@ async def make(text: str, voice: str, rate: str, male: bool = False) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--voice", default="female", help="female, male, or a full edge-tts voice name")
+    ap.add_argument("--male-copies", action="store_true", help="also make a male-voice copy of every phrase in clips/m/")
     ap.add_argument("--rate", default="-10%", help="speaking speed, e.g. -20%% for slower (default -10%%)")
     ap.add_argument("--only", nargs="+", help="make just these phrases")
     ap.add_argument("--from", dest="src", help="text file with one phrase per line")
@@ -167,6 +169,8 @@ def main() -> None:
         dl = dialogue_lines()
         wanted = phrases_from_data(a.course_only) + [t for t, g in dl if g == "f"] + ([] if a.course_only else fidel_letters())
         male = [t for t, g in dl if g == "m"]
+    if a.male_copies:
+        male = male + list(wanted)
 
     # Male clips are tracked under "m/<key>" in generated.json.
     have = existing_clips()
@@ -203,13 +207,12 @@ def main() -> None:
         print("\n".join(f"{t}   ->   {to_tts(t)}" + ("   (male voice)" if m else "") for t, m in todo))
         return
 
-    voice = VOICES.get(a.voice, a.voice)
     (CLIPS / MALE_DIR).mkdir(parents=True, exist_ok=True)
     failed = 0
     for i, (text, m) in enumerate(todo, 1):
         for attempt in (1, 2, 3):
             try:
-                asyncio.run(make(text, VOICES["male"] if m else voice, a.rate, m))
+                asyncio.run(make(text, VOICES["male" if m else "female"], a.rate, m))
                 made[(MALE_DIR + "/" if m else "") + normalize(text)] = to_tts(text)
                 print(f"[{i}/{len(todo)}] {to_tts(text)}")
                 break

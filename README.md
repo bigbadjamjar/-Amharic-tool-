@@ -55,13 +55,14 @@ GitHub website (Add file → Upload files). The deploy workflow rebuilds the cli
 To see it locally before pushing, run `python3 tools/audio_manifest.py`.
 
 **Making clips automatically on GitHub** (nothing to install): open the repo's **Actions** tab, pick
-**Make audio clips** on the left, press **Run workflow**, choose which words and which voice, and press the green
+**Make audio clips** on the left, press **Run workflow**, choose which words, and press the green
 **Run workflow** button. It takes from a few minutes to about an hour, saves the new clips into `site/audio/clips/` and
 republishes the site. Run it again any time new words are added; it only makes clips that are missing.
 
 **Dialogues** use two voices: lines spoken by a woman use the normal clips, and lines spoken by a man use clips in
-`site/audio/clips/m/` (same naming), made with the male voice. The **Make audio clips** workflow makes both when you
-choose “course words and sentences”. A man's line with no male clip falls back to the normal clip if there is one.
+`site/audio/clips/m/` (same naming), made with the male voice. There is no voice to pick: every run of
+**Make audio clips** uses the female voice (Mekdes) for the normal clips and the male voice (Ameha) for the men's lines,
+and “course words and sentences” or “everything” includes the dialogues. A man's line with no male clip falls back to the normal clip if there is one.
 
 **Making clips in bulk on your own computer** with the same free Microsoft Amharic voices:
 
@@ -70,8 +71,8 @@ pip install edge-tts
 python3 tools/make_audio.py --list          # see what's missing
 python3 tools/make_audio.py --course-only   # just the course words and sentences
 python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
-python3 tools/make_audio.py                 # make them all (female voice, Mekdes)
-python3 tools/make_audio.py --voice male    # Ameha instead
+python3 tools/make_audio.py                 # make them all (Mekdes, and Ameha for the men's dialogue lines)
+python3 tools/make_audio.py --male-copies   # also a male-voice copy of everything in clips/m/ (for a voice switch later)
 python3 tools/make_audio.py --only "ቡና" "ሻይ"
 ```
 
