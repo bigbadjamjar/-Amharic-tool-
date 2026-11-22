@@ -17,7 +17,7 @@ async def main():
     for r in rows:
         base = ord(r); letters = [chr(base+k) for k in range(7)]
         full = f"{OUT}/row-{r}.mp3"
-        await edge_tts.Communicate("፣ ".join(letters).replace("፣", ",") + ".", VOICE, rate="-25%").save(full)
+        await edge_tts.Communicate(". ".join(letters) + ".", VOICE, rate="-20%").save(full)
         st, en, dur = silences(full)
         # sound segments = gaps between silences
         segs, t = [], 0.0
