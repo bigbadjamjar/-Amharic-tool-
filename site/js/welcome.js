@@ -53,7 +53,7 @@ function renderWelcome(){
     <h3>How to start</h3>
     <ol class="wlsteps">
       <li><b>Type your name.</b> Your scores and mistakes are kept under it. If others share the device, they can add their own name.</li>
-      <li><b>Look at the letters.</b> Open <b>Fidel</b> at the top and tap a few letters to hear them. You don't need to learn them all before starting.</li>
+      <li><b>Look at the letters.</b> Open <b>Fidel &amp; numbers</b> at the top and tap a few letters to hear them. You don't need to learn them all before starting.</li>
       <li><b>Do Unit 1.</b> In <b>Course</b>, read the notes, listen to the words, try the dialogue, then take the unit test.</li>
       <li><b>Come back most days.</b> Today's session on the Course page mixes in what you've learned and anything you got wrong.</li>
     </ol>
