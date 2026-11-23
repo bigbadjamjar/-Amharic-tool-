@@ -7,7 +7,7 @@
    While it is null, nothing about accounts shows anywhere in the app and nothing is loaded or sent.
 
    The Firebase code is kept in js/firebase/ (copied from the "firebase" npm package, version 13.4.0)
-   and is only loaded once someone uses the account part, so the app is no slower for everyone else.
+   and is only loaded on the Profiles page or when signed in, so the app is no slower for everyone else.
 
    What is stored online (Cloud Firestore, one document per account, see firestore.rules):
      users/<account id>   {name: profile name, data: the profile's saved progress as JSON text, updated: time in ms, v: 1}
@@ -98,6 +98,8 @@ function clLoad(){
     CL.fb = {U, F, auth, db};
     CL.offline = false;
     U.onAuthStateChanged(auth, user => clAuthChanged(user));
+    // finishes a sign-in that went to Google's page and back, and gets Google's window ready so it opens instantly on a tap
+    U.getRedirectResult(auth).catch(e => { if (e && e.code && !/network|internal/.test(e.code)) { CL.err = clErrText(e); clRender(); } });
     return CL.fb;
   }).catch(e => { CL.loading = null; CL.offline = true; throw e; });
   return CL.loading;
@@ -130,15 +132,23 @@ async function clDo(busy, fn){
   CL.busy = ""; clRender();
 }
 function clGoogle(){
-  return clDo("Signing in…", async ({U, auth}) => {
-    const p = new U.GoogleAuthProvider(); p.setCustomParameters({prompt: "select_account"});
-    try { await U.signInWithPopup(auth, p); }
-    catch (e) {
-      // some phones (apps added to the home screen) can't open the Google window: go to Google's page and come back instead
-      if (e && /popup-blocked|operation-not-supported/.test(e.code)) { try { clStore.setItem(CL_REDIRECT, "1"); } catch (x) {} await U.signInWithRedirect(auth, p); }
-      else throw e;
-    }
-  });
+  // Browsers only allow the Google window if it opens straight from the tap, so Firebase must already be loaded
+  // (the Profiles page starts loading it when it shows the sign-in buttons).
+  if (!CL.fb) {
+    CL.busy = "Getting ready…"; clRender();
+    clLoad().then(() => { CL.busy = ""; CL.msg = "Ready. Tap Sign in with Google again."; clRender(); },
+      () => { CL.busy = ""; CL.err = "You're offline. Connect to the internet to sign in."; clRender(); });
+    return;
+  }
+  const {U, auth} = CL.fb;
+  const p = new U.GoogleAuthProvider(); p.setCustomParameters({prompt: "select_account"});
+  const popup = U.signInWithPopup(auth, p);   // started inside the tap
+  CL.busy = "Signing in…"; CL.err = ""; CL.msg = ""; clRender();
+  popup.catch(async e => {
+    // the Google window was blocked anyway (some phones, apps added to the home screen): go to Google's page and come back instead
+    if (e && /popup-blocked|operation-not-supported/.test(e.code)) { try { clStore.setItem(CL_REDIRECT, "1"); } catch (x) {} try { await U.signInWithRedirect(auth, p); return; } catch (x) { e = x; } }
+    CL.err = clErrText(e);
+  }).finally(() => { CL.busy = ""; clRender(); });
 }
 const clEmailBits = () => [CL.email.trim(), CL.pass];
 function clEmailGo(){
@@ -341,7 +351,8 @@ function cloudHTML(){
     h += `<div class="pfrow" style="margin-top:10px"><button class="btn" data-act="cl-out">Sign out</button></div>`;
     return h + status + foot + `</div>`;
   }
-  // signed out
+  // signed out: start loading Firebase now, so "Sign in with Google" can open Google's window straight from the tap
+  if (!CL.fb && !CL.loading && typeof navigator !== "undefined" && navigator.onLine !== false) clLoad().catch(() => {});
   h += `<p>Sign in to keep ${PROF.list().length > 1 ? "everyone's" : nm + (cur ? "'s" : "")} progress safe and carry on from any phone or computer. One account holds every profile on this device. You don't need an account to use the app.</p>`;
   if (CL.form) {
     const reset = CL.form === "reset", isNew = CL.form === "new";
