@@ -74,6 +74,7 @@ function renderWelcome(){
 
     <button class="btn primary wide wlgo" data-act="wl-start" style="margin-top:22px">${back ? "Continue learning" : "Start learning"}</button>
     <p class="count wllink">You can open this page again by tapping the app name at the top.</p>
+    <p class="count wllink"><a href="learn-amharic.html">Everything in the course, unit by unit</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></p>
     <p class="count wllink wlcopy">© 2026 Robert Sadler. All rights reserved.</p>`;
 }
 

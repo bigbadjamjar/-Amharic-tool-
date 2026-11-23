@@ -33,6 +33,10 @@ jobs:
       - name: Rebuild the audio list
         run: python3 tools/audio_manifest.py
 
+      # The written course overview and the sitemap that Google reads, rebuilt from the course data.
+      - name: Rebuild the pages for search engines
+        run: node tools/make_learn_page.mjs
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
