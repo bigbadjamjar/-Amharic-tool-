@@ -254,6 +254,7 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .ntry.pfrow .btn{flex:none;padding:12px 22px}
 .codebox{display:block;width:100%;margin:10px 0 8px;font:.78rem/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);resize:vertical;word-break:break-all}
 .clform input{display:block;width:100%;margin:0 0 8px;font:inherit;font-size:1rem;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.lead .link{padding:0;line-height:inherit;vertical-align:baseline;min-height:0}
 .gmark{font-weight:700;margin-right:4px}
 .filebtn{position:relative;cursor:pointer}
 .filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
