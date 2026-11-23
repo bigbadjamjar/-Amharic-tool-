@@ -34,12 +34,19 @@ async function device(on = true){
   page.on("pageerror", e => { bad++; console.log("PAGE ERROR " + e.message); });
   return { ctx, page };
 }
-// a device with one profile that already has some progress
-async function withProfile(page, name, data){
+// a device with some profiles (the first one in use): [[name, data], ...]
+async function withProfiles(page, list){
   await page.goto(BASE);
-  await page.evaluate(([name, data]) => { localStorage.setItem("amharic-profiles", JSON.stringify({ list: [{ id: "p1", name }], cur: "p1" })); localStorage.setItem("amharic-p:p1", JSON.stringify(data)); }, [name, data]);
+  await page.evaluate(list => { localStorage.setItem("amharic-profiles", JSON.stringify({ list: list.map((x, i) => ({ id: "p" + i + Math.random().toString(36).slice(2, 6), name: x[0] })), cur: null }));
+    const idx = JSON.parse(localStorage.getItem("amharic-profiles")); idx.cur = idx.list[0].id; localStorage.setItem("amharic-profiles", JSON.stringify(idx));
+    idx.list.forEach((p, i) => localStorage.setItem("amharic-p:" + p.id, JSON.stringify(list[i][1]))); }, list);
   await page.reload();
 }
+const withProfile = (page, name, data) => withProfiles(page, [[name, data]]);
+const byName = (page, name) => page.evaluate(name => { const idx = JSON.parse(localStorage.getItem("amharic-profiles")); const p = idx.list.find(p => p.name === name); return p ? JSON.parse(localStorage.getItem("amharic-p:" + p.id)) : null; }, name);
+const names = page => page.evaluate(() => JSON.parse(localStorage.getItem("amharic-profiles")).list.map(p => p.name).sort().join(","));
+const cloudProfiles = async uid => { const d = await cloudDoc(uid); return d ? JSON.parse(JSON.parse(JSON.stringify(d.fields.data.stringValue))).profiles : null; };
+const cp = (list, name) => list.find(e => e.name === name && !e.del);
 const profilesPage = async page => { await page.click("#whobtn"); await page.waitForSelector("#app h2:has-text('Profiles')"); };
 const local = page => page.evaluate(() => JSON.parse(localStorage.getItem("amharic-p:" + JSON.parse(localStorage.getItem("amharic-profiles")).cur)));
 const cloudDoc = async uid => { const r = await fetch(`${FS}/users/${uid}`, { headers: { Authorization: "Bearer owner" } }); return r.ok ? r.json() : null; };
@@ -62,44 +69,54 @@ async function emailSignIn(page, create){
   await ctx.close();
 }
 
-// --- device A: make an account; its progress goes up
+// --- device A: Rob and Sara; make an account; both go up
 const A = await device();
-await withProfile(A.page, "Rob", { rom: false, best: { u1: 8, u2: 5 }, srs: { v: 1, it: { "w:ሰላም": [3, 99999, 5, 0, 20000] }, act: { 20000: 6 } } });
+await withProfiles(A.page, [["Rob", { rom: false, best: { u1: 8, u2: 5 }, srs: { v: 1, it: { "w:ሰላም": [3, 99999, 5, 0, 20000] }, act: { 20000: 6 } } }], ["Sara", { best: { u4: 7 } }]]);
 ok(!(await A.page.evaluate(() => performance.getEntriesByType("resource").some(e => /firebase/.test(e.name)))), "signed out: Firebase not loaded at start");
 await profilesPage(A.page);
 ok(await A.page.locator("#account").count(), "account section shows when switched on");
 await shot(A.page, "1-signed-out");
 await emailSignIn(A.page, true);
-await A.page.waitForSelector("text=Rob's progress is now saved to your account");
+await A.page.waitForSelector("text=Rob and Sara's progress is now saved to your account");
 await shot(A.page, "3-signed-in");
 const uid = await uidOf(A.page);
-let d = await cloudDoc(uid);
-ok(d && JSON.parse(d.fields.data.stringValue).best.u1 === 8 && d.fields.name.stringValue === "Rob", "A's progress is in the account");
+let c = await cloudProfiles(uid);
+ok(c && cp(c, "Rob")?.data.best.u1 === 8 && cp(c, "Sara")?.data.best.u4 === 7, "both of A's profiles are in the account");
 
-// --- device B: different progress, same account: combine
+// --- device B: Rob (other progress) and an empty "Learner": Rob combines, Sara arrives, Learner goes
 const B = await device();
-await withProfile(B.page, "Robert", { rom: true, best: { u1: 6, u3: 9 }, srs: { v: 1, it: { "l:ሀ": [1, 99999, 1, 0, 20001] }, act: { 20001: 3 } } });
+await withProfiles(B.page, [["Learner", {}], ["rob", { rom: true, best: { u1: 6, u3: 9 }, srs: { v: 1, it: { "l:ሀ": [1, 99999, 1, 0, 20001] }, act: { 20001: 3 } } }]]);
 await profilesPage(B.page);
 await emailSignIn(B.page, false);
-await B.page.waitForSelector("[data-act=cl-merge]");
-ok(await B.page.locator("text=Your account already has progress").count(), "B is asked what to do with the account's progress");
-await shot(B.page, "4-second-device-choice");
-await B.page.click("[data-act=cl-merge]");
-await B.page.waitForSelector("text=are combined");
-let b = await local(B.page);
-ok(b.best.u1 === 8 && b.best.u3 === 9 && b.best.u2 === 5, "B now has both devices' best scores: " + JSON.stringify(b.best));
-ok(b.srs.it["w:ሰላም"] && b.srs.it["l:ሀ"], "B has both devices' words");
-d = await cloudDoc(uid); const c = JSON.parse(d.fields.data.stringValue);
-ok(c.best.u3 === 9 && c.srs.it["l:ሀ"], "the account has the combined progress");
+await B.page.waitForSelector("text=Added from your account: Sara");
+await shot(B.page, "4-second-device");
+ok(await names(B.page) === "Rob,Sara" || await names(B.page) === "Sara,rob", "B now has Rob and Sara, and the empty Learner is gone: " + await names(B.page));
+let b = await byName(B.page, "Rob") || await byName(B.page, "rob");
+ok(b.best.u1 === 8 && b.best.u3 === 9 && b.best.u2 === 5, "B's Rob has both devices' best scores: " + JSON.stringify(b.best));
+ok(b.srs.it["w:ሰላም"] && b.srs.it["l:ሀ"], "B's Rob has both devices' words");
+ok((await byName(B.page, "Sara")).best.u4 === 7, "Sara's progress came to B");
+c = await cloudProfiles(uid);
+ok(c.filter(e => !e.del).length === 2 && (cp(c, "Rob") || cp(c, "rob")).data.best.u3 === 9, "the account has two profiles, Rob combined");
 
-// --- a change on B reaches A
-await B.page.click("#romtoggle");   // a setting change, saved, then sent 5 seconds later
+// --- changes on B reach A: a setting, and a new profile
+await B.page.click("#romtoggle");
+await B.page.fill("#pf-add", "Tom"); await B.page.click("[data-act=pf-add]");
 await B.page.waitForTimeout(6500);
-const bRom = (await local(B.page)).rom;
-d = await cloudDoc(uid);
-ok(JSON.parse(d.fields.data.stringValue).rom === bRom, "B's change was sent to the account");
-await A.page.click("[data-act=cl-sync]"); await A.page.waitForSelector("text=Synced.");
-ok((await local(A.page)).rom === bRom && (await local(A.page)).best.u3 === 9, "A picked up B's change and progress");
+c = await cloudProfiles(uid);
+ok(cp(c, "Tom"), "B's new profile Tom went up");
+await A.page.click("#whobtn"); await A.page.click("[data-act=cl-sync]"); await A.page.waitForSelector("text=Synced.");
+ok(await names(A.page) === "Rob,Sara,Tom", "A has Tom now: " + await names(A.page));
+const bRob = await byName(B.page, "Rob") || await byName(B.page, "rob");
+ok((await byName(A.page, "Rob")).rom === bRob.rom && (await byName(A.page, "Rob")).best.u3 === 9, "A's Rob picked up B's change and progress");
+
+// --- deleting Tom on A removes him everywhere
+await A.page.click("[data-act=pf-use] >> text=Tom"); await A.page.click("[data-act=pf-del]");
+ok(await A.page.locator("text=from this device and from your account").count(), "delete warns it's from the account too");
+await A.page.click("[data-act=pf-del-ok]");
+await A.page.waitForTimeout(2500);
+ok(!cp(await cloudProfiles(uid), "Tom"), "Tom is gone from the account");
+await B.page.click("#whobtn"); await B.page.click("[data-act=cl-sync]"); await B.page.waitForSelector("text=Synced.");
+ok(!(await names(B.page)).includes("Tom"), "Tom is gone from B: " + await names(B.page));
 
 // --- A offline: the app still opens and works, and changes go up once back online
 await A.page.waitForTimeout(1500);   // let the service worker finish saving the app
@@ -110,20 +127,20 @@ await A.page.evaluate(() => { const p = JSON.parse(localStorage.getItem("amharic
 await profilesPage(A.page);
 await A.page.waitForSelector("#account");
 ok(await A.page.locator("#account + .note >> text=Signed in as").count(), "Profiles page shows signed in while offline");
+await A.page.click("[data-act=pf-use] >> text=Rob");
 await A.page.click("#romtoggle");   // change while offline
-const aRom = (await local(A.page)).rom;
+const aRom = (await byName(A.page, "Rob")).rom;
 await A.page.waitForTimeout(6000);
 await A.ctx.setOffline(false);
 await A.page.evaluate(() => window.dispatchEvent(new Event("online")));
 await A.page.waitForTimeout(3000);
-d = await cloudDoc(uid);
-ok(JSON.parse(d.fields.data.stringValue).rom === aRom, "the offline change was sent once back online");
+ok(cp(await cloudProfiles(uid), "Rob").data.rom === aRom, "the offline change was sent once back online");
 
 // --- B: delete the account
 await B.page.click("[data-act=cl-del]"); await B.page.click("[data-act=cl-del-ok]");
 await B.page.waitForSelector("text=Your account and the progress saved in it are deleted");
 ok(!(await cloudDoc(uid)), "the account's document is gone");
-ok((await local(B.page)).best.u3 === 9, "progress on B's device is still there");
+ok((await byName(B.page, "Sara")).best.u4 === 7, "progress on B's device is still there");
 const users = await (await fetch("http://127.0.0.1:9099/emulator/v1/projects/demo-amharic/accounts", { method: "DELETE" })).ok;
 
 await browser.close(); server.close();

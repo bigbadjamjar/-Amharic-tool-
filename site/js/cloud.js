@@ -78,9 +78,9 @@ const CL = {
   msg: "", err: "",
   form: "",          // "", "email" (sign in), "new" (create account), "reset" (forgot password)
   email: "", pass: "",
-  ask: null,         // {name, data, t}: the account already has progress and this profile has some too
   del: false,        // showing "delete my account?"
   offline: false,
+  snap: {},          // each profile's data as last saved or synced, so saving with nothing changed doesn't count as a change
   timer: null
 };
 
@@ -148,9 +148,9 @@ function clEmailGo(){
   return clDo("Signing in…", async ({U, auth}) => { await U.signInWithEmailAndPassword(auth, em, pw); });
 }
 async function clSignOut(){
-  clPut(null); CL.link = null; CL.ask = null; CL.del = false; CL.form = "";
+  clearTimeout(CL.timer); clPut(null); CL.link = null; CL.del = false; CL.form = "";
   if (CL.fb) { try { await CL.fb.U.signOut(CL.fb.auth); } catch (e) {} }
-  CL.user = null; CL.msg = "Signed out. Progress stays on this device."; clRender();
+  CL.user = null; CL.msg = "Signed out. Everyone's progress stays on this device."; clRender();
 }
 async function clDelete(){
   const user = CL.user; if (!user) return;
@@ -165,100 +165,154 @@ async function clDelete(){
   });
 }
 
-/* ---------- linking a profile and keeping it in step ---------- */
+/* ---------- keeping every profile in step with the account ----------
+   The account holds all the profiles from every device where it was used:
+     users/<uid>.data = JSON {profiles: [{id, name, t, data} or {id, del: true, t}]}   (v: 2)
+   Accounts saved by the first version (v: 1) held one profile; it is read as a profile with id "first".
+   This device remembers which of its profiles is which one in the account (link.map: local id -> account id),
+   when each profile last changed here (link.lts), and profiles deleted here that the account should forget (link.gone). */
 const clDocRef = uid => CL.fb.F.doc(CL.fb.db, "users", uid);
 async function clRead(uid){
   const snap = await CL.fb.F.getDoc(clDocRef(uid));
   if (!snap.exists()) return null;
-  const x = snap.data(); let data = {};
-  try { data = JSON.parse(x.data || "{}"); } catch (e) {}
-  return {name: String(x.name || ""), data, t: +x.updated || 0};
+  const x = snap.data(); let d = {};
+  try { d = JSON.parse(x.data || "{}"); } catch (e) {}
+  const t = +x.updated || 0;
+  if ((+x.v || 1) < 2) return {t, profiles: [{id: "first", name: String(x.name || "Me"), t, data: d}]};
+  return {t, profiles: Array.isArray(d.profiles) ? d.profiles.filter(e => e && typeof e.id === "string") : []};
 }
-async function clWrite(uid, name, data){
-  const t = Date.now();
-  await CL.fb.F.setDoc(clDocRef(uid), {name: String(name || "Learner").slice(0, 40), data: JSON.stringify(data), updated: t, v: CL_V});
+async function clWrite(uid, profiles){
+  const t = Date.now(), live = profiles.filter(e => !e.del);
+  await CL.fb.F.setDoc(clDocRef(uid), {name: String(live.map(e => e.name).join(", ") || "Learner").slice(0, 40), data: JSON.stringify({profiles}), updated: t, v: 2});
   return t;
 }
 const clLinked = () => CL.link && CL.user && CL.link.uid === CL.user.uid ? CL.link : null;
-const clProfile = () => { const l = clLinked(); return l ? PROF.list().find(p => p.id === l.pid) || null : null; };
-const clIsCur = () => { const l = clLinked(), c = PROF.cur(); return !!(l && c && c.id === l.pid); };
-const clLocal = () => clIsCur() ? profileData() : PROF.load(CL.link.pid);
+const cloudSignedIn = () => !!clLinked();
+const clNorm = L => {   // fill in a link record, including one saved by the first version ({pid, lt})
+  L.map = L.map || {}; L.lts = L.lts || {}; L.gone = L.gone || {};
+  if (L.pid) { L.map[L.pid] = "first"; L.lts[L.pid] = L.lt || 0; delete L.pid; delete L.lt; delete L.ct; }
+  return L;
+};
+if (CL.link) clNorm(CL.link);
 // Can the account's progress be put into what's on screen without disturbing anything?
 const clSafe = () => !S.quiz && !(typeof G !== "undefined" && G) && !(S.mode === "fidel" && S.ftab === "type");
 function clApply(data){
   const keepLesson = S.lesson, keepView = S.lview;
   applyData(data); S.lesson = keepLesson; S.lview = keepView;
 }
+const clSame = (a, b) => (a || "").trim().toLowerCase() === (b || "").trim().toLowerCase();
 
 async function clAuthChanged(user){
   CL.user = user || null;
   try { clStore.removeItem(CL_REDIRECT); } catch (e) {}
   if (!user) { if (CL.link) { CL.link = null; clPut(null); } clRender(); return; }
-  if (CL.link && CL.link.uid !== user.uid) { CL.link = null; clPut(null); }   // a different account than last time
-  if (CL.link && !PROF.list().some(p => p.id === CL.link.pid)) { CL.link = null; clPut(null); }   // that profile was deleted here
   CL.form = ""; CL.pass = "";
-  if (CL.link) { await clSync(true); return; }
-  // just signed in on this device: link the profile in use
+  if (CL.link && CL.link.uid === user.uid) { await clSync(true); return; }
+  // just signed in on this device
+  CL.link = clNorm({uid: user.uid, email: user.email || "", at: 0}); clPut(CL.link);
   CL.busy = "Getting your progress…"; clRender();
-  try {
-    const cloud = await clRead(user.uid);
-    if (!PROF.cur()) { PROF.add(cloud && cloud.name || (user.displayName || "").split(" ")[0] || "Learner", cloud ? cloud.data : {}); applyData(PROF.load()); }
-    const cur = PROF.cur();
-    if (!cloud) { save(); await clLinkTo(cur.id, null); CL.msg = `Signed in. ${cur.name}'s progress is now saved to your account.`; }
-    else if (!clHasProgress(profileData())) { await clLinkTo(cur.id, cloud, true); CL.msg = `Signed in. Your progress from your account is now in ${cur.name}.`; }
-    else CL.ask = cloud;   // both have progress: ask (see cloudHTML)
-  } catch (e) { CL.err = "Signed in, but couldn't reach your saved progress. " + clErrText(e); }
-  CL.busy = ""; clRender();
-  if (typeof render === "function" && S.mode !== "me" && S.mode !== "who") render();
+  keep();
+  const r = await clSync(true, true);
+  CL.busy = "";
+  if (r && !CL.err) {
+    const names = PROF.list().map(p => p.name);
+    CL.msg = "Signed in. " + (names.length ? clList(names) + (names.length > 1 ? "'s progress is" : "'s progress is") + " now saved to your account." : "");
+    if (r.added.length) CL.msg += " Added from your account: " + clList(r.added) + ".";
+  }
+  if (typeof render === "function") render();
 }
-// Link profile pid to the signed-in account and bring the two copies together.
-async function clLinkTo(pid, cloud, replace){
-  CL.link = {uid: CL.user.uid, email: CL.user.email || "", pid, lt: Date.now(), ct: 0, at: 0}; clPut(CL.link);
-  if (cloud && replace) { CL.link.lt = 0; }   // this profile had nothing yet: the account's copy wins on settings too
-  await clSync(true, cloud);
-}
-async function clChoose(how){
-  const cloud = CL.ask; if (!cloud) return;
-  CL.ask = null; CL.busy = "Saving…"; clRender();
-  try {
-    if (how === "new") { keep(); PROF.add(cloud.name || "Me", cloud.data); applyData(PROF.load()); await clLinkTo(PROF.cur().id, cloud, true); CL.msg = `Signed in. ${PROF.cur().name} is added with the progress from your account.`; }
-    else { save(); await clLinkTo(PROF.cur().id, cloud); CL.msg = `Signed in. ${PROF.cur().name}'s progress here and in your account are combined.`; }
-  } catch (e) { CL.err = clErrText(e); }
-  CL.busy = ""; if (typeof render === "function") render();
-}
+const clList = a => a.length < 2 ? (a[0] || "") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
 
 let clSyncing = null;
-/* Bring this device and the account into step. apply: also put changes from the account into what's on screen (when safe). */
-async function clSync(apply, cloudKnown){
+/* Bring this device and the account into step, for every profile.
+   apply: also put changes into the profile on screen (when safe). first: this device has just signed in.
+   Resolves to {added: [names of profiles that came from the account]} or null if it couldn't sync. */
+async function clSync(apply, first){
   if (clSyncing) return clSyncing;
   clSyncing = (async () => {
-    const L = clLinked(); if (!L || !CL.fb) return;
-    if (!PROF.list().some(p => p.id === L.pid)) { CL.link = null; clPut(null); return; }
+    const L = clLinked(); if (!L || !CL.fb) return null;
+    clNorm(L);
     try {
-      const cloud = cloudKnown !== undefined ? cloudKnown : await clRead(L.uid);
-      const cur = clIsCur(), local = clLocal();
-      const merged = cloud ? cloudMerge(local, L.lt || 0, cloud.data, cloud.t) : local;
-      const ms = JSON.stringify(merged), name = (clProfile() || {}).name;
-      let t = cloud ? cloud.t : 0;
-      if (!cloud || ms !== JSON.stringify(cloud.data) || cloud.name !== name) t = await clWrite(L.uid, name, merged);
-      if (ms !== JSON.stringify(local)) {
-        if (!cur) { PROF.save(merged, L.pid); L.lt = t; }
-        else if (apply && clSafe()) { PROF.save(merged, L.pid); clApply(merged); L.lt = t; if (typeof render === "function") render(); }
-      } else L.lt = Math.max(L.lt || 0, t);
-      L.ct = t; L.at = Date.now(); CL.offline = false; CL.err = ""; clPut(L);
+      const cloud = await clRead(L.uid), now = Date.now();
+      const ents = cloud ? cloud.profiles : [], byId = {};
+      ents.forEach(e => { byId[e.id] = e; });
+      const out = {}, added = [];
+      let curId = PROF.cur() ? PROF.cur().id : null, curGone = false;
+      // forget map entries for profiles that are no longer here
+      for (const pid in L.map) if (!PROF.list().some(p => p.id === pid)) { delete L.map[pid]; delete L.lts[pid]; }
+      const mapped = () => new Set(Object.values(L.map));
+      // a profile here with the same name as one in the account (and not yet paired) is the same person
+      for (const e of ents) {
+        if (e.del || mapped().has(e.id)) continue;
+        const p = PROF.list().find(q => !L.map[q.id] && clSame(q.name, e.name));
+        if (p) L.map[p.id] = e.id;
+      }
+      // just signed in: an empty, unnamed-for profile here (like "Learner" with nothing done) isn't worth adding to the account
+      if (first && ents.some(e => !e.del)) for (const p of PROF.list()) {
+        if (L.map[p.id]) continue;
+        const d = p.id === curId ? profileData() : PROF.load(p.id);
+        if (!clHasProgress(d)) { PROF.remove(p.id); if (p.id === curId) { curId = null; curGone = true; } }
+      }
+      // each profile here
+      for (const p of PROF.list()) {
+        const isCur = p.id === curId, local = isCur ? profileData() : PROF.load(p.id), lt = L.lts[p.id] || 0;
+        let cid = L.map[p.id], e = cid && byId[cid];
+        if (!cid) { cid = byId[p.id] ? p.id + Math.random().toString(36).slice(2, 5) : p.id; L.map[p.id] = cid; }
+        if (e && e.del && lt <= e.t) {   // deleted on another device
+          delete L.map[p.id]; delete L.lts[p.id];
+          if (isCur && !(apply && clSafe())) { out[cid] = e; continue; }
+          PROF.remove(p.id); if (isCur) { curId = null; curGone = true; }
+          continue;
+        }
+        if (!e || e.del) { out[cid] = {id: cid, name: p.name, t: lt || now, data: local}; continue; }
+        const merged = cloudMerge(local, lt, e.data, e.t), name = lt >= e.t ? p.name : e.name;
+        const changedHere = JSON.stringify(merged) !== JSON.stringify(local), changedThere = JSON.stringify(merged) !== JSON.stringify(e.data) || name !== e.name;
+        const t = changedThere ? now : e.t;
+        out[cid] = {id: cid, name, t, data: merged};
+        if (name !== p.name) PROF.rename(p.id, name);
+        if (changedHere) {
+          if (!isCur) { PROF.save(merged, p.id); L.lts[p.id] = t; }
+          else if (apply && clSafe()) { PROF.save(merged, p.id); clApply(merged); L.lts[p.id] = t; }
+        } else L.lts[p.id] = Math.max(lt, t);
+      }
+      // profiles in the account that aren't on this device yet
+      const have = mapped();
+      for (const e of ents) {
+        if (e.del || have.has(e.id) || out[e.id]) continue;
+        const keepCur = PROF.cur() ? PROF.cur().id : null;
+        const id = PROF.add(e.name || "Learner", e.data || {});
+        if (keepCur) PROF.use(keepCur); else curId = id;
+        L.map[id] = e.id; L.lts[id] = e.t; out[e.id] = e; added.push(PROF.list().find(p => p.id === id).name);
+      }
+      // profiles deleted here, and deletions from other devices (kept for 90 days so every device hears of them)
+      for (const cid in L.gone) out[cid] = {id: cid, del: true, t: L.gone[cid]};
+      for (const e of ents) if (e.del && !out[e.id] && now - e.t < 90 * 864e5) out[e.id] = e;
+      const list = Object.values(out);
+      if (!cloud || JSON.stringify(list) !== JSON.stringify(ents)) await clWrite(L.uid, list);
+      L.gone = {};
+      for (const p of PROF.list()) CL.snap[p.id] = JSON.stringify(PROF.cur() && p.id === PROF.cur().id ? profileData() : PROF.load(p.id));
+      if (curGone || (!PROF.cur() && PROF.list().length)) { if (!PROF.cur() && PROF.list().length) PROF.use(PROF.list()[0].id); applyData(PROF.load()); }
+      else if (curId && !PROF.list().some(p => p.id === curId)) applyData(PROF.load());
+      if (S.mode === "who" && PROF.cur()) S.mode = "course";
+      L.at = Date.now(); CL.offline = false; CL.err = ""; clPut(L);
+      if (typeof render === "function") render();
+      return {added};
     } catch (e) {
+      clPut(L);
       CL.offline = navigator.onLine === false || (e && /unavailable|network/.test(e.code || e.message || ""));
       if (!CL.offline) CL.err = "Couldn't sync just now. " + clErrText(e);
+      return null;
     }
   })().finally(() => { clSyncing = null; clRender(); });
   return clSyncing;
 }
 
-/* Called by save() in app.js after every change: note the time, and send it to the account a few seconds later. */
+/* Called by app.js after every change (save, rename, new profile): note the time, and send it to the account a few seconds later. */
 function cloudTouch(){
   if (!CL.link || !cloudOn()) return;
-  const c = PROF.cur(); if (!c || c.id !== CL.link.pid) return;
-  CL.link.lt = Date.now(); clPut(CL.link);
+  const c = PROF.cur(); clNorm(CL.link);
+  if (c) { const j = JSON.stringify(profileData()); if (CL.snap[c.id] !== j) { CL.snap[c.id] = j; CL.link.lts[c.id] = Date.now(); } }   // only a real change counts
+  clPut(CL.link);
   clearTimeout(CL.timer); CL.timer = setTimeout(() => clSync(false), 5000);
 }
 
@@ -272,29 +326,14 @@ function cloudHTML(){
   const foot = `<p class="count" style="margin-top:10px"><a href="privacy.html" target="_blank" rel="noopener">Privacy notice</a>: what is saved and how to delete it.</p>`;
   if (CL.busy) return h + `<p role="status">${esc(CL.busy)}</p></div>`;
   const status = (CL.msg ? `<p class="count" role="status">${esc(CL.msg)}</p>` : "") + (CL.err ? `<p class="count bad" role="alert">${esc(CL.err)}</p>` : "");
-  if (CL.user && CL.ask) {
-    const a = CL.ask;
-    return h + `<p>Signed in as <b>${esc(CL.user.email || "")}</b>. Your account already has progress${a.name ? " for <b>" + esc(a.name) + "</b>" : ""}: ${esc(statLine(a.data))}.</p>
-      <p style="margin-top:8px">What should happen to it on this device?</p>
-      <div class="stack" style="margin-top:10px">
-        <button class="topic" data-act="cl-merge"><b>Combine it with ${nm}'s progress</b><small>Best when it's the same person. Nothing is lost: scores and words learned from both are kept.</small></button>
-        <button class="topic" data-act="cl-new"><b>Add it as a separate profile</b><small>${nm} stays as it is on this device, and ${esc(a.name || "the account")} is added next to it.</small></button>
-      </div><div class="pfrow" style="margin-top:10px"><button class="link" data-act="cl-out">Cancel and sign out</button></div>${status}</div>`;
-  }
   const L = clLinked();
   if (CL.user && L) {
-    const p = clProfile();
-    h += `<p>Signed in as <b>${esc(CL.user.email || CL.user.displayName || "you")}</b>. <b>${esc(p ? p.name : "")}</b>'s progress is saved to your account and kept in step on every device where you sign in.</p>`;
+    const names = PROF.list().map(p => "<b>" + esc(p.name) + "</b>");
+    h += `<p>Signed in as <b>${esc(CL.user.email || CL.user.displayName || "you")}</b>. ${names.length ? clList(names) + "'s progress is" : "Progress is"} saved to your account and kept in step on every device where you sign in.</p>`;
     h += `<p class="count" style="margin-top:6px">${CL.offline ? "You're offline. Changes are kept on this device and saved to your account when you're back online." : L.at ? "Last synced " + clAgo(L.at) + "." : "Syncing…"}</p>`;
-    if (cur && p && cur.id !== p.id) h += `<p class="count">You're using ${esc(cur.name)} now, which stays on this device only.</p>`;
     if (CL.del) h += `<div class="note warn"><p>Delete your account and the progress saved in it? Progress on this device stays. This can't be undone.</p><div class="pfrow" style="margin-top:8px"><button class="btn danger" data-act="cl-del-ok">Delete my account</button><button class="btn" data-act="cl-del-x">Cancel</button></div></div>`;
     else h += `<div class="pfrow" style="margin-top:10px"><button class="btn" data-act="cl-sync">Sync now</button><button class="btn" data-act="cl-out">Sign out</button></div>
       <div class="bar" style="justify-content:flex-start"><button class="link" data-act="cl-del">Delete my account</button></div>`;
-    return h + status + foot + `</div>`;
-  }
-  if (CL.user && !L) {   // signed in, but no profile here is linked (it was deleted, or linking failed)
-    h += `<p>Signed in as <b>${esc(CL.user.email || CL.user.displayName || "you")}</b>.${cur ? "" : " Add a profile above first."}</p>`;
-    h += `<div class="pfrow" style="margin-top:10px">${cur ? `<button class="btn primary" data-act="cl-link">Save ${nm}'s progress to this account</button>` : ""}<button class="btn" data-act="cl-out">Sign out</button></div>`;
     return h + status + foot + `</div>`;
   }
   if (CL.link && CL.user === undefined) {   // signed in on this device, but Firebase hasn't loaded (offline, or still starting)
@@ -303,7 +342,7 @@ function cloudHTML(){
     return h + status + foot + `</div>`;
   }
   // signed out
-  h += `<p>Sign in to keep ${nm}${cur ? "'s" : ""} progress safe and carry on from any phone or computer. You don't need an account to use the app.</p>`;
+  h += `<p>Sign in to keep ${PROF.list().length > 1 ? "everyone's" : nm + (cur ? "'s" : "")} progress safe and carry on from any phone or computer. One account holds every profile on this device. You don't need an account to use the app.</p>`;
   if (CL.form) {
     const reset = CL.form === "reset", isNew = CL.form === "new";
     h += `<div class="clform" style="margin-top:10px">
@@ -325,22 +364,26 @@ function cloudAct(a, v){
   if (a === "cl-email-go") { clEmailGo(); return true; }
   if (a === "cl-out") { clSignOut(); return true; }
   if (a === "cl-sync") { CL.msg = ""; keep(); clSync(true).then(() => { if (!CL.err && !CL.offline) CL.msg = "Synced."; clRender(); }); return true; }
-  if (a === "cl-merge" || a === "cl-new") { clChoose(a === "cl-new" ? "new" : "merge"); return true; }
   if (a === "cl-jump") { const el = document.getElementById("account"); if (el) window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - (document.querySelector("header") || {offsetHeight: 0}).offsetHeight - 12, behavior: "smooth"}); return true; }
-  if (a === "cl-link") { if (CL.user) clAuthChanged(CL.user); return true; }
   if (a === "cl-del") { CL.del = true; return false; }
   if (a === "cl-del-x") { CL.del = false; return false; }
   if (a === "cl-del-ok") { clDelete(); return true; }
   return false;
 }
 
-/* A profile was deleted on this device: if it was the linked one, stop syncing it (the account keeps its copy). */
-function cloudForget(pid){ if (CL.link && CL.link.pid === pid) { CL.link = null; clPut(null); } }
+/* A profile was deleted on this device: delete it from the account too, so it doesn't come back. */
+function cloudForget(pid){
+  if (!CL.link) return; clNorm(CL.link);
+  const cid = CL.link.map[pid]; if (!cid) return;
+  CL.link.gone[cid] = Date.now(); delete CL.link.map[pid]; delete CL.link.lts[pid]; clPut(CL.link);
+  clearTimeout(CL.timer); CL.timer = setTimeout(() => clSync(false), 1000);
+}
 
 /* Start up: only load Firebase if this device is signed in (or coming back from Google's sign-in page). */
 function cloudStart(){
   if (!cloudOn()) return;
   let back = false; try { back = !!clStore.getItem(CL_REDIRECT); } catch (e) {}
+  if (CL.link) { const c = PROF.cur(); PROF.list().forEach(p => { CL.snap[p.id] = JSON.stringify(c && p.id === c.id ? profileData() : PROF.load(p.id)); }); }
   if (CL.link || back) clLoad().catch(() => clRender());
   document.addEventListener("input", e => { if (e.target.id === "cl-email") CL.email = e.target.value; if (e.target.id === "cl-pass") CL.pass = e.target.value; });
   document.addEventListener("keydown", e => { if (e.key === "Enter" && (e.target.id === "cl-email" || e.target.id === "cl-pass")) { e.preventDefault(); clEmailGo(); } });
