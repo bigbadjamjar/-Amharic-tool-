@@ -1,7 +1,7 @@
 /* "Support this app": a link to Rob's Ko-fi page, where people can give a small donation.
    Put the page address in SUPPORT_URL (for example "https://ko-fi.com/amharicapp").
    While it is empty, nothing about donations shows anywhere in the app. */
-const SUPPORT_URL = "";
+const SUPPORT_URL = "https://ko-fi.com/amharicapp";
 
 const supportOn = () => /^https:\/\/[^\s"<>]+$/.test(SUPPORT_URL);
 const supportA = (cls, inner) => `<a class="${cls}" href="${SUPPORT_URL}" target="_blank" rel="noopener">${inner}</a>`;
