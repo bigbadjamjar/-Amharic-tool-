@@ -340,7 +340,7 @@ function renderLesson(l){
 function fidelChart(){
   const p=FID.find(f=>f.ch===S.pick)||FID[0], r=FR[p.row];
   const ordName=p.ord<7?["1st","2nd","3rd","4th","5th","6th","7th"][p.ord]+" order":p.ord===7?"“wa” form":"rounded form";
-  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter to see it up close${Object.keys(AUDIO_FILES).length?", then press ▶ to hear it":""}.</p>
+  let h=`<p class="lead">Each letter is a consonant plus a vowel. Rows are consonants, columns are the seven vowel orders. Tap any letter to see it up close${Object.keys(AUDIO_FILES).length?" and hear it. Press ▶ to hear it again":""}.</p>
    <div class="peek"><span class="am nosay"><span class="pkch">${p.ch}</span></span><div class="pktxt"><b>${esc(p.snd||"(vowel only)")}</b><small>${ordName}</small><small>${p.ord===5?"also the bare consonant":"&nbsp;"}</small></div>${sayBtn(p.ch,"pk")||`<span class="say pk pkgap" aria-hidden="true"></span>`}</div>
    <div class="chartbox"><table class="chart"><tr><th></th>${VOW.map(v=>`<th>${v}</th>`).join("")}<th>wa</th></tr>`;
   FR.forEach(r=>{
@@ -351,8 +351,8 @@ function fidelChart(){
   h+=`</table></div><h3>Rounded letters <small>· q, h, k, g + w</small></h3><div class="chartbox"><table class="chart"><tr><th></th>${LVO.map(x=>`<th>${x[1]}</th>`).join("")}</tr>`;
   FR.filter(r=>LV[r[0]]).forEach(r=>{h+=`<tr><td>${r[1]}</td>`+r.extra.filter(f=>f.ord===8).map(f=>`<td><button data-act="pick" data-v="${f.ch}" aria-pressed="${f.ch===S.pick}">${f.ch}</button></td>`).join("")+`</tr>`;});
   h+=`</table></div>
-   <div class="tip"><b>Twin letters.</b> Some sounds have more than one letter: <span class="am">ሀ ሐ ኀ</span> are all h, <span class="am">ሰ ሠ</span> are s, <span class="am">አ ዐ</span> carry a bare vowel, and <span class="am">ጸ ፀ</span> are ts'. Spelling decides which one a word uses. When you type here, either twin is marked correct.</div>
-   <div class="tip"><b>First and fourth order.</b> For the h letters and for <span class="am">አ ዐ</span>, the first order sounds the same as the fourth: <span class="am">ሀ</span> and <span class="am">ሃ</span> are both ha.</div>
+   <div class="tip"><b>Twin letters.</b> Some sounds have more than one letter: <span class="am">ሀ</span> <span class="am">ሐ</span> <span class="am">ኀ</span> are all h, <span class="am">ሰ</span> <span class="am">ሠ</span> are s, <span class="am">አ</span> <span class="am">ዐ</span> carry a bare vowel, and <span class="am">ጸ</span> <span class="am">ፀ</span> are ts'. Spelling decides which one a word uses. When you type here, either twin is marked correct.</div>
+   <div class="tip"><b>First and fourth order.</b> For the h letters and for <span class="am">አ</span> <span class="am">ዐ</span>, the first order sounds the same as the fourth: <span class="am">ሀ</span> and <span class="am">ሃ</span> are both ha.</div>
    <div class="tip"><b>Sixth order.</b> The same letter stands for the consonant alone and for the consonant with a very short i, so the chart labels it (i): <span class="am">ልብስ</span> is libs, with only one vowel sounded. Doubled consonants are not shown in fidel either.</div>
    <div class="tip"><b>Numerals and marks.</b> ፩ 1, ፪ 2, ፫ 3, ፬ 4, ፭ 5, ፮ 6, ፯ 7, ፰ 8, ፱ 9, ፲ 10, ፳ 20. Sentences end with <span class="am">።</span>. Older texts also separate words with <span class="am">፡</span>; modern writing uses a space. <button class="link" data-act="fn" data-v="num">See all the numbers ›</button></div>`;
   return h;
@@ -994,7 +994,7 @@ document.addEventListener("click",e=>{
   else if(a==="lesson-go"){S.mode="course";S.lesson=+v;S.lview="notes";top=true;}
   else if(a==="lview"){S.lview=v;}
   else if(a==="ftab"){S.ftab=v;top=true;}
-  else if(a==="pick"){S.pick=v;}   // just shows the letter; its ▶ button plays it
+  else if(a==="pick"){S.pick=v; playAm(v);}   // shows the letter up close and plays it, so no reaching up for the ▶ (it stays there to hear it again)
   else if(a==="rtab"){S.rtab=v;top=true;}
   else if(a==="cat"){S.cat=v;}
   else if(a==="eview"){S.eview=v;}
