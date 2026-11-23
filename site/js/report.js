@@ -17,7 +17,7 @@
 // can be read by anyone (and by spam robots).
 const REPORT_EMAIL = "";
 const REPORT_REPO = "https://github.com/bigbadjamjar/-Amharic-tool-";
-const REPORT_SITE = "https://bigbadjamjar.github.io/-Amharic-tool-/";
+const REPORT_SITE = "https://amharicapp.com/";
 
 const FLAG_SVG = `<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><path d="M5 21V4m0 0h11l-2 4 2 4H5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const REP_ITEM_KINDS = [["am","Amharic spelling"],["en","English meaning"],["rom","Transcription"],["audio","Audio clip"],["other","Something else"]];

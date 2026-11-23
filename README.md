@@ -3,7 +3,7 @@
 A phone-friendly app for learning Amharic: a course, the Fidel chart with typing practice, a numbers trainer,
 conjugation tables for every verb, and tests. It is a plain web page with no build step.
 
-Live site (after the deploy workflow runs on `main`): https://bigbadjamjar.github.io/-Amharic-tool-/
+Live site: https://amharicapp.com/ (the old address https://bigbadjamjar.github.io/-Amharic-tool-/ redirects there)
 
 ## Running it
 
@@ -93,3 +93,7 @@ speaker yet**. `docs/native-check.md` lists every practice sentence, with the do
 a reviewer (regenerate it with `node tools/native-check.mjs`).
 
 The conjugation tables and the verb list are standard grammar; the verb engine works out every form by rule.
+
+## Copyright
+
+© 2026 Robert Sadler. All rights reserved. See [LICENSE](LICENSE).
