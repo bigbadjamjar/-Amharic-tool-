@@ -246,7 +246,7 @@ function applyData(d){
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
 const profileData=()=>({best:S.best,rom:S.rom,gloss:S.gloss,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,goal:S.goal,games:S.gm,answer:S.ans,...(S.schemePicked?{scheme:S.scheme}:{})});
-const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
+const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); cloudTouch(); };   // cloudTouch: cloud.js sends it to the account, if signed in
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
 // Several people on this device: ask who's practising each time the app opens. Nobody yet: ask for a name.
@@ -845,7 +845,7 @@ function renderWho(){
   let h=`<h2>${L.length?"Who's practising?":"What's your name?"}</h2><p class="lead">${L.length?"Each person has their own scores, mistakes and settings.":"Type your name to start. If other people use this device they can add their own name later, and everyone's progress is kept separately."}</p>`;
   if(L.length) h+=`<div class="stack" style="margin-top:14px">`+L.map(p=>`<button class="topic" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small></button>`).join("")+`</div><h3>Someone new</h3>`;
   h+=`<div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">${L.length?"Add":"Start"}</button></div>`;
-  if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? <button class="link" data-act="mode" data-v="me">Restore a backup</button></p>`;
+  if(!L.length) h+=`<p class="count" style="margin-top:14px">Moving from another device? ${cloudOn()?`<button class="link" data-act="mode" data-v="me">Sign in</button> or <button class="link" data-act="mode" data-v="me">restore a backup</button>`:`<button class="link" data-act="mode" data-v="me">Restore a backup</button>`}</p>`;
   return h;
 }
 function renderMe(){
@@ -860,6 +860,7 @@ function renderMe(){
     else h+=`<div class="bar" style="justify-content:flex-start;gap:16px"><button class="link" data-act="pf-ren">Rename ${esc(cur.name)}</button><button class="link" data-act="pf-del">Delete ${esc(cur.name)}</button></div>`;
   }
   h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
+  h+=cloudHTML();   // optional account (cloud.js); empty until Firebase is set up
   if(cur){
     h+=`<h3>Back up or move to another device</h3><div class="note"><p>Save ${esc(cur.name)}'s progress as a file or a code. On the other phone or computer, open this app, go to Profiles and restore it.</p>
       <div class="pfrow" style="margin-top:10px"><button class="btn" data-act="pf-file">Download backup file</button><button class="btn" data-act="pf-code">Show backup code</button></div>`;
@@ -951,6 +952,7 @@ document.addEventListener("click",e=>{
   if(a.startsWith("gm-")){ if(!gmAct(a,v)) render(); return; }   // games.js
   if(a.startsWith("dr-")){ if(!drAct(a,v)) render(); return; }   // drills.js
   if(a.startsWith("rec-")){recAct(a,v,b.dataset.g);return;}
+  if(a.startsWith("cl-")){ if(!cloudAct(a,v)) render(); return; }   // cloud.js: sign in, sync
   if(a==="find-go"){dgStop();S.find.from=true;findGo(v);return;}
   if(a==="find-back"){dgStop();S.mode="find";render();window.scrollTo(0,0);const i=$("#findq");if(i)i.focus({preventScroll:true});return;}
   if(a==="find-try"){S.find.q=v;const i=$("#findq");if(i)i.value=v;findRefresh();return;}
@@ -979,7 +981,7 @@ document.addEventListener("click",e=>{
   else if(a==="pf-ren-x"){S.pf.ren=null;}
   else if(a==="pf-del"){S.pf.del=true;S.pf.ren=null;}
   else if(a==="pf-del-x"){S.pf.del=false;}
-  else if(a==="pf-del-ok"){recDelAll(PROF.cur().id); recCount=null; PROF.remove(PROF.cur().id); S.pf.del=false; S.pf.code=""; applyData(PROF.load()); if(!PROF.cur())S.mode="who";}
+  else if(a==="pf-del-ok"){cloudForget(PROF.cur().id); recDelAll(PROF.cur().id); recCount=null; PROF.remove(PROF.cur().id); S.pf.del=false; S.pf.code=""; applyData(PROF.load()); if(!PROF.cur())S.mode="who";}
   else if(a==="pf-file"){save(); const b=PROF.backup(), url=URL.createObjectURL(new Blob([JSON.stringify(b,null,1)],{type:"application/json"})), l=document.createElement("a");
     l.href=url; l.download="amharic-"+b.name.replace(/[^\w-]+/g,"-").toLowerCase()+"-"+b.saved.slice(0,10)+".json"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
     S.pf.msg="Backup file saved to your downloads.";}
@@ -1049,3 +1051,4 @@ document.addEventListener("click",e=>{
 // A shared link ending #welcome opens the welcome page, even in a tab that is already open.
 window.addEventListener("hashchange",()=>{ if(wlAsked()){ dgStop(); S.mode="welcome"; render(); window.scrollTo(0,0); } });
 render();
+cloudStart();   // cloud.js: if signed in on this device, bring progress up to date

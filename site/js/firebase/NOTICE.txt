@@ -1,0 +1,3 @@
+These three files are copied unchanged from the "firebase" npm package, version 13.4.0
+(only the import address of firebase-app.js was changed to a local one, and source map lines removed).
+Copyright Google LLC. Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
