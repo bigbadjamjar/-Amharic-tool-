@@ -821,6 +821,153 @@ The Amharic examples and phrases in the culture notes. Please check the spelling
 | ያልጠረጠረ ተመነጠረ | yalt'eret'ere temenet'ere | whoever didn't suspect got plucked (be careful) |  |
 | የማያውቁት አገር አይናፍቅም | yemayawqut ager aynafqim | you don't miss a country you have never known |  |
 
+### The country at a glance
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ኢትዮጵያ | ityop'ya | (in the text) |  |
+| ክረምት | kiremt | (in the text) |  |
+| በጋ | bega | (in the text) |  |
+| ዓባይ | abbay | (in the text) |  |
+| አዲስ አበባ | addis abeba | (in the text) |  |
+| ኢትዮጵያ | ityop'ya | Ethiopia |  |
+| ኢትዮጵያዊ ነኝ | ityop'yawi negn | I'm Ethiopian (a man) |  |
+| ኢትዮጵያዊት ነኝ | ityop'yawit negn | I'm Ethiopian (a woman) |  |
+| ሀገሬ | hageré | my country |  |
+| ኢትዮጵያ ቆንጆ ሀገር ናት | ityop'ya qonjo hager nat | Ethiopia is a beautiful country **(ናት (feminine) for a country: is that the usual choice?)** |  |
+
+### Regions and cities
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ክልል | kilil | (in the text) |  |
+| አክሱም | aksum | (in the text) |  |
+| ላሊበላ | lalibela | (in the text) |  |
+| ጎንደር | gonder | (in the text) |  |
+| ባሕር ዳር | bahir dar | (in the text) |  |
+| ሐረር | harer | (in the text) |  |
+| ገጠር | get'er | (in the text) |  |
+| ከተማ | ketema | (in the text) |  |
+| ከየት ነህ? | keyet neh? | where are you from? (to a man) |  |
+| ከየት ነሽ? | keyet nesh? | where are you from? (to a woman) |  |
+| ከአዲስ አበባ ነኝ | ke'addis abeba negn | I'm from Addis Ababa |  |
+| ከተማ | ketema | town, city |  |
+| ገጠር | get'er | the countryside |  |
+
+### Peoples and languages
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| አማርኛ | amarigna | (in the text) |  |
+| ግዕዝ | ge'iz | (in the text) |  |
+| ሀበሻ | habesha | (in the text) |  |
+| ቋንቋ | qwanqwa | language |  |
+| አማርኛ ትችላለህ? | amarigna tichilaleh? | can you speak Amharic? (to a man) |  |
+| አማርኛ ትችያለሽ? | amarigna tichiyalesh? | can you speak Amharic? (to a woman) |  |
+| ትንሽ ትንሽ | tinnish tinnish | a little |  |
+| ኦሮምኛ | oromigna | Afaan Oromo (its Amharic name) |  |
+| ትግርኛ | tigrigna | Tigrinya |  |
+
+### A short history
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ድንቅነሽ | dinqinesh | (in the text) |  |
+| አክሱም | aksum | (in the text) |  |
+| ዓድዋ | adwa | (in the text) |  |
+| ደርግ | derg | (in the text) |  |
+| ታሪክ | tarik | history |  |
+| ንጉሥ | nigus | king |  |
+| ንግሥት | nigist | queen |  |
+| ንጉሠ ነገሥት | niguse negest | emperor (“king of kings”) |  |
+| ድንቅነሽ | dinqinesh | Lucy (“you are wonderful”) |  |
+
+### Faith
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ታቦት | tabot | (in the text) |  |
+| ነጋሺ | negashi | (in the text) |  |
+| ቤተ ክርስቲያን | béte kristiyan | church |  |
+| መስጊድ | mesgid | mosque |  |
+| ጾም | ts'om | a fast, fasting |  |
+| ጾመኛ ነኝ | ts'omegna negn | I'm fasting **(Is ጾመኛ ነኝ the natural way to say this?)** |  |
+| እግዚአብሔር ይባርክህ | igziabhér yibarkih | God bless you (to a man) |  |
+
+### Injera, wat and more
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ጤፍ | t'éf | (in the text) |  |
+| ምጣድ | mit'ad | (in the text) |  |
+| እንጀራ | injera | (in the text) |  |
+| ወጥ | wet' | (in the text) |  |
+| በርበሬ | berberé | (in the text) |  |
+| ንጥር ቅቤ | nit'ir qibé | (in the text) |  |
+| ዶሮ ወጥ | doro wet' | (in the text) |  |
+| ጥብስ | t'ibs | (in the text) |  |
+| ክትፎ | kitfo | (in the text) |  |
+| ሽሮ | shiro | (in the text) |  |
+| ሻይ | shay | (in the text) |  |
+| ጠጅ | t'ej | (in the text) |  |
+| ጠላ | t'ella | (in the text) |  |
+| እንሰት | inset | (in the text) |  |
+| ቆጮ | qoch'o | (in the text) |  |
+| ምግቡ ይጣፍጣል | migibu yit'afit'al | the food is delicious |  |
+| ያቃጥላል? | yaqat'ilal? | is it spicy? (“does it burn?”) **(Is this what people ask about hot food?)** |  |
+| ዶሮ ወጥ | doro wet' | chicken stew |  |
+| ውሃ እባክህ | wiha ibakih | water, please (to a man) |  |
+| ሂሳብ እባክህ | hisab ibakih | the bill, please (to a man) |  |
+
+### Music and dance
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ቅኝት | qignit | (in the text) |  |
+| ትዝታ | tizita | (in the text) |  |
+| ማሲንቆ | masinqo | (in the text) |  |
+| ክራር | krar | (in the text) |  |
+| ዋሽንት | washint | (in the text) |  |
+| ከበሮ | kebero | (in the text) |  |
+| በገና | begena | (in the text) |  |
+| አዝማሪ | azmari | (in the text) |  |
+| ዜማ | zéma | (in the text) |  |
+| እስክስታ | iskista | (in the text) |  |
+| ሙዚቃ | muziqa | music |  |
+| ዘፈን | zefen | song |  |
+| ዘፋኝ | zefagn | singer |  |
+| ጭፈራ | ch'ifera | dancing |  |
+| ይህን ዘፈን እወደዋለሁ | yihin zefen iwedewallehu | I love this song |  |
+
+### Running and sport
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| አበበ ቢቂላ | abebe biqila | (in the text) |  |
+| እግር ኳስ | igir kwas | (in the text) |  |
+| ሩጫ | rut'a | running, a race |  |
+| ሯጭ | rwach' | runner |  |
+| በርታ! | berta! | keep going! (to a man) |  |
+| በርቺ! | berchi! | keep going! (to a woman) |  |
+| ጎበዝ! | gobez! | well done! |  |
+
+### Family and community
+
+| Amharic | Transcription | English | OK? / correction |
+|---|---|---|---|
+| ቤተሰብ | béteseb | (in the text) |  |
+| ጎረቤት | gorebét | (in the text) |  |
+| እድር | idir | (in the text) |  |
+| እቁብ | iqub | (in the text) |  |
+| ሀበሻ ቀሚስ | habesha qemis | (in the text) |  |
+| ነጠላ | net'ela | (in the text) |  |
+| ጋቢ | gabi | (in the text) |  |
+| ቤተሰብ | béteseb | family |  |
+| ጎረቤት | gorebét | neighbour |  |
+| እንኳን ደህና መጣህ | inkwan dehna met'ah | welcome (to a man) |  |
+| እንኳን ደህና መጣሽ | inkwan dehna met'ash | welcome (to a woman) |  |
+| ግባ ግባ | giba giba | come in, come in (to a man) |  |
+
 ## Everyday drills: time, money and dates
 
 The Test tab's “Everyday Amharic” drills build whole phrases from these pieces (for example part of the day + hour + ተኩል). Please check the pieces and the patterns.

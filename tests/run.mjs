@@ -206,10 +206,21 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   for (const c of CULTURE) {
     ok(c.id && !ids.has(c.id + "-c") && c.title && c.intro && c.icon && c.p.length, `culture ${c.id}: needs id, title, intro, icon, text`);
     ids.add(c.id + "-c");
-    ok(c.units.length && c.units.every(n => lessonNums.has(n)), `culture ${c.id}: links to a unit that doesn't exist`);
+    ok(c.units.every(n => lessonNums.has(n)), `culture ${c.id}: links to a unit that doesn't exist`);
+    ok(!c.facts || c.facts.every(f => f.length === 2 && f[0] && f[1]), `culture ${c.id}: facts should be [label, value] pairs`);
     for (const p of c.p) for (const m of p.matchAll(/\{([^|}]+)\|([^}]*)\}/g)) ok(m[2].trim() && !/[A-Za-z]/.test(m[1]), `culture ${c.id}: example ${m[0]} needs fidel and a transcription`);
     for (const [am, rom, en] of c.phrases) ok(am && rom && en && !/[A-Za-z]/.test(am), `culture ${c.id}: bad phrase ${am}`);
   }
+}
+
+// --- the Ethiopia tab: every culture note is in exactly one group, and every group's notes exist
+{
+  const ec = vm.createContext({});
+  vm.runInContext(["data/culture.js", "ethiopia.js"].map(f => fs.readFileSync(path.join(root, "js", f), "utf8")).join("\n;\n") + ";globalThis.E={CULTURE,ETH_GROUPS};", ec);
+  const { CULTURE, ETH_GROUPS } = ec.E, all = ETH_GROUPS.flatMap(g => g.ids);
+  ok(all.length === new Set(all).size, "Ethiopia tab: a note is in two groups");
+  ok(all.every(id => CULTURE.some(c => c.id === id)), "Ethiopia tab: a group names a note that doesn't exist");
+  ok(CULTURE.every(c => all.includes(c.id)), "Ethiopia tab: a culture note isn't in any group, so it can't be opened");
 }
 
 // --- everyday drills: the Ethiopian calendar and clock
