@@ -93,3 +93,7 @@ speaker yet**. `docs/native-check.md` lists every practice sentence, with the do
 a reviewer (regenerate it with `node tools/native-check.mjs`).
 
 The conjugation tables and the verb list are standard grammar; the verb engine works out every form by rule.
+
+## Copyright
+
+© 2026 Rob. All rights reserved. See [LICENSE](LICENSE).
