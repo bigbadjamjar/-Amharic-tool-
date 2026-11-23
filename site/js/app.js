@@ -138,8 +138,7 @@ function numOut(){
 }
 function renderNum(){
   const t=S.num.tab;
-  let h=`<h2>Numbers</h2><p class="lead">Learn the Amharic words for numbers and the Amharic number symbols, then test yourself.</p>
-   <div class="bar">${mini("ntab",[["chart","Chart"],["rules","Rules"],["try","Try any"],["cards","Cards"]],t)}</div>`;
+  let h=fnSwitch()+chips("ntab",[["chart","Chart"],["rules","Rules"],["try","Try any"],["cards","Cards"]],t)+`<h2>Numbers</h2><p class="lead">Learn the Amharic words for numbers and the Amharic number symbols, then test yourself.</p>`;
   if(t==="chart"){
     h+=`<h3>One to ten</h3><div class="grid2">${NBASE.slice(0,10).map(nCard).join("")}</div>
         <h3>Tens</h3><div class="grid2">${NBASE.slice(10,18).map(nCard).join("")}</div>
@@ -332,7 +331,7 @@ function fidelChart(){
    <div class="tip"><b>Twin letters.</b> Some sounds have more than one letter: <span class="am">ሀ ሐ ኀ</span> are all h, <span class="am">ሰ ሠ</span> are s, <span class="am">አ ዐ</span> carry a bare vowel, and <span class="am">ጸ ፀ</span> are ts'. Spelling decides which one a word uses. When you type here, either twin is marked correct.</div>
    <div class="tip"><b>First and fourth order.</b> For the h letters and for <span class="am">አ ዐ</span>, the first order sounds the same as the fourth: <span class="am">ሀ</span> and <span class="am">ሃ</span> are both ha.</div>
    <div class="tip"><b>Sixth order.</b> The same letter stands for the consonant alone and for the consonant with a very short i, so the chart labels it (i): <span class="am">ልብስ</span> is libs, with only one vowel sounded. Doubled consonants are not shown in fidel either.</div>
-   <div class="tip"><b>Numerals and marks.</b> ፩ 1, ፪ 2, ፫ 3, ፬ 4, ፭ 5, ፮ 6, ፯ 7, ፰ 8, ፱ 9, ፲ 10, ፳ 20. Sentences end with <span class="am">።</span>. Older texts also separate words with <span class="am">፡</span>; modern writing uses a space.</div>`;
+   <div class="tip"><b>Numerals and marks.</b> ፩ 1, ፪ 2, ፫ 3, ፬ 4, ፭ 5, ፮ 6, ፯ 7, ፰ 8, ፱ 9, ፲ 10, ፳ 20. Sentences end with <span class="am">።</span>. Older texts also separate words with <span class="am">፡</span>; modern writing uses a space. <button class="link" data-act="fn" data-v="num">See all the numbers ›</button></div>`;
   return h;
 }
 function fidelKey(){
@@ -379,8 +378,10 @@ function fidelType(){
   else h+=kbHTML(P,true);
   return h;
 }
+// Fidel and Numbers share one tab: this switch at the top flips between the two halves.
+const fnSwitch = () => `<div class="fnsw norom-auto" role="group" aria-label="Letters or numbers">`+[["fidel","<span class=\"am nosay\">ፊ</span> Letters"],["num","<span class=\"am nosay\">፩</span> Numbers"]].map(([v,l])=>`<button data-act="fn" data-v="${v}" aria-pressed="${S.mode===v}">${l}</button>`).join("")+`</div>`;
 function renderFidel(){
-  return chips("ftab",[["chart","Chart"],["type","Typing practice"],["key","Sound guide"]],S.ftab)+
+  return fnSwitch()+chips("ftab",[["chart","Chart"],["type","Typing practice"],["key","Sound guide"]],S.ftab)+
     (S.ftab==="type"?"":`<h2>${S.ftab==="chart"?"The fidel":"Sound guide"}</h2>`)+
     (S.ftab==="chart"?fidelChart():S.ftab==="type"?fidelType():fidelKey());
 }
@@ -816,7 +817,7 @@ async function readIncoming(text){
 }
 
 /* ---------- render + events ---------- */
-const MODES=["course","fidel","num","ref","test","prog"];
+const MODES=["course","fidel","ref","test","prog"];
 function render(){
   schemeApply(S.scheme);
   document.body.classList.toggle("norom",!S.rom);
@@ -824,7 +825,8 @@ function render(){
   // quizzes, typing practice and dialogues keep a reading width on a wide screen (see "laptop and desktop" in style.css)
   document.body.classList.toggle("focus",!!(S.mode==="test"&&(S.quiz||G))||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg")||rdFocus());
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
-  MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m));
+  MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m||(m==="fidel"&&S.mode==="num")));
+  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // the Fidel & numbers tab reopens whichever half you used last
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
@@ -880,12 +882,13 @@ document.addEventListener("click",e=>{
   if(a.startsWith("rd-")){ if(!rdAct(a,v,b)) render(); return; }
   if(a==="mode"||a==="lesson"||a==="lesson-go"||a==="dg-open"||a==="start") rdLeave();
   if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
-  if(a==="mode"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
+  if(a==="mode"||a==="fn"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
   if(a==="dg-open"){S.mode="course";S.lesson=+v;S.lview="dlg";dgReset(+v,true);render();window.scrollTo(0,0);return;}
   if(a==="say-slow"){playAm(v,lsSlow());return;}
   if(a==="rom"){S.rom=!S.rom;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
-  else if(a==="mode"){S.mode=v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
+  else if(a==="fn"){S.mode=v;top=true;}
+  else if(a==="mode"){S.mode=(v==="fidel"&&S.mode!=="fidel"&&S.mode!=="num"&&S.fnLast==="num")?"num":v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
   else if(a==="wl-start"){S.mode=wlStart();top=true;}
   else if(a==="scheme"){S.scheme=v; S.schemePicked=true; schemeDevice.set(v); if(PROF.cur()) save();}
   else if(a==="scheme-jump"){const el=$("#colours"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return;}

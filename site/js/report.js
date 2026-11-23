@@ -62,7 +62,7 @@ function repItemOf(box){
 /* --- where in the app --- */
 function repWhere(){
   if(typeof S==="undefined") return "";
-  const tab = {course:"Course",fidel:"Fidel",num:"Numbers",ref:"Tables",test:"Test",prog:"Progress",find:"Search",me:"Profiles",who:"Profiles",welcome:"Welcome page"}[S.mode] || S.mode;
+  const tab = {course:"Course",fidel:"Fidel & numbers › Letters",num:"Fidel & numbers › Numbers",ref:"Tables",test:"Test",prog:"Progress",find:"Search",me:"Profiles",who:"Profiles",welcome:"Welcome page"}[S.mode] || S.mode;
   const p = [tab];
   try{
     if(S.mode==="course" && S.lesson){ const l = typeof LMAP!=="undefined" && LMAP[S.lesson]; p.push("Unit "+S.lesson+(l&&l.title?" ("+l.title+")":"")); p.push({notes:"Notes",words:"Words",sent:"Sentences",dlg:"Dialogue",cards:"Cards"}[S.lview]||S.lview); }
