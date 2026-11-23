@@ -1,6 +1,7 @@
 /* ---------- everyday drills: telling the time, prices, dates ----------
-   The "Everyday Amharic" section of the Test tab: an explanation page for each topic (with a few
-   things to try), and short tests that use the normal quiz screen. The words are in data/everyday.js.
+   A guide for each topic (with a few things to try), drawn at the end of the matching note in
+   Learn › Culture, and short tests in the "Everyday Amharic" section of the Test tab, which use the
+   normal quiz screen. The words are in data/everyday.js.
    Uses app.js helpers (S, mk, pick, ri, shuffle, esc, numWord, mini, tItem, wordList) at call time. */
 
 /* ----- the Ethiopian calendar -----
@@ -188,9 +189,8 @@ const DR_TESTS = {
 };
 function drTopic(id){ const t = DR_TESTS[id]; return t && { name: t[0], desc: t[1], gen: t[2] }; }
 
-/* ----- the explanation pages ----- */
-const DR_TABS = [["time", "Time"], ["money", "Money"], ["dates", "Dates"]];
-const drState = () => S.dr || (S.dr = { tab: "time", h: null, m: 0, date: "", seed: 1 });
+/* ----- the guides (shown in Learn › Culture) ----- */
+const drState = () => S.dr || (S.dr = { h: null, m: 0, date: "", seed: 1 });
 // a line of Amharic with its transcription and a play button for the whole phrase
 const drLine = (parts, rom, cls) => `<span class="drline ${cls || ""}"><span class="am nosay norom-auto">${esc(parts.join(" "))}</span>${drSayBtn(parts)}${rom ? `<span class="rom">${esc(rom)}</span>` : ""}</span>`;
 const drWords = list => wordList(list.map(w => [w[0], w[1], w[2]]), true);
@@ -200,11 +200,7 @@ function drTimePage(){
   const t = etTime(D.h, D.m);
   const rows = [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6].map(w => {
     return `<div class="row drrow"><span>${w} am · ${w} pm</span><span class="form">${drLine([EV.hours[etHour(w) - 1][0]], EV.hours[etHour(w) - 1][1])}</span><span class="en">${etHour(w)} o'clock</span></div>`; }).join("");
-  return `<div class="note"><h4>Two ways to tell the time</h4>
-      <p>Ethiopians usually count the hours from sunrise, not from midnight. The first hour of daylight, 7 in the morning, is {አንድ ሰዓት|and se'at} “one o'clock”. Noon is {ስድስት ሰዓት|siddist se'at} “six o'clock”, and 6 in the evening is {አሥራ ሁለት ሰዓት|asra hulett se'at} “twelve o'clock”. Then the night hours start again from one.</p>
-      <p><b>The rule:</b> take 6 off the Western time (or add 6, it comes to the same on a 12-hour clock). 9 am is 3 o'clock, 2 pm is 8 o'clock, 8 pm is 2 o'clock.</p>
-      <p>A watch looks the same. You just read the hour from the opposite side of the face. Phones, flights and offices may use the Western clock, so if a time sounds odd, ask {በኢትዮጵያ ሰዓት?|be'ityop'ya se'at?} “by Ethiopian time?” or {በፈረንጅ ሰዓት?|beferenj se'at?} “by Western time?”</p></div>
-    <div class="note drtry"><h4>Try any time</h4>
+  return `<div class="note drtry"><h4>Try any time</h4>
       <div class="drpick"><select id="dr-h" class="sel" aria-label="Hour">${Array.from({ length: 24 }, (_, h) => `<option value="${h}" ${h === D.h ? "selected" : ""}>${h % 12 || 12} ${h < 12 ? "am" : "pm"}</option>`).join("")}</select>
       <select id="dr-m" class="sel" aria-label="Minutes">${DR_MINS.map(m => `<option value="${m}" ${m === D.m ? "selected" : ""}>:${String(m).padStart(2, "0")}</option>`).join("")}</select>
       <button class="link" data-act="dr-now">Now</button></div>
@@ -223,13 +219,7 @@ function drMoneyPage(){
   const D = drState(), rnd = (s => () => (s = (s * 9301 + 49297) % 233280) / 233280)(D.seed * 7919);
   const board = EV.items.map(it => { const n = priceRound(it[3] + rnd() * (it[4] - it[3])), ps = priceSay(n, 0);
     return `<div class="row drprice"><span class="form">${drLine([it[0]], it[1])}<small class="en">${esc(it[2])}</small></span><span class="drp">${priceStr(n, 0)}</span>${drLine(ps.parts, ps.rom)}</div>`; }).join("");
-  return `<div class="note"><h4>Birr and santim</h4>
-      <p>Ethiopian money is the {ብር|birr}. A birr has 100 {ሳንቲም|santim}. Say the number, then {ብር|birr}: {ሃምሳ ብር|hamsa birr} 50 birr, {መቶ ሃያ ብር|meto haya birr} 120 birr.</p>
-      <p>For birr and santim, join the santim on with {ከ-|ke-}: {አሥር ብር ከሃምሳ ሳንቲም|assir birr kehamsa santim} 10.50 birr. Santim are rare in shops now, but you will see them on bills.</p>
-      <p>Prices on this page are only examples; they change quickly. The number words are on the Numbers tab.</p></div>
-    <div class="note"><h4>Asking and bargaining</h4>
-      <p>{ስንት ነው?|sint new?} “how much is it?” The answer is usually just the price and {ነው|new} “it is”: {ቡና ሠላሳ ብር ነው|buna selasa birr new} “coffee is 30 birr”.</p>
-      <p>In a market it is normal to bargain. {ውድ ነው|wid new} “it's expensive”, then {ቀንሱልኝ|qenisullign} “bring it down for me”. In shops and cafés the price is usually fixed.</p></div>
+  return `<p class="count">Prices here are only examples; they change quickly. The number words are in Learn › Fidel, under Numbers.</p>
     <div class="bar"><h3 style="margin:0">Price board</h3><button class="link" data-act="dr-reprice">New prices</button></div>
     <div class="tbl drboard">${board}</div>
     <h3>Shopping phrases</h3>${drWords(EV.shop)}`;
@@ -247,22 +237,25 @@ function drDatesPage(){
     return `<div class="row drhol"><span class="form">${drLine([hd[0]], hd[1])}<small class="en">${esc(hd[2])}</small></span><span class="en">${drLine(eSaid(0, hd[3], hd[4]), eSaidRom(0, hd[3], hd[4]))}<small>${gShort(g[1], g[2])}</small></span></div>`; }).join("");
   return `<div class="note drtoday"><h4>Today</h4><p class="count">${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} is</p>
       <p class="drbig norom-auto">${esc(wd[0])}፣ ${esc(eStr(0, em, ed))} <small>${ey} ዓ.ም.</small></p>${drLine(said, wd[1] + " " + eSaidRom(0, em, ed))}${glossHTML(said.join(" "), wd[1] + " " + eSaidRom(0, em, ed))}</div>
-    <div class="note"><h4>Thirteen months of sunshine</h4>
-      <p>Ethiopia has its own calendar. Twelve months have exactly 30 days, and a thirteenth month, {ጳጉሜ|p'agumé}, has 5 days (6 every fourth year).</p>
-      <p>The year starts on {መስከረም|meskerem} 1, which is 11 September (12 September in the year before a Western leap year). The Ethiopian year number is 7 or 8 behind the Western one: 8 behind until New Year in September, then 7. Write {ዓ.ም.|amete mihret} after an Ethiopian year.</p>
-      <p>Say the month, then the day: {ኅዳር አሥራ ሦስት|hidar asra sost} “Hidar 13”. {ዛሬ ስንት ነው?|zaré sint new?} asks “what's the date today?”</p></div>
     <div class="note drtry"><h4>Change a date</h4><div class="drpick"><input id="dr-date" class="sel" type="date" value="${esc(D.date || "")}" aria-label="A Western date"></div>${conv || `<p class="count">Pick a Western date to see it in the Ethiopian calendar.</p>`}</div>
     <h3>The months this year (${ey} <span class="norom-auto">ዓ.ም.</span>)</h3><div class="tbl wl2">${months}</div>
     <h3>Days of the week</h3>${drWords(EV.days)}
     <h3>Holidays with a fixed date</h3><div class="tbl wl2">${hols}</div>
     <h3>Useful words</h3>${drWords(EV.dateWords)}`;
 }
-const DR_PAGE_TESTS = { time: ["dr-time", "dr-clock"], money: ["dr-price", "dr-shop"], dates: ["dr-days", "dr-date"] };
+/* The guides now live in Learn › Culture, at the end of the matching note; Test › Everyday Amharic
+   keeps only the tests. note: the culture note id, page: the guide drawn under it. */
+const DR_GUIDES = [
+  { tab: "time",  name: "Telling the time",       note: "time",     page: () => drTimePage(),  tests: ["dr-time", "dr-clock"] },
+  { tab: "money", name: "Money and prices",       note: "market",   page: () => drMoneyPage(), tests: ["dr-price", "dr-shop"] },
+  { tab: "dates", name: "Dates and the calendar", note: "calendar", page: () => drDatesPage(), tests: ["dr-days", "dr-date"] }
+];
+const drGuideFor = noteId => DR_GUIDES.find(g => g.note === noteId);
+// drawn inside a Culture note (ethiopia.js), after its phrases
+const drGuideHTML = g => `<div class="drguide">${fmtNotes(g.page())}</div><h3>Test yourself</h3>${tStack(g.tests)}`;
 function drMenu(){
-  const D = drState();
-  const body = D.tab === "money" ? drMoneyPage() : D.tab === "dates" ? drDatesPage() : drTimePage();
-  return `<div class="bar">${mini("dr-tab", DR_TABS, D.tab)}${glossBtn()}</div>
-    <h3>Test yourself</h3>${tStack(DR_PAGE_TESTS[D.tab])}${fmtNotes(body)}`;
+  return DR_GUIDES.map(g => `<div class="bar"><h3 style="margin:0">${g.name}</h3><button class="link" data-act="eth-note" data-v="${g.note}">How it works ›</button></div>${tStack(g.tests)}`).join("")
+    + `<p class="count" style="margin-top:16px">The explanations, clock and calendar converters are in Learn › Culture.</p>`;
 }
 // notes above write Amharic examples as {fidel|transcription}, like the course
 const fmtNotes = h => h.replace(/\{([^|}]+)\|([^}]*)\}/g, (_, a, r) => /^[\u1200-\u137F\s፣።?]+$/.test(a) && drCanSay([a.replace(/[?።፣]/g, "")])
@@ -272,7 +265,6 @@ const fmtNotes = h => h.replace(/\{([^|}]+)\|([^}]*)\}/g, (_, a, r) => /^[\u1200
 function drAct(a, v){
   const D = drState();
   if(a === "dr-say"){ drPlay(String(v).split("|")); return true; }
-  if(a === "dr-tab"){ D.tab = v; return false; }
   if(a === "dr-now"){ const t = new Date(); D.h = t.getHours(); D.m = DR_MINS[Math.floor(t.getMinutes() / 15)]; return false; }
   if(a === "dr-reprice"){ D.seed++; return false; }
   return false;
