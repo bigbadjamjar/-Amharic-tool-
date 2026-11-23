@@ -276,22 +276,28 @@ function flashHTML(words,key){
 const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[id]}/${id==="daily"?20:10}</strong>best</span>` : `<span class="best untried">not tried</span>`;
 
 /* ---------- course ---------- */
+const levelOf=n=>LEVELS.find(v=>n>=v.from&&n<=v.to);
 function renderCourse(){
   if(RD.view) return rdHTML();   // reading stories and culture notes (reader.js)
   if(S.lesson) return renderLesson(LMAP[S.lesson]);
-  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}${rdCourseCards()}<div class="stack" style="margin-top:14px">`;
-  LESSONS.forEach(l=>{
-    h+= l.review
+  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}${rdCourseCards()}`;
+  const unitBtn=l=> l.review
       ? `<button class="topic" data-act="start" data-v="R${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>Mixed test</small>${bestChip("R"+l.n)}</button>`
       : `<button class="topic" data-act="lesson" data-v="${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>${l.vocab.length} words</small>${bestChip("L"+l.n)}</button>`;
+  // grouped into levels (LEVELS in course.js); anything outside every level goes at the end under "More units"
+  const groups=LEVELS.map(v=>[v,LESSONS.filter(l=>l.n>=v.from&&l.n<=v.to)]).filter(([,ls])=>ls.length);
+  const rest=LESSONS.filter(l=>!LEVELS.some(v=>l.n>=v.from&&l.n<=v.to));
+  if(rest.length) groups.push([{name:"More units",about:""},rest]);
+  groups.forEach(([v,ls])=>{
+    const a=ls[0].n,b=ls[ls.length-1].n;
+    h+=`<h3 class="lvl">${esc(v.name)} <small>· units ${a}–${b}</small></h3>${v.about?`<p class="lvlabout">${esc(v.about)}</p>`:""}<div class="stack">${ls.map(unitBtn).join("")}</div>`;
   });
-  h+=`</div>`;
   if(LATER.length){h+=`<h3>Still to add</h3><div class="stack">`;LATER.forEach(([n,t])=>{h+=`<button class="topic" disabled><b><span class="lnum">${n}</span>${esc(t)}</b></button>`;});h+=`</div>`;}
   return h;
 }
 function renderLesson(l){
   let h=`<button class="back" data-act="lesson" data-v="">‹ All units</button>
-   <h2>Unit ${l.n}: ${esc(l.title)}</h2>
+   ${levelOf(l.n)?`<p class="lvltag">${esc(levelOf(l.n).name)}</p>`:""}<h2>Unit ${l.n}: ${esc(l.title)}</h2>
    <div class="bar">${mini("lview",[["notes","Notes"],["words","Words"]].concat(sentOf([l.n]).length?[["sent","Sentences"]]:[],DMAP[l.n]?[["dlg","Dialogue"]]:[],[["cards",DMAP[l.n]?"Cards":"Flashcards"]]),S.lview)}</div>`;
   if(S.lview==="notes"){
     l.notes.forEach(nt=>{
