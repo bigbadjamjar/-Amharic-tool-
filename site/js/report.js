@@ -62,13 +62,14 @@ function repItemOf(box){
 /* --- where in the app --- */
 function repWhere(){
   if(typeof S==="undefined") return "";
-  const tab = {course:"Course",fidel:"Fidel & numbers › Letters",num:"Fidel & numbers › Numbers",ref:"Tables",test:"Test",prog:"Progress",find:"Search",me:"Profiles",who:"Profiles",welcome:"Welcome page"}[S.mode] || S.mode;
+  const tab = {course:"Course",fidel:"ፊደል (Fidel) › Letters",num:"ፊደል (Fidel) › Numbers",eth:"Ethiopia",ref:"Tables",test:"Test",prog:"Progress",find:"Search",me:"Profiles",who:"Profiles",welcome:"Welcome page"}[S.mode] || S.mode;
   const p = [tab];
   try{
     if(S.mode==="course" && S.lesson){ const l = typeof LMAP!=="undefined" && LMAP[S.lesson]; p.push("Unit "+S.lesson+(l&&l.title?" ("+l.title+")":"")); p.push({notes:"Notes",words:"Words",sent:"Sentences",dlg:"Dialogue",cards:"Cards"}[S.lview]||S.lview); }
     else if(S.mode==="fidel") p.push({chart:"Chart",type:"Typing"}[S.ftab]||S.ftab);
     else if(S.mode==="ref"){ p.push({pronouns:"Pronouns",verbs:"Verbs",extra:"Extra words"}[S.rtab]||S.rtab); if(S.rtab==="extra" && S.cat) p.push(S.cat); }
     else if(S.mode==="test" && S.quiz){ const t = typeof topic==="function" && topic(S.quiz.id); p.push((t&&t.name)||S.quiz.id); if(!S.quiz.done) p.push("question "+(S.quiz.i+1)); }
+    else if(S.mode==="eth" && typeof ETHV!=="undefined" && ETHV.id && ETHMAP[ETHV.id]) p.push(ETHMAP[ETHV.id].title);
     else if(S.mode==="find" && S.find && S.find.q) p.push("“"+S.find.q+"”");
   }catch(e){}
   return p.filter(Boolean).join(" › ");
