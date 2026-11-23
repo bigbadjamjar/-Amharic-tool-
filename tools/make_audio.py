@@ -7,6 +7,7 @@
     python3 tools/make_audio.py --list          # only show what would be made
     python3 tools/make_audio.py --course-only   # just the course words and sentences
     python3 tools/make_audio.py --fidel         # just the letters of the Fidel chart
+    python3 tools/make_audio.py --verbs         # just the verb tables (every tense, every person)
     python3 tools/make_audio.py --only "ሰላም" "ቡና"
     python3 tools/make_audio.py --from words.txt   # one phrase per line
 
@@ -75,16 +76,19 @@ def note_examples(text: str) -> list:
     return out
 
 
-def code_phrases(course_only: bool = False) -> list:
-    """Amharic the app builds in code (number words, each verb's "-ing" noun and doer word),
-    listed by tools/code_phrases.mjs. Numbers come with the course run; verb words only with "everything"."""
+def code_phrases(course_only: bool = False, verbs_only: bool = False) -> list:
+    """Amharic the app builds in code (number words, each verb's "-ing" noun and doer word, every form
+    in the verb tables), listed by tools/code_phrases.mjs. Numbers come with the course run;
+    verb words and verb table forms with "everything" and "verb tables"."""
     try:
         out = subprocess.run(["node", str(SITE.parent / "tools" / "code_phrases.mjs")], capture_output=True, text=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError) as e:
         print(f"Could not list number words and verb words (needs Node.js): {e}", file=sys.stderr)
         return []
     d = json.loads(out)
-    return d["numbers"] + ([] if course_only else d["verbs"])
+    if verbs_only:
+        return d["verbs"] + d["conj"]
+    return d["numbers"] + ([] if course_only else d["verbs"] + d["conj"])
 
 
 def dialogue_lines() -> list:
@@ -209,6 +213,8 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0, help="stop after this many clips")
     ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences, the reading stories and the culture notes")
     ap.add_argument("--fidel", action="store_true", help="only the letters of the Fidel chart")
+    ap.add_argument("--verbs", action="store_true", help="only the verb tables: every tense and person of each course verb")
+    ap.add_argument("--workers", type=int, default=4, help="clips made at the same time (default 4)")
     a = ap.parse_args()
 
     male = []   # dialogue lines spoken by a man: always the male voice, saved in clips/m/
@@ -218,6 +224,8 @@ def main() -> None:
         wanted = [l.strip() for l in open(a.src, encoding="utf-8") if l.strip()]
     elif a.fidel:
         wanted = fidel_letters()
+    elif a.verbs:
+        wanted = code_phrases(verbs_only=True)
     else:
         dl = dialogue_lines()
         wanted = phrases_from_data(a.course_only) + [t for t, g in dl if g == "f"] + code_phrases(a.course_only) + ([] if a.course_only else fidel_letters())
@@ -249,7 +257,9 @@ def main() -> None:
         text, m = best[key], key.startswith(MALE_DIR + "/")
         if key not in have:
             todo.append((text, m))
-        elif a.redo_all or (key in made and (a.redo or made[key] != to_tts(text))):
+        elif a.redo_all or (key in made and (a.redo or (made[key] != to_tts(text) and not a.verbs))):
+            # (a verb-tables run only adds missing clips: a word that is also in a sentence elsewhere
+            #  may be said there with punctuation, and that version should stay)
             todo.append((text, m))
             remake += 1
     if a.limit:
@@ -261,22 +271,33 @@ def main() -> None:
         return
 
     (CLIPS / MALE_DIR).mkdir(parents=True, exist_ok=True)
-    failed = 0
-    for i, (text, m) in enumerate(todo, 1):
-        for attempt in (1, 2, 3):
-            try:
-                asyncio.run(make(text, VOICES["male" if m else "female"], a.rate, m))
-                made[(MALE_DIR + "/" if m else "") + normalize(text)] = to_tts(text)
-                print(f"[{i}/{len(todo)}] {to_tts(text)}")
-                break
-            except Exception as e:  # keep going; network hiccups are common
-                if attempt == 3:
-                    failed += 1
-                    print(f"[{i}/{len(todo)}] FAILED {text}: {e}", file=sys.stderr)
-                else:
-                    time.sleep(2 * attempt)
-        if i % 25 == 0:
-            save_generated(made)
+    stats = {"done": 0, "failed": 0}
+
+    async def one(i: int, text: str, m: bool, gate: asyncio.Semaphore) -> None:
+        async with gate:
+            for attempt in (1, 2, 3):
+                try:
+                    await make(text, VOICES["male" if m else "female"], a.rate, m)
+                    made[(MALE_DIR + "/" if m else "") + normalize(text)] = to_tts(text)
+                    print(f"[{i}/{len(todo)}] {to_tts(text)}", flush=True)
+                    break
+                except Exception as e:  # keep going; network hiccups are common
+                    if attempt == 3:
+                        stats["failed"] += 1
+                        print(f"[{i}/{len(todo)}] FAILED {text}: {e}", file=sys.stderr, flush=True)
+                    else:
+                        await asyncio.sleep(2 * attempt)
+            stats["done"] += 1
+            if stats["done"] % 25 == 0:
+                save_generated(made)
+
+    async def run_all() -> None:
+        # a few at a time: much faster than one by one, and gentle enough on the voice service
+        gate = asyncio.Semaphore(max(1, a.workers))
+        await asyncio.gather(*(one(i, t, m, gate) for i, (t, m) in enumerate(todo, 1)))
+
+    asyncio.run(run_all())
+    failed = stats["failed"]
     save_generated(made)
     print(f"done, {failed} failed; manifest lists {write_manifest()} clips")
 

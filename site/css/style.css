@@ -143,7 +143,8 @@ body.norom .rom{display:none}
 .miss s{color:var(--bad)}
 .back{color:var(--accent);font-weight:600;padding:14px 0 0;font-size:.95rem}
 .sel{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;max-width:100%}
-.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;max-height:232px;overflow-y:auto;padding:2px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;max-height:232px;overflow-y:auto;padding:2px;overscroll-behavior:contain}
+.vtbl .form[data-act]{cursor:pointer}
 .vitem{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-width:0}
 .vitem .am{font-size:1.15rem;line-height:1.25}
 .vitem small{color:var(--muted);font-size:.74rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}

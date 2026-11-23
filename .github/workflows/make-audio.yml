@@ -8,6 +8,7 @@ name: Make audio clips
 # Dialogue lines, reading stories and culture notes come with the course words.
 # Clips it made before are remade if their text in the app has changed (e.g. punctuation fixed).
 # Clips you added yourself are never replaced.
+# "verb tables" makes every form in Tables › Verbs (each tense, each person) for the course verbs.
 on:
   workflow_dispatch:
     inputs:
@@ -18,6 +19,7 @@ on:
         options:
           - course words and sentences
           - fidel letters
+          - verb tables
           - everything
 
 permissions:
@@ -31,7 +33,7 @@ concurrency:
 jobs:
   make:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -47,6 +49,7 @@ jobs:
           args=""
           [ "${{ inputs.which }}" = "course words and sentences" ] && args="$args --course-only"
           [ "${{ inputs.which }}" = "fidel letters" ] && args="$args --fidel"
+          [ "${{ inputs.which }}" = "verb tables" ] && args="$args --verbs"
           python3 tools/make_audio.py $args
 
       # Runs even if the step above stopped part way, so finished clips are kept.

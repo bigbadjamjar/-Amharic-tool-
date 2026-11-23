@@ -11,7 +11,7 @@ const lessonSelect=(id,val)=>`<select id="${id}" class="sel" aria-label="Unit"><
 function vListHTML(){
   const m=vMatch(), show=m.slice(0,60);
   if(!m.length) return `<p class="count">No verbs match.</p>`;
-  return `<div class="vgrid">`+show.map(([v,i])=>`<button class="vitem" data-act="vsel" data-v="${i}" aria-pressed="${i===S.v.sel}"><span class="am">${esc(v.am)}</span><small>${esc(v.en)}</small></button>`).join("")+`</div>`+
+  return `<div class="vgrid" data-keepscroll="vgrid">`+show.map(([v,i])=>`<button class="vitem" data-act="vsel" data-v="${i}" aria-pressed="${i===S.v.sel}"><span class="am">${esc(v.am)}</span><small>${esc(v.en)}</small></button>`).join("")+`</div>`+
     (m.length>show.length?`<p class="count">Showing 60 of ${m.length}. Search or pick a unit to narrow the list.</p>`:"");
 }
 function vPanel(){
@@ -21,7 +21,9 @@ function vPanel(){
     <p><b>${esc(v.en)}</b> ${LMAP[v.lesson]?`<span class="count">· unit ${v.lesson}</span>`:""}</p>
     ${f.vn?`<p class="count">“-ing” noun: <span class="am">${esc(f.vn.am)}</span> <span class="rom">${esc(f.vn.rom)}</span> · doer: <span class="am">${esc(f.part.am)}</span> <span class="rom">${esc(f.part.rom)}</span></p>`:`<p class="count">This verb has only the forms below. For “will be” use <span class="am">ሆነ</span>; for commands use <span class="am">ሁን</span> “be!”.</p>`}</div>`;
   h+=chips("vtense",av.map(x=>[x[0],x[1]]),t)+`<p class="count" style="margin:6px 0 8px">${esc(info[2])}</p><div class="tbl vtbl">`;
-  PR.forEach((p,i)=>{h+=`<div class="row"><span class="who">${p.am}</span><span class="form">${A(f[t][i].am,f[t][i].rom)}</span>${enCell(v,t,i)}</div>`;});
+  // tapping a form plays it, like tapping a verb in the list or a fidel letter (the ▶ after it does the same)
+  PR.forEach((p,i)=>{const x=f[t][i], tap=canSay(x.am)?` data-act="say" data-v="${esc(x.am)}"`:"";
+    h+=`<div class="row"><span class="who">${p.am}</span><span class="form"${tap}>${A(x.am,x.rom)}</span>${enCell(v,t,i)}</div>`;});
   return h+`</div><p class="count" style="margin-top:6px">The English on the right shows what each form means${t==="pres"||t==="presNeg"?". This tense covers both now and the future":""}. <span class="ptag">m</span> <span class="ptag">f</span> <span class="ptag">pl</span> mark “you” said to a man, a woman, or more than one person.</p>`;
 }
 // make an over-long name (from an old profile or backup) smaller until it fits its fixed box
@@ -903,9 +905,13 @@ function render(){
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitHead(); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
+  // Boxes that scroll inside the page (the verb list) keep their place when the page is redrawn,
+  // so tapping a verb or a tense doesn't throw the list back to the top.
+  const keep={}; document.querySelectorAll("#app [data-keepscroll]").forEach(el=>keep[el.dataset.keepscroll]=el.scrollTop);
   $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="eth"?renderEth():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
   addSayButtons($("#app"));
+  document.querySelectorAll("#app [data-keepscroll]").forEach(el=>{ const k=el.dataset.keepscroll; if(k in keep) el.scrollTop=keep[k]; });
   const ein=$("#tin.en"); if(ein&&!ein.readOnly&&document.activeElement!==ein) ein.focus({preventScroll:true});   // typed English answers: straight to the keyboard
   // listening questions play by themselves, once, when they first appear
   const Q=S.quiz; if(S.mode==="test"&&Q&&!Q.done){const q=Q.qs[Q.i]; if(q.listen&&Q.heard!==Q.i){Q.heard=Q.i; playAm(q.listen);}}
@@ -1010,7 +1016,7 @@ document.addEventListener("click",e=>{
   else if(a==="p-show"){S.prac.shown=!S.prac.shown;}
   else if(a==="k-native"){S.kb.native=!S.kb.native;S.kb.cons=null;}
   else if(a==="vview"){S.v.view=v;}
-  else if(a==="vsel"){S.v.sel=+v;}
+  else if(a==="vsel"){S.v.sel=+v; playAm(VLIST[+v].am);}   // picking a verb also says it
   else if(a==="vtense"){S.v.tense=v;}
   else if(a==="vdeck"){S.v.deck=v;vNewCard();}
   else if(a==="vflip"){S.v.flip=!S.v.flip;}
