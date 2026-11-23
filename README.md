@@ -24,11 +24,13 @@ site/
     vocab.js          extra vocabulary by theme
     fidel.js          the Fidel rows
     everyday.js       words for the Everyday drills: telling the time, prices, dates, the Ethiopian calendar
+    gloss.js          word by word: the English meaning of each word of every sentence, in Amharic order
   js/engine.js        the verb engine: works out every tense from a verb's dictionary form
   js/audio.js         plays saved clips
   js/dialogue.js      the Dialogue tab: read, play it all, or take one part
   js/drills.js        Test tab > Everyday Amharic: time, money and dates, with the Ethiopian clock and calendar
   js/games.js         Test tab > Games: matching pairs, speed round, fidel bingo
+  js/gloss.js         the "Word by word" switch: shows each word's meaning under a sentence
   js/app.js           the screens and quizzes
   audio/clips/        saved sound files
   audio/manifest.js   list of clips (generated)

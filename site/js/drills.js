@@ -193,7 +193,7 @@ const DR_TABS = [["time", "Time"], ["money", "Money"], ["dates", "Dates"]];
 const drState = () => S.dr || (S.dr = { tab: "time", h: null, m: 0, date: "", seed: 1 });
 // a line of Amharic with its transcription and a play button for the whole phrase
 const drLine = (parts, rom, cls) => `<span class="drline ${cls || ""}"><span class="am nosay norom-auto">${esc(parts.join(" "))}</span>${drSayBtn(parts)}${rom ? `<span class="rom">${esc(rom)}</span>` : ""}</span>`;
-const drWords = list => wordList(list.map(w => [w[0], w[1], w[2]]));
+const drWords = list => wordList(list.map(w => [w[0], w[1], w[2]]), true);
 
 function drTimePage(){
   const D = drState(); if(D.h === null){ const t = new Date(); D.h = t.getHours(); D.m = DR_MINS[Math.floor(t.getMinutes() / 15)]; }
@@ -208,7 +208,7 @@ function drTimePage(){
       <div class="drpick"><select id="dr-h" class="sel" aria-label="Hour">${Array.from({ length: 24 }, (_, h) => `<option value="${h}" ${h === D.h ? "selected" : ""}>${h % 12 || 12} ${h < 12 ? "am" : "pm"}</option>`).join("")}</select>
       <select id="dr-m" class="sel" aria-label="Minutes">${DR_MINS.map(m => `<option value="${m}" ${m === D.m ? "selected" : ""}>:${String(m).padStart(2, "0")}</option>`).join("")}</select>
       <button class="link" data-act="dr-now">Now</button></div>
-      <div class="drclock">${clockSVG(D.h, D.m, 112)}<div><p class="count">${wTime(D.h, D.m)} on a Western clock is</p><p class="drbig norom-auto">${eClock(D.h, D.m)} <small>on an Ethiopian clock</small></p>${drLine(t.parts, t.rom, "big")}</div></div></div>
+      <div class="drclock">${clockSVG(D.h, D.m, 112)}<div><p class="count">${wTime(D.h, D.m)} on a Western clock is</p><p class="drbig norom-auto">${eClock(D.h, D.m)} <small>on an Ethiopian clock</small></p>${drLine(t.parts, t.rom, "big")}${glossHTML(t.parts.join(" "), t.rom)}</div></div></div>
     <div class="note"><h4>Morning, afternoon, evening, night</h4><p>Because the same hour comes round twice, say which part of the day you mean, before the hour:</p>
       <p>{ጠዋት|t'ewat} morning (about 6 am to noon) · {ቀን|qen} the middle of the day · {ከሰዓት በኋላ|kese'at behwala} afternoon (“after the hour”, noon to 6 pm) · {ማታ|mata} evening (6 pm to midnight) · {ሌሊት|lélit} night (midnight to 6 am).</p>
       <p>{ጠዋት ሦስት ሰዓት|t'ewat sost se'at} is 9 am, {ከሰዓት በኋላ ስምንት ሰዓት|kese'at behwala simmint se'at} is 2 pm, {ማታ ሁለት ሰዓት|mata hulett se'at} is 8 pm.</p></div>
@@ -240,13 +240,13 @@ function drDatesPage(){
   let conv = "";
   const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(D.date || "");
   if(m){ const j = gToJdn(+m[1], +m[2], +m[3]), [y, mo, d] = jdnToE(j), w = EV.days[weekday(j)];
-    conv = `<p class="drbig norom-auto">${esc(eStr(0, mo, d))} <small>${y} ዓ.ም.</small></p>${drLine([w[0]].concat(eSaid(0, mo, d)), w[1] + " " + eSaidRom(0, mo, d))}`; }
+    conv = `<p class="drbig norom-auto">${esc(eStr(0, mo, d))} <small>${y} ዓ.ም.</small></p>${drLine([w[0]].concat(eSaid(0, mo, d)), w[1] + " " + eSaidRom(0, mo, d))}${glossHTML([w[0]].concat(eSaid(0, mo, d)).join(" "), w[1] + " " + eSaidRom(0, mo, d))}`; }
   const months = EV.months.map((mo, i) => { const [, gm, gd] = eToG(ey, i + 1, 1);
     return `<div class="row drrow"><span class="lnum">${i + 1}</span><span class="form">${drLine([mo[0]], mo[1])}</span><span class="en">from ${gShort(gm, gd)}${i === 12 ? ` · ${etMonthDays(ey, 13)} days` : ""}</span></div>`; }).join("");
   const hols = EV.holidays.map(hd => { const g = eToG(ey, hd[3], hd[4]);
     return `<div class="row drhol"><span class="form">${drLine([hd[0]], hd[1])}<small class="en">${esc(hd[2])}</small></span><span class="en">${drLine(eSaid(0, hd[3], hd[4]), eSaidRom(0, hd[3], hd[4]))}<small>${gShort(g[1], g[2])}</small></span></div>`; }).join("");
   return `<div class="note drtoday"><h4>Today</h4><p class="count">${new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} is</p>
-      <p class="drbig norom-auto">${esc(wd[0])}፣ ${esc(eStr(0, em, ed))} <small>${ey} ዓ.ም.</small></p>${drLine(said, wd[1] + " " + eSaidRom(0, em, ed))}</div>
+      <p class="drbig norom-auto">${esc(wd[0])}፣ ${esc(eStr(0, em, ed))} <small>${ey} ዓ.ም.</small></p>${drLine(said, wd[1] + " " + eSaidRom(0, em, ed))}${glossHTML(said.join(" "), wd[1] + " " + eSaidRom(0, em, ed))}</div>
     <div class="note"><h4>Thirteen months of sunshine</h4>
       <p>Ethiopia has its own calendar. Twelve months have exactly 30 days, and a thirteenth month, {ጳጉሜ|p'agumé}, has 5 days (6 every fourth year).</p>
       <p>The year starts on {መስከረም|meskerem} 1, which is 11 September (12 September in the year before a Western leap year). The Ethiopian year number is 7 or 8 behind the Western one: 8 behind until New Year in September, then 7. Write {ዓ.ም.|amete mihret} after an Ethiopian year.</p>
@@ -261,7 +261,7 @@ const DR_PAGE_TESTS = { time: ["dr-time", "dr-clock"], money: ["dr-price", "dr-s
 function drMenu(){
   const D = drState();
   const body = D.tab === "money" ? drMoneyPage() : D.tab === "dates" ? drDatesPage() : drTimePage();
-  return `<div class="bar">${mini("dr-tab", DR_TABS, D.tab)}</div>
+  return `<div class="bar">${mini("dr-tab", DR_TABS, D.tab)}${glossBtn()}</div>
     <h3>Test yourself</h3>${tStack(DR_PAGE_TESTS[D.tab])}${fmtNotes(body)}`;
 }
 // notes above write Amharic examples as {fidel|transcription}, like the course

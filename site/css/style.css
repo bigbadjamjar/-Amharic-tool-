@@ -55,6 +55,24 @@ small{text-wrap:pretty}
 .am{font-family:var(--f-fidel)}
 .rom{color:var(--gold);font-size:.85rem;font-style:italic}
 body.norom .rom{display:none}
+/* word by word (js/gloss.js): each Amharic word with its meaning under it, in Amharic order */
+.glbtn{display:inline-flex;align-items:center;gap:7px;flex:none;font-size:.82rem;font-weight:600;color:var(--ink);padding:5px 10px 5px 6px;border-radius:999px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.glbtn i{width:28px;height:16px;border-radius:8px;background:var(--line);position:relative;display:inline-block;transition:background .15s}
+.glbtn i::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--surface);transition:left .15s}
+.glbtn[aria-pressed="true"]{border-color:var(--accent)}
+.glbtn[aria-pressed="true"] i{background:var(--accent)}
+.glbtn[aria-pressed="true"] i::after{left:14px}
+.glbar{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.glbar h3{margin-bottom:0}
+.dtog{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
+.gloss{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;grid-column:1 / -1}
+.gw{display:inline-flex;flex-direction:column;align-items:flex-start;padding:3px 8px 4px;border-radius:8px;background:var(--tint);max-width:100%}
+.gw .am{font-family:var(--f-fidel-sans);font-size:1.02rem;line-height:1.3;display:block}
+.gw .rom{font-size:.72rem;line-height:1.2}
+.gw .ge{font-size:.8rem;line-height:1.25;color:var(--ink);font-weight:500}
+.gw .ge.unsure{text-decoration:underline dotted;text-underline-offset:3px}
+.row .form .gw .am,.row .gw .am{font-size:1.02rem}
+.glq{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:10px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:1px}
 .pcard .am{font-size:1.6rem;line-height:1.3}
