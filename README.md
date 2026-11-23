@@ -31,6 +31,7 @@ site/
   js/drills.js        Test tab > Everyday Amharic: time, money and dates, with the Ethiopian clock and calendar
   js/games.js         Test tab > Games: matching pairs, speed round, fidel bingo
   js/gloss.js         the "Word by word" switch: shows each word's meaning under a sentence
+  js/support.js       "Support this app" (Ko-fi): set SUPPORT_URL; empty hides it everywhere
   js/app.js           the screens and quizzes
   audio/clips/        saved sound files
   audio/manifest.js   list of clips (generated)
