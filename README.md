@@ -96,4 +96,4 @@ The conjugation tables and the verb list are standard grammar; the verb engine w
 
 ## Copyright
 
-© 2026 Rob. All rights reserved. See [LICENSE](LICENSE).
+© 2026 Robert Sadler. All rights reserved. See [LICENSE](LICENSE).
