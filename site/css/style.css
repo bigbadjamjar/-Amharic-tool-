@@ -482,18 +482,25 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 @media (min-width:960px){ .whobtn{width:7.5rem} }
 @media (min-width:1200px){ .whobtn{width:9rem} }
 .whobtn[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--head-ink)}
-.seg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--head-soft);border-radius:11px;padding:3px;gap:2px}
-.seg button{white-space:nowrap;padding:8px 2px;border-radius:8px;font-weight:600;color:var(--head-muted);font-size:.86rem}
+/* the six tabs: each takes its word's width plus an equal share of the spare room, so a longer word
+   never spills past its highlight or the edge of the bar */
+.seg{display:flex;background:var(--head-soft);border-radius:11px;padding:3px;gap:2px}
+.seg button{flex:1 1 auto;min-width:0;white-space:nowrap;padding:8px 6px;border-radius:8px;font-weight:600;color:var(--head-muted);font-size:.86rem;line-height:1.2;text-align:center}
 .seg button:hover{color:var(--head-ink)}
 .seg button[aria-selected="true"]{background:var(--tab-on);color:var(--tab-on-ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .seg .short{display:none}
-/* the Fidel tab is labelled ፊደል: Ethiopic letters look small next to Latin ones, so a little bigger */
-.seg .fidtab{font-family:var(--f-fidel-sans);font-size:1.08em;line-height:1}
 /* ፊደል (Fidel): one tab, with a Letters / Numbers switch at the top of the page */
 .fnsw{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--tint);border-radius:11px;padding:3px;margin-top:14px}
 .fnsw button{padding:9px 6px;border-radius:8px;font-weight:600;font-size:.95rem;color:var(--muted)}
 .fnsw button .am{font-size:1.1em;margin-right:4px}
 .fnsw button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+/* Learn: Fidel · Units · Stories · Culture. Each part takes its word's width plus an equal share. */
+.lrnsw{display:flex}
+.lrnsw button{flex:1 1 auto;min-width:0;white-space:nowrap;padding:9px 4px;display:inline-flex;align-items:center;justify-content:center;gap:4px;line-height:1.2}
+.lrnsw button .am{margin-right:0;line-height:1}
+.lrnsw + .fnsw{margin-top:8px}
+@media (max-width:420px){ .lrnsw button{font-size:.86rem;padding:9px 2px} }
+@media (max-width:350px){ .lrnsw button{font-size:.78rem;padding:9px 1px} }
 /* phones: the English name sits in small letters under the Amharic, so both fit beside the tools
    without making the bar taller; the profile name drops (the initial stays) and the switch label shortens */
 @media (max-width:440px){
@@ -506,7 +513,11 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
   .seg .full{display:none} .seg .short{display:inline}
   .whobtn{padding:0 3px} .whobtn .nm{display:none}
 }
-@media (max-width:400px){ .seg{display:flex} .seg button{flex:1 1 auto;font-size:.76rem;padding:8px 1px} }
+@media (max-width:400px){ .seg button{font-size:.78rem;padding:8px 3px} }
+@media (max-width:350px){ .seg{gap:1px} .seg button{font-size:.74rem;padding:8px 2px} }
+/* mid widths (tablet, small laptop): the bar is busy, so the switch shows its short label */
+@media (min-width:600px) and (max-width:759px){ .romtoggle .full{display:none} .romtoggle .short{display:inline} }
+@media (min-width:960px) and (max-width:1023px){ .romtoggle .full{display:none} .romtoggle .short{display:inline} }
 @media (max-width:340px){ .head{padding-left:10px;padding-right:10px} .tools{gap:3px} .romtoggle .short{display:none} .romtoggle{padding:0 4px} }
 .wlname{margin:0 0 6px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 /* fidel chart: the big play button in the letter box (tapping a letter no longer plays it) */
@@ -584,7 +595,7 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .head{flex-direction:row;align-items:center;gap:20px;padding-top:10px;padding-bottom:10px}
   .brand{display:contents}
   .brand h1{order:1}
-  .seg{order:2;flex:1;max-width:620px;margin:0 auto}
+  .seg{order:2;flex:1 1 auto;min-width:360px;max-width:620px;margin:0 auto}
   .tools{order:3}
   .wrap{font-size:1.02rem}
   /* card lists: units, tests, progress rows, search results */

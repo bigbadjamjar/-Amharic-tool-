@@ -1,8 +1,8 @@
 /* ---------- reading stories ----------
-   Stories (data/stories.js) live on the Test tab (section "Stories"), and are also linked from the end of
-   the unit they go with. Tap any word to see what it means and how it sounds; play one line or the whole
+   Stories (data/stories.js) live on the Learn tab (Units · Stories · Culture), and are also linked from the
+   end of the unit they go with. Tap any word to see what it means and how it sounds; play one line or the whole
    story; a short quiz at the end, whose best score is kept like any test's (S.best["st-" + id]).
-   The culture notes live in the Ethiopia tab (ethiopia.js); the Course page and a unit's "Read more" link to them.
+   The culture notes are Learn › Culture (ethiopia.js); a unit's "Read more" links to them.
    The rest of the state lives in RD, not in S, and isn't saved. Uses app.js helpers (S, esc, fmt, mini,
    wordList, render, save, shuffle, LMAP) at call time. */
 const RD_DEF = () => ({view:null, id:null, from:null, w:null, en:false, ans:{}, ord:null, playing:-1, tok:0});
@@ -15,8 +15,8 @@ function rdWords(line){
   const am = line[0].split(/\s+/).filter(Boolean), rom = line[1].replace(/[?!.,;:]/g, " ").split(/\s+/).filter(Boolean);
   return am.map((w, j) => ({key: rdKey(w), shown: w.replace(/^[«"“]+/, "").replace(/[።፣፤፥፦፧?!.,;:»"”]+$/, ""), pre: (w.match(/^[«"“]+/) || [""])[0], post: (w.match(/[።፣፤፥፦፧?!.,;:»"”]+$/) || [""])[0], rom: rom[j] || ""}));
 }
-// a story shows on the Test tab
-const rdFocus = () => S.mode==="test" && !S.quiz && RD.view==="story";
+// a story shows on the Learn tab
+const rdFocus = () => S.mode==="course" && RD.view==="story";
 const rdHere = tok => tok===RD.tok && rdFocus();
 function rdStop(){ if(RD.playing>=0){ RD.tok++; stopAm(); RD.playing = -1; } }
 function rdLeave(){ rdStop(); RD.view = null; RD.id = null; RD.w = null; }
@@ -26,12 +26,7 @@ function rdShuffle(){ const s = STMAP[RD.id]; RD.ord = s ? s.qs.map(q => shuffle
 const stBestId = s => "st-"+s.id;
 const stChip = s => { const b = S.best[stBestId(s)]; return b!=null ? `<span class="best"><strong>${b}/${s.qs.length}</strong>best</span>` : `<span class="best untried">not tried</span>`; };
 
-/* Course page: a card for the Ethiopia tab (the stories are on the Test tab) */
-function rdCourseCards(){
-  return `<div class="rdgo">
-    <button class="tcard cu" data-act="mode" data-v="eth"><span class="ticon" aria-hidden="true">🌍</span><b>Ethiopia</b><small>The country, its peoples, history, faith, food and music, with useful phrases.</small><span class="tn">${CULTURE.length} notes in the Ethiopia tab ›</span></button></div>`;
-}
-/* Test tab, section "Stories": every story, easiest first, with its best quiz score */
+/* Learn › Stories: every story, easiest first, with its best quiz score */
 function rdStoryList(){
   return `<div class="stack">${STORIES.map(s => `<button class="topic" data-act="rd-story" data-v="${s.id}" data-from="list"><b><span class="lnum">${s.after}</span>${esc(s.title)}</b><small>After unit ${s.after} · ${s.lines.length} lines · ${s.qs.length} questions · ${esc(s.intro)}</small>${stChip(s)}</button>`).join("")}</div>`;
 }
@@ -41,14 +36,15 @@ function rdUnitLinks(n){
   if(!st.length && !cu.length) return "";
   return `<h3>Read more</h3><div class="stack rdfill rdmore" style="--c:${Math.min(st.length+cu.length,3)}">`+
     st.map(s => `<button class="topic" data-act="rd-story" data-v="${s.id}" data-from="unit"><b>📖 Story and quiz: ${esc(s.title)}</b><small>${esc(s.intro)} Tap any word for its meaning.</small></button>`).join("")+
-    cu.map(c => `<button class="topic" data-act="eth-note" data-v="${c.id}"><b>${c.icon} Ethiopia: ${esc(c.title)}</b><small>${esc(c.intro)}</small></button>`).join("")+`</div>`;
+    cu.map(c => `<button class="topic" data-act="eth-note" data-v="${c.id}"><b>${c.icon} Culture: ${esc(c.title)}</b><small>${esc(c.intro)}</small></button>`).join("")+`</div>`;
 }
 
 function rdBack(){
-  const back = RD.from==="unit" && S.lesson ? `‹ Unit ${S.lesson}` : RD.view==="story" ? "‹ All stories" : "‹ Course";
+  const back = RD.from==="unit" && S.lesson ? `‹ Unit ${S.lesson}` : "‹ All stories";
   return `<button class="back" data-act="rd-back">${back}</button>`;
 }
 function rdHTML(){
+  if(RD.view==="stories") return `<h2>Stories</h2><p class="lead">Short stories that grow with the course, easiest first. Tap any word for its meaning, listen to the whole story, then answer a short quiz. Your best score is kept.</p>`+rdStoryList();
   if(RD.view==="story") return rdStoryHTML(STMAP[RD.id]);
   return "";
 }
@@ -104,13 +100,14 @@ function rdPlayAll(from){
 // Clicks on data-act="rd-…". Returns true if it has rendered already.
 function rdAct(a, v, b){
   const from = b && b.dataset.from;
-  if(a==="rd-story"){   // a story opens on the Test tab, wherever it was chosen
-    S.mode = "test"; S.quiz = null; S.tsec = "stories"; if(typeof gmStop==="function") gmStop();
+  if(a==="rd-story"){   // a story opens on the Learn tab, wherever it was chosen
+    S.mode = "course"; S.quiz = null; if(typeof gmStop==="function") gmStop();
     rdOpen("story", v, from==="unit" ? "unit" : "list"); window.scrollTo(0,0); return false;
   }
   if(a==="rd-back"){
     const f = RD.from;
-    rdLeave(); if(f==="unit" && S.lesson){ S.mode = "course"; S.lview = "notes"; }   // back to the unit, or to the list of stories
+    if(f==="unit" && S.lesson){ rdLeave(); S.mode = "course"; S.lview = "notes"; }   // back to the unit, or to the list of stories
+    else rdOpen("stories", null, "list");
     window.scrollTo(0,0); return false;
   }
   if(a==="rd-en"){ RD.en = !RD.en; return false; }
