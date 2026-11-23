@@ -820,7 +820,7 @@ async function readIncoming(text){
 }
 
 /* ---------- render + events ---------- */
-const MODES=["course","fidel","ref","test","prog"];
+const MODES=["course","fidel","eth","ref","test","prog"];
 function render(){
   schemeApply(S.scheme);
   document.body.classList.toggle("norom",!S.rom);
@@ -829,11 +829,11 @@ function render(){
   document.body.classList.toggle("focus",!!(S.mode==="test"&&(S.quiz||G))||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg")||rdFocus());
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m||(m==="fidel"&&S.mode==="num")));
-  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // the Fidel & numbers tab reopens whichever half you used last
+  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // the ፊደል (Fidel) tab reopens whichever half you used last
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
-  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
+  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="eth"?renderEth():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
   addSayButtons($("#app"));
   // listening questions play by themselves, once, when they first appear
@@ -885,6 +885,8 @@ document.addEventListener("click",e=>{
   if(a==="find-try"){S.find.q=v;const i=$("#findq");if(i)i.value=v;findRefresh();return;}
   if(a.startsWith("dg-")&&a!=="dg-open"){ if(!dgAct(a,v)) render(); return; }
   if(a.startsWith("rd-")){ if(!rdAct(a,v,b)) render(); return; }
+  if(a.startsWith("eth-")){ dgStop(); S.find.from=false; ethAct(a,v,b); return; }   // ethiopia.js
+  if(a==="mode"&&v==="eth") ethReset();   // the Ethiopia tab always opens on its list of notes
   if(a==="mode"||a==="lesson"||a==="lesson-go"||a==="dg-open"||a==="start") rdLeave();
   if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
   if(a==="mode"||a==="fn"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
