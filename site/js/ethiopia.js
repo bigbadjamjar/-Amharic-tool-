@@ -1,4 +1,4 @@
-/* ---------- the Ethiopia tab ----------
+/* ---------- Learn › Culture (Ethiopia, its people and everyday life) ----------
    Notes on the country, its peoples and everyday life (data/culture.js), sorted into groups below.
    Each note has a few paragraphs, sometimes a table of quick facts, and useful phrases with audio.
    A note can also be opened from the end of a course unit's notes ("Read more"); its back button then
@@ -23,7 +23,7 @@ function renderEth(){
 }
 
 function ethHomeHTML(){
-  let h = `<h2>Ethiopia <span class="ethname"><span class="am nosay">ኢትዮጵያ</span> <span class="rom">ityop'ya</span></span></h2>
+  let h = learnSwitch() + `<h2>Culture <span class="ethname">Ethiopia, <span class="am nosay">ኢትዮጵያ</span> <span class="rom">ityop'ya</span></span></h2>
     <p class="lead">The country, its peoples and its everyday life: history, faith, food, music and more. Each note ends with a few useful phrases you can listen to.</p>`;
   ETH_GROUPS.forEach(g => {
     h += `<h3>${esc(g.title)}</h3><div class="tgrid rdgrid">` + g.ids.map(id => {
@@ -35,7 +35,7 @@ function ethHomeHTML(){
 }
 
 function ethNoteHTML(c){
-  const back = ETHV.unit && LMAP[ETHV.unit] ? `‹ Unit ${ETHV.unit}` : "‹ Ethiopia";
+  const back = ETHV.unit && LMAP[ETHV.unit] ? `‹ Unit ${ETHV.unit}` : "‹ Culture";
   const i = ETH_ORDER.indexOf(c.id), next = ETHMAP[ETH_ORDER[i+1]];
   let h = `<button class="back" data-act="eth-back">${back}</button>
     <h2 class="rdh"><span aria-hidden="true">${c.icon}</span> ${esc(c.title)}</h2><p class="lead">${esc(c.intro)}</p>`;

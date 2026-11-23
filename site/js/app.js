@@ -138,7 +138,7 @@ function numOut(){
 }
 function renderNum(){
   const t=S.num.tab;
-  let h=fnSwitch()+chips("ntab",[["chart","Chart"],["rules","Rules"],["try","Try any"],["cards","Cards"]],t)+`<h2>Numbers</h2><p class="lead">Learn the Amharic words for numbers and the Amharic number symbols, then test yourself.</p>`;
+  let h=learnSwitch()+fnSwitch()+chips("ntab",[["chart","Chart"],["rules","Rules"],["try","Try any"],["cards","Cards"]],t)+`<h2>Numbers</h2><p class="lead">Learn the Amharic words for numbers and the Amharic number symbols, then test yourself.</p>`;
   if(t==="chart"){
     h+=`<h3>One to ten</h3><div class="grid2">${NBASE.slice(0,10).map(nCard).join("")}</div>
         <h3>Tens</h3><div class="grid2">${NBASE.slice(10,18).map(nCard).join("")}</div>
@@ -284,9 +284,9 @@ const bestChip = id => S.best[id]!=null ? `<span class="best"><strong>${S.best[i
 /* ---------- course ---------- */
 const levelOf=n=>LEVELS.find(v=>n>=v.from&&n<=v.to);
 function renderCourse(){
-  if(RD.view&&RD.view!=="story") return rdHTML();   // culture notes (reader.js); stories show on the Test tab
+  if(RD.view) return (RD.view==="stories"?learnSwitch():"")+rdHTML();   // the stories and a story (reader.js)
   if(S.lesson) return renderLesson(LMAP[S.lesson]);
-  let h=`<h2>Course</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}${rdCourseCards()}`;
+  let h=learnSwitch()+`<h2>Units</h2><p class="lead">${LASTL} short units built around everyday situations: greetings, family, food, getting around. Grammar comes in as each topic needs it, and every fifth unit is a review.</p>${dailyCard()}`;
   const unitBtn=l=> l.review
       ? `<button class="topic" data-act="start" data-v="R${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>Mixed test</small>${bestChip("R"+l.n)}</button>`
       : `<button class="topic" data-act="lesson" data-v="${l.n}"><b><span class="lnum">${l.n}</span>${esc(l.title)}</b><small>${l.vocab.length} words</small>${bestChip("L"+l.n)}</button>`;
@@ -392,8 +392,12 @@ function fidelType(){
 }
 // Fidel and Numbers share one tab: this switch at the top flips between the two halves.
 const fnSwitch = () => `<div class="fnsw norom-auto" role="group" aria-label="Letters or numbers">`+[["fidel","<span class=\"am nosay\">ፊ</span> Letters"],["num","<span class=\"am nosay\">፩</span> Numbers"]].map(([v,l])=>`<button data-act="fn" data-v="${v}" aria-pressed="${S.mode===v}">${l}</button>`).join("")+`</div>`;
+/* The Learn tab: Fidel (letters and numbers), the course units, the reading stories and the culture notes
+   (Ethiopia), with a switch at the top of each. */
+const learnCur = () => S.mode==="fidel"||S.mode==="num" ? "fidel" : S.mode==="eth" ? "culture" : RD.view==="stories" ? "stories" : "units";
+const learnSwitch = () => `<div class="fnsw lrnsw norom-auto" role="group" aria-label="Learn">`+[["fidel","<span class=\"am nosay\">ፊ</span> Fidel"],["units","📘 Units"],["stories","📖 Stories"],["culture","🌍 Culture"]].map(([v,l])=>`<button data-act="learn" data-v="${v}" aria-pressed="${learnCur()===v}">${l}</button>`).join("")+`</div>`;
 function renderFidel(){
-  return fnSwitch()+chips("ftab",[["chart","Chart"],["type","Typing practice"],["key","Sound guide"]],S.ftab)+
+  return learnSwitch()+fnSwitch()+chips("ftab",[["chart","Chart"],["type","Typing practice"],["key","Sound guide"]],S.ftab)+
     (S.ftab==="type"?"":`<h2>${S.ftab==="chart"?"The fidel":"Sound guide"}</h2>`)+
     (S.ftab==="chart"?fidelChart():S.ftab==="type"?fidelType():fidelKey());
 }
@@ -676,7 +680,6 @@ const TSECS = [
   ["units","📘","Units","A test for each course unit, the review units, and one across the whole course.",()=>LESSONS.length+1,()=>tStack(LESSONS.map(l=>(l.review?"R":"L")+l.n).concat("Lall"))],
   ["num","🔢","Numbers","Number words and the Amharic numerals, both ways round.",()=>NTESTS.length,()=>tStack(NTESTS)],
   ["sent","🧩","Sentences","Build Amharic sentences word by word, or pick what a sentence means.",()=>3,()=>bsIntro()+tStack(["build-course","build-verbs","sent-mean"])+bsHTML(true)],
-  ["stories","📖","Stories","Short stories that grow with the course. Tap any word for its meaning, then answer a short quiz.",()=>STORIES.length,()=>rdStoryList(),"story"],
   ["dlg","💬","Dialogues","Hear one side of a short conversation and answer as the other person.",()=>DIALOGUES.length,()=>noH3(dgMenu())],
   ["general","📋","General practice","Pronouns, verbs, verb forms, extra words, and everything mixed.",()=>5,()=>tStack(["pronouns","verbs","verbs-type","extra","mixed"])],
   ["everyday","🕒","Everyday Amharic","Telling the time the Ethiopian way, prices in birr, dates and the Ethiopian calendar.",()=>Object.keys(DR_TESTS).length,()=>drMenu()],
@@ -766,7 +769,6 @@ function slotPick(Q,j){
 }
 function renderTest(){
   const Q=S.quiz;
-  if(!Q&&RD.view==="story") return rdHTML();   // a reading story and its quiz (reader.js)
   if(!Q&&G) return gmRender();   // a game (games.js)
   if(!Q) return testMenu();
   const tp=topic(Q.id), QN=Q.n;
@@ -875,7 +877,8 @@ async function readIncoming(text){
 }
 
 /* ---------- render + events ---------- */
-const MODES=["course","fidel","eth","ref","test","prog"];
+const MODES=["welcome","course","ref","test","prog"];
+const TABOF={eth:"course",fidel:"course",num:"course",me:null,who:null,find:null};   // pages that light up another tab
 function render(){
   schemeApply(S.scheme);
   document.body.classList.toggle("norom",!S.rom);
@@ -883,8 +886,8 @@ function render(){
   // quizzes, typing practice and dialogues keep a reading width on a wide screen (see "laptop and desktop" in style.css)
   document.body.classList.toggle("focus",!!(S.mode==="test"&&(S.quiz||G))||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg")||rdFocus());
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
-  MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m||(m==="fidel"&&S.mode==="num")));
-  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // the ፊደል (Fidel) tab reopens whichever half you used last
+  const on=S.mode in TABOF?TABOF[S.mode]:S.mode; MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",on===m));
+  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // Learn › Fidel reopens whichever half you used last
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
@@ -944,17 +947,18 @@ document.addEventListener("click",e=>{
   if(a.startsWith("dg-")&&a!=="dg-open"){ if(!dgAct(a,v)) render(); return; }
   if(a.startsWith("rd-")){ if(!rdAct(a,v,b)) render(); return; }
   if(a.startsWith("eth-")){ dgStop(); S.find.from=false; ethAct(a,v,b); return; }   // ethiopia.js
-  if(a==="mode"&&v==="eth") ethReset();   // the Ethiopia tab always opens on its list of notes
-  if(a==="mode"||a==="lesson"||a==="lesson-go"||a==="dg-open"||a==="start"||a==="tsec"||a==="quit") rdLeave();
-  if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
-  if(a==="mode"||a==="fn"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
+  if((a==="mode"&&v==="eth")||a==="learn") ethReset();   // Culture always opens on its list of notes
+  if(a==="mode"||a==="learn"||a==="lesson"||a==="lesson-go"||a==="dg-open"||a==="start"||a==="tsec"||a==="quit") rdLeave();
+  if(a==="mode"||a==="learn"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
+  if(a==="mode"||a==="fn"||a==="learn"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
   if(a==="dg-open"){S.mode="course";S.lesson=+v;S.lview="dlg";dgReset(+v,true);render();window.scrollTo(0,0);return;}
   if(a==="say-slow"){playAm(v,lsSlow());return;}
   if(a==="rom"){S.rom=!S.rom;save();}
   else if(a==="gloss"){S.gloss=!S.gloss;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
   else if(a==="fn"){S.mode=v;top=true;}
-  else if(a==="mode"){S.mode=(v==="fidel"&&S.mode!=="fidel"&&S.mode!=="num"&&S.fnLast==="num")?"num":v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
+  else if(a==="learn"){ S.lesson=null; S.mode=v==="culture"?"eth":v==="fidel"?(S.fnLast||"fidel"):"course"; if(v==="stories") rdOpen("stories",null,"list"); top=true; }
+  else if(a==="mode"){S.mode=v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
   else if(a==="wl-start"){S.mode=wlStart();top=true;}
   else if(a==="scheme"){S.scheme=v; S.schemePicked=true; schemeDevice.set(v); if(PROF.cur()) save();}
   else if(a==="scheme-jump"){const el=$("#colours"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return;}

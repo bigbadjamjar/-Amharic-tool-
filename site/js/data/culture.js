@@ -1,5 +1,5 @@
 /* ---------- culture notes ----------
-   Notes on Ethiopia, its peoples and everyday life, shown in the Ethiopia tab (js/ethiopia.js, which also
+   Notes on Ethiopia, its peoples and everyday life, shown in the Culture tab (js/ethiopia.js, which also
    sorts them into groups). units: the course units a note goes with (may be empty). facts: optional
    [label, value] pairs shown as a small table.
    p: paragraphs. {fidel|transcription} marks an Amharic example, as in the course notes.

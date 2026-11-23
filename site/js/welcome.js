@@ -54,9 +54,9 @@ function renderWelcome(){
     <h3>How to start</h3>
     <ol class="wlsteps">
       <li><b>Type your name.</b> Your scores and mistakes are kept under it. If others share the device, they can add their own name.</li>
-      <li><b>Look at the letters.</b> Open <b><span class="am nosay">ፊደል</span></b> (Fidel) at the top and tap a few letters to hear them. You don't need to learn them all before starting.</li>
-      <li><b>Do Unit 1.</b> In <b>Course</b>, read the notes, listen to the words, try the dialogue, then take the unit test.</li>
-      <li><b>Come back most days.</b> Today's session on the Course page mixes in what you've learned and anything you got wrong.</li>
+      <li><b>Look at the letters.</b> Open <b>Learn</b> at the top, then <b>Fidel</b>, and tap a few letters to hear them. You don't need to learn them all before starting.</li>
+      <li><b>Do Unit 1.</b> In <b>Learn</b>, read the notes, listen to the words, try the dialogue, then take the unit test.</li>
+      <li><b>Come back most days.</b> Today's session on the Learn page mixes in what you've learned and anything you got wrong.</li>
     </ol>
     <div class="tip">Not reading fidel yet? The <b>Transcription</b> switch at the top shows every word in English letters too, like <span class="rom">selam</span>. Turn it off when you're ready.</div>
 
