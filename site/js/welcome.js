@@ -67,7 +67,7 @@ function renderWelcome(){
       <p><b>Written for this app.</b> The lessons, sentences and dialogues are original, not copied from a textbook.</p>
       <p><b>Not yet checked by a native speaker.</b> Treat it as practice, and if something sounds odd, ask an Amharic speaker. Corrections are very welcome.</p>
       <p><b>Computer voices.</b> The audio is made by text-to-speech, so it is clear but not always perfectly natural.</p>
-      <p><b>Private.</b> Nothing is sent anywhere. Use Profiles to back up your progress or move it to another device.</p>
+      <p><b>Private.</b> ${cloudOn()?`Your progress stays on this device unless you choose to sign in, which keeps it safe and lets you use it on your other devices. <a href="privacy.html" target="_blank" rel="noopener">Privacy notice</a>.`:`Nothing is sent anywhere. Use Profiles to back up your progress or move it to another device.`}</p>
     </div>
 
     ${typeof supportCard === "function" ? supportCard() : ""}

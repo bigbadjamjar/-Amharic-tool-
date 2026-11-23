@@ -32,13 +32,30 @@ site/
   js/games.js         Test tab > Games: matching pairs, speed round, fidel bingo
   js/gloss.js         the "Word by word" switch: shows each word's meaning under a sentence
   js/support.js       "Support this app" (Ko-fi): set SUPPORT_URL; empty hides it everywhere
+  js/cloud.js         optional sign-in (Google or email) and progress sync with Firebase: set FIREBASE_CONFIG; null hides it
+  js/firebase/        the Firebase code cloud.js loads (copied from the firebase npm package, 13.4.0, Apache-2.0)
+  privacy.html        the privacy notice
   js/app.js           the screens and quizzes
   audio/clips/        saved sound files
   audio/manifest.js   list of clips (generated)
 tools/                audio scripts, native-speaker check list
 docs/native-check.md  sentences for a native speaker to check
 tests/run.mjs         checks the data and the verb engine:  node tests/run.mjs
+tests/cloud/          sign-in, sync and database rules, against the Firebase emulators (see its README)
+firestore.rules       the database rules to paste into the Firebase console
 ```
+
+## Accounts (optional)
+
+Nobody needs an account. Someone who signs in on the Profiles page links one profile on that device to their
+account; its progress is copied to Firebase (Cloud Firestore, `users/<account id>`) and kept in step with their
+other devices. Progress from two devices is combined rather than overwritten: best scores keep the higher one,
+each practised word keeps the most recent result, and settings come from whichever device changed last.
+Everything still works offline; changes are sent when the connection comes back.
+
+To switch it on: create a Firebase project, turn on Google and Email/Password sign-in, add the site's domain to
+the authorised domains, create a Firestore database, paste `firestore.rules` into its Rules tab, and put the web
+config in `FIREBASE_CONFIG` at the top of `site/js/cloud.js`.
 
 ## Phone app and offline use
 

@@ -325,6 +325,31 @@ ok(!/[ሀ-፼]/.test(X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመ�
   const man = fs.readFileSync(path.join(root, "audio/manifest.js"), "utf8");
   ok(/"ሀ": "clips\/ሀ\.mp3\?[0-9a-f]{6}"/.test(man), "manifest clips carry a fingerprint (run tools/audio_manifest.py)");
 }
+// --- optional account (cloud.js): two copies of a profile combine without losing progress
+{
+  const cctx = vm.createContext({});
+  vm.runInContext(fs.readFileSync(path.join(root, "js/cloud.js"), "utf8") + "\n;globalThis.C={cloudMerge,cloudOn,clHasProgress};", cctx);
+  const { cloudMerge, cloudOn, clHasProgress } = cctx.C;
+  ok(!cloudOn(), "cloud.js ships switched off until FIREBASE_CONFIG is set");
+  const phone = { rom: false, rate: 0.75, best: { u1: 8, u2: 5 }, miss: [{ k: "a", q: {} }],
+    srs: { v: 1, it: { "w:ሰላም": [3, 120, 5, 0, 110], "w:ውሃ": [1, 101, 1, 1, 100] }, act: { 100: 4, 110: 6 } },
+    goal: { n: 10, rest: true, met: { 100: 1 } }, games: { src: "words", best: { m: 30 } } };
+  const laptop = { rom: true, rate: 1, best: { u1: 6, u3: 9 }, miss: [],
+    srs: { v: 1, it: { "w:ሰላም": [2, 115, 3, 0, 105], "w:ውሃ": [2, 105, 2, 1, 102], "l:ሀ": [1, 112, 1, 0, 111] }, act: { 100: 2, 111: 3 } },
+    goal: { n: 20, rest: false, met: { 111: 1 } }, games: { src: "letters", best: { m: 25, s: 12 } } };
+  const m = cloudMerge(phone, 2000, laptop, 1000);   // the phone changed last
+  ok(m.rom === false && m.rate === 0.75 && m.miss.length === 1 && m.goal.n === 10 && m.games.src === "words", "settings and mistakes come from the side changed last");
+  ok(m.best.u1 === 8 && m.best.u2 === 5 && m.best.u3 === 9, "best scores keep the higher of each: " + JSON.stringify(m.best));
+  ok(m.srs.it["w:ሰላም"][0] === 3 && m.srs.it["w:ውሃ"][0] === 2 && m.srs.it["l:ሀ"], "each word from the side that saw it last: " + JSON.stringify(m.srs.it));
+  ok(m.srs.act[100] === 4 && m.srs.act[110] === 6 && m.srs.act[111] === 3, "answers per day keep the bigger count");
+  ok(m.goal.met[100] && m.goal.met[111], "goal days from both sides");
+  ok(m.games.best.m === 30 && m.games.best.s === 12, "game best scores keep the higher");
+  const m2 = cloudMerge(phone, 1000, laptop, 2000);
+  ok(m2.rom === true && m2.miss.length === 0 && m2.best.u1 === 8, "the other way round: laptop settings, still the best scores");
+  ok(JSON.stringify(phone.best) === JSON.stringify({ u1: 8, u2: 5 }) && phone.srs.it["w:ውሃ"][0] === 1, "merging changes neither copy");
+  ok(JSON.stringify(cloudMerge({}, 0, laptop, 1).best) === JSON.stringify(laptop.best), "an empty profile takes the account's progress");
+  ok(!clHasProgress({}) && clHasProgress(phone), "clHasProgress");
+}
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);
 process.exit(fails ? 1 : 0);
