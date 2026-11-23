@@ -3,7 +3,7 @@
 A phone-friendly app for learning Amharic: a course, the Fidel chart with typing practice, a numbers trainer,
 conjugation tables for every verb, and tests. It is a plain web page with no build step.
 
-Live site (after the deploy workflow runs on `main`): https://bigbadjamjar.github.io/-Amharic-tool-/
+Live site: https://amharicapp.com/ (the old address https://bigbadjamjar.github.io/-Amharic-tool-/ redirects there)
 
 ## Running it
 
