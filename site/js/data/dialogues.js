@@ -176,5 +176,58 @@ const DIALOGUES = [
   ["A","አይ፣ ሱቁ ተዘግቷል።","ay, suqu tezegtwal","No, the shop is closed."],
   ["B","መቼ ይከፈታል?","meché yikkefetal?","When does it open?"],
   ["A","ከሰዓት በኋላ ይከፈታል።","kese'at behwala yikkefetal","It opens in the afternoon."],
-  ["B","እሺ። ቤት ሄደን ሻይ እናፍላ።","ishi. bét héden shay innafla","OK. Let's go home and make some tea.","Check እናፍላ “let's make (tea)”."]]}
+  ["B","እሺ። ቤት ሄደን ሻይ እናፍላ።","ishi. bét héden shay innafla","OK. Let's go home and make some tea.","Check እናፍላ “let's make (tea)”."]]},
+{"l":22,"title":"At the clinic","scene":"Tom isn't well and goes to see Dr Almaz.",
+ "who":{"A":{"name":"Almaz","am":"አልማዝ","g":"f"},"B":{"name":"Tom","am":"ቶም","g":"m"}},
+ "lines":[
+  ["A","ጤና ይስጥልኝ። ምን ሆንክ?","t'éna yist'illign. min honk?","Hello. What's wrong?"],
+  ["B","ጉሮሮዬን ያመኛል፤ ትኩሳትም አለብኝ።","gurorroyén yamegnal; tikkusatim allebbign","I have a sore throat, and a temperature too."],
+  ["A","ከመቼ ጀምሮ?","kemeché jemro?","Since when?"],
+  ["B","ከትናንት ጀምሮ። በጣም ደክሞኛል።","ketinant jemro. bet'am dekmognal","Since yesterday. I'm very tired."],
+  ["A","ጉንፋን ነው። ይህን መድኃኒት በቀን ሦስት ጊዜ ውሰድ።","gunfan new. yihin medhanit beqen sost gizé wised","It's flu. Take this medicine three times a day."],
+  ["B","እሺ። ነገ ሥራ መሄድ እችላለሁ?","ishi. nege sira mehéd ichilallehu?","OK. Can I go to work tomorrow?"],
+  ["A","አይ፣ ለሁለት ቀን ቤት ብታርፍ ይሻላል።","ay, lehulet qen bét bitarf yishalal","No, you'd better rest at home for two days."],
+  ["B","አመሰግናለሁ፣ ዶክተር።","ameseginallehu, doktor","Thank you, doctor."]]},
+
+{"l":23,"title":"A room in Bahir Dar","scene":"Tom arrives at a hotel by Lake Tana, where Meron works.",
+ "who":{"A":{"name":"Tom","am":"ቶም","g":"m"},"B":{"name":"Meron","am":"ሜሮን","g":"f"}},
+ "lines":[
+  ["A","ሰላም። አልጋ አለ?","selam. alga alle?","Hello. Have you got a room?"],
+  ["B","አዎ፣ አለ። ለስንት ሌሊት?","awo, alle. lesint lélit?","Yes, we have. For how many nights?"],
+  ["A","ለሁለት ሌሊት። ስንት ነው?","lehulet lélit. sint new?","For two nights. How much is it?"],
+  ["B","ለአንድ ሌሊት ስምንት መቶ ብር ነው፤ ከቁርስ ጋር።","le'and lélit simint meto birr new; kequrs gar","It's eight hundred birr a night, with breakfast."],
+  ["A","ጥሩ። ጣና ሐይቅን ለመጎብኘት መጣሁ። ጀልባ አለ?","t'iru. t'ana hayqin lemegobignet met'ahu. jelba alle?","Good. I've come to see Lake Tana. Is there a boat?"],
+  ["B","አዎ፣ ጠዋት ይነሣል። ሹፌሩ እንዲወስድህ እነግረዋለሁ።","awo, t'ewat yinessal. shuféru indiwesdih inegrewallehu","Yes, it leaves in the morning. I'll tell the driver to take you.","Check እንዲወስድህ “(for him) to take you”."],
+  ["A","በጣም አመሰግናለሁ!","bet'am ameseginallehu!","Thank you very much!"]]},
+
+{"l":24,"title":"A busy morning","scene":"Hanna, the manager, stops by Abebe's desk.",
+ "who":{"A":{"name":"Hanna","am":"ሃና","g":"f"},"B":{"name":"Abebe","am":"አበበ","g":"m"}},
+ "lines":[
+  ["A","አበበ፣ ምን እየሠራህ ነው?","abebe, min iyeserrah new?","Abebe, what are you working on?"],
+  ["B","ለደንበኛው ኢሜይል እየጻፍኩ ነው።","ledenbegnaw iméyl iyets'afku new","I'm writing an email to the customer."],
+  ["A","ጥሩ። ስብሰባው በአራት ሰዓት ይጀምራል።","t'iru. sibsebaw be'arat se'at yijemmiral","Good. The meeting starts at four o'clock (10 a.m.)."],
+  ["B","ዛሬ ሥራ በዝቶብኛል። ከስብሰባው በኋላ ልጨርስ?","zaré sira beztobignal. kesibsebaw behwala lich'ers?","I'm very busy today. Shall I finish it after the meeting?"],
+  ["A","እሺ። ዱሮ ሁልጊዜ ቶሎ ትጨርስ ነበር!","ishi. duro hulgizé tolo tich'ers nebber!","OK. You always used to finish quickly!"],
+  ["B","አዎ፣ ግን አሁን ብዙ ደንበኞች አሉን።","awo, gin ahun bizu denbegnoch allun","Yes, but now we have lots of customers."]]},
+
+{"l":26,"title":"Is Dawit there?","scene":"Sara rings Dawit's house, and his brother Yonas answers.",
+ "who":{"A":{"name":"Yonas","am":"ዮናስ","g":"m"},"B":{"name":"Sara","am":"ሳራ","g":"f"}},
+ "lines":[
+  ["A","ሃሎ?","halo?","Hello?"],
+  ["B","ሃሎ፣ ጤና ይስጥልኝ። ዳዊት አለ?","halo, t'éna yist'illign. dawit alle?","Hello. Is Dawit there?"],
+  ["A","የለም፣ ወጥቷል። ማን ልበል?","yellem, wet'twal. man libel?","No, he's gone out. Who's calling?"],
+  ["B","ሳራ ነኝ። ይቅርታ፣ ድምፅህ አይሰማም።","sara negn. yiqirta, dimts'ih aysemam","It's Sara. Sorry, I can't hear you very well."],
+  ["A","ሳራ? እሺ። ማታ እንደሚመለስ ነግሮኛል።","sara? ishi. mata indemmimelles negrognal","Sara? OK. He told me he'll be back this evening.","Check ነግሮኛል “he has told me”."],
+  ["B","ደውዬ ነበር በለው፤ ደውልልኝ በለው።","dewiyé nebber belew; dewilillign belew","Tell him I rang, and ask him to ring me."],
+  ["A","እሺ፣ እነግረዋለሁ። ቻው!","ishi, inegrewallehu. chaw!","OK, I'll tell him. Bye!"]]},
+
+{"l":27,"title":"Which café?","scene":"Hanna and Dawit can't agree where to have coffee.",
+ "who":{"A":{"name":"Hanna","am":"ሃና","g":"f"},"B":{"name":"Dawit","am":"ዳዊት","g":"m"}},
+ "lines":[
+  ["A","ዳዊት፣ ዛሬ ቡና የት እንጠጣ?","dawit, zaré bunna yet innit'et'a?","Dawit, where shall we have coffee today?"],
+  ["B","ገበያው አጠገብ ያለው ካፌ ጥሩ ይመስለኛል።","gebeyaw at'egeb yallew kafé t'iru yimeslegnal","I think the café next to the market is good."],
+  ["A","እኔ ግን ቤተ ክርስቲያኑ አጠገብ ያለው ይሻለኛል። ቡናው ይበልጥ ይጣፍጣል።","iné gin béte kristiyanu at'egeb yallew yishalegnal. bunnaw yibelt' yit'afit'al","But I prefer the one next to the church. The coffee is better."],
+  ["B","ግን ከዚህ ሩቅ ነው።","gin kezzih ruq new","But it's a long way from here."],
+  ["A","አይ፣ ሩቅ አይደለም! አሥር ደቂቃ ብቻ ነው።","ay, ruq aydellem! asir deqiqa bicha new","No, it isn't far! It's only ten minutes."],
+  ["B","እሺ፣ እስማማለሁ። እንሂድ!","ishi, ismammallehu. innihid!","OK, I agree. Let's go!"]]}
 ];
