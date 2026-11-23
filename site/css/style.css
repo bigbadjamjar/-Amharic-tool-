@@ -482,6 +482,9 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 @media (min-width:960px){ .whobtn{width:7.5rem} }
 @media (min-width:1200px){ .whobtn{width:9rem} }
 .whobtn[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--head-ink)}
+/* set by fitHead() in app.js when the top bar would otherwise run past its edge */
+body.whotight .whobtn{width:auto!important;padding:0 3px;flex:none!important} body.whotight .whobtn .nm{display:none}
+body.romtight .romtoggle .full{display:none} body.romtight .romtoggle .short{display:inline}
 /* the six tabs: each takes its word's width plus an equal share of the spare room, so a longer word
    never spills past its highlight or the edge of the bar */
 .seg{display:flex;background:var(--head-soft);border-radius:11px;padding:3px;gap:2px}
@@ -516,7 +519,7 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 @media (max-width:400px){ .seg button{font-size:.78rem;padding:8px 3px} }
 @media (max-width:350px){ .seg{gap:1px} .seg button{font-size:.74rem;padding:8px 2px} }
 /* mid widths (tablet, small laptop): the bar is busy, so the switch shows its short label */
-@media (min-width:600px) and (max-width:759px){ .romtoggle .full{display:none} .romtoggle .short{display:inline} }
+@media (min-width:600px) and (max-width:959px){ .romtoggle .full{display:none} .romtoggle .short{display:inline} }
 @media (min-width:960px) and (max-width:1023px){ .romtoggle .full{display:none} .romtoggle .short{display:inline} }
 @media (max-width:340px){ .head{padding-left:10px;padding-right:10px} .tools{gap:3px} .romtoggle .short{display:none} .romtoggle{padding:0 4px} }
 .wlname{margin:0 0 6px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
