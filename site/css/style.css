@@ -139,6 +139,14 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .peek .am{font-size:2.4rem;line-height:1.1}
 .peek b{font-size:1.2rem;color:var(--gold);font-style:italic}
 .peek small{display:block;color:var(--muted)}
+/* the letter box never changes size whichever letter is tapped: one line for the sound, one for the order, one kept for the "bare consonant" note */
+.peek .am{flex:0 0 auto;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.peek .pkch{width:1.3em;text-align:center}
+.peek .rep{font-size:1.05rem;margin:0 0 0 -6px}
+.peek .pktxt{flex:1;min-width:0}
+.peek .pktxt b,.peek .pktxt small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.peek .pktxt b{display:block}
+.peek .pkgap{visibility:hidden;flex:0 0 auto}
 /* typing */
 .tin{width:100%;font-family:var(--f-fidel);font-size:1.6rem;padding:6px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);text-align:center;min-height:50px}
 .tin.ok{border-color:var(--good);background:var(--good-bg)} .tin.no{border-color:var(--bad);background:var(--bad-bg)}
@@ -425,8 +433,13 @@ header{position:sticky;top:0;z-index:5;background:var(--head-bg);color:var(--hea
 .seg button{padding:8px 2px;border-radius:8px;font-weight:600;color:var(--head-muted);font-size:.86rem}
 .seg button:hover{color:var(--head-ink)}
 .seg button[aria-selected="true"]{background:var(--tab-on);color:var(--tab-on-ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
-/* phones: drop the English name and the profile name (the initial stays), shorten the switch label */
-@media (max-width:440px){ .brand h1 .long{display:none} }
+/* phones: the English name sits in small letters under the Amharic, so both fit beside the tools
+   without making the bar taller; the profile name drops (the initial stays) and the switch label shortens */
+@media (max-width:440px){
+  .brandbtn{flex-direction:column;align-items:flex-start;gap:0;padding:0;line-height:1}
+  .brand h1 span{font-size:1.25rem;line-height:1.05}
+  .brand h1 .long{font-size:.72rem;letter-spacing:.02em;line-height:1.1;margin-top:1px}
+}
 @media (max-width:599px){
   .romtoggle .full{display:none} .romtoggle .short{display:inline}
   .whobtn{padding:0 3px} .whobtn .nm{display:none}
