@@ -11,7 +11,7 @@ const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
   .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress|report)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={romOf,enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,goalClean,goalTick,goalStreak,goalOk,gToE,eToG,etTime,EV};", ctx);
+  "\n;globalThis.X={romOf,enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,goalClean,goalTick,goalStreak,goalOk,gToE,eToG,etTime,EV,GLOSS,GLOSSW,glossOf,glossOfWords,glWords,glKey,STORIES,CULTURE};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -276,6 +276,35 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
 
 // --- transcription of a sentence with a comma inside is not left in Amharic letters
 ok(!/[ሀ-፼]/.test(X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመስገን። አንተስ?")), "romOf with inner punctuation: " + X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመስገን። አንተስ?"));
+
+// --- word by word (data/gloss.js): one meaning for each word, and every sentence covered
+{
+  const SR = { cur: null };
+  for (const [k, v] of Object.entries(X.GLOSS)) {
+    const n = X.glWords(k).length, g = v.split("|");
+    ok(n === g.length, `gloss for ${k}: ${n} Amharic words but ${g.length} meanings ("${v}")`);
+    ok(g.every(x => x.trim() && !/^\s|\s$/.test(x)), `gloss for ${k}: an empty meaning, or spaces round a | ("${v}")`);
+  }
+  // Sentences without a word-by-word line are listed, not failed, so new content can land first.
+  const all = [];
+  X.SENT.forEach(s => all.push(["sentences", s.am]));
+  X.DIALOGUES.forEach(d => d.lines.forEach(l => all.push([`dialogue ${d.l}`, l[1]])));
+  X.STORIES.forEach(s => s.lines.forEach(l => all.push([`story ${s.id}`, l[0]])));
+  X.CULTURE.forEach(c => (c.phrases || []).forEach(p => all.push([`culture ${c.id}`, p[0]])));
+  ["timeWords", "shop", "dateWords"].forEach(k => X.EV[k].forEach(p => all.push([`everyday ${k}`, p[0]])));
+  const missing = all.filter(([, am]) => X.glWords(am).length > 1 && !X.glossOf(am));
+  if (missing.length) console.log(`note: ${missing.length} sentences have no word-by-word meanings yet (data/gloss.js):\n  ` + missing.map(([w, am]) => `${w}: ${am}`).join("\n  "));
+  const used = new Set(all.map(([, am]) => X.glKey(am)));
+  const spare = Object.keys(X.GLOSS).filter(k => !used.has(X.glKey(k)));
+  if (spare.length) console.log(`note: ${spare.length} entries in data/gloss.js match no sentence (edited or removed?):\n  ` + spare.join("\n  "));
+  ok(X.glossOf("ስሜ ሳራ ነው።").join("|") === "my name|Sara|is", "glossOf ignores punctuation");
+  ok(X.glossOf("ሰላም") === null, "one word: no word-by-word line");
+  // every time the Everyday drills can say, and the made-up sentences of the sentence builder
+  for (let h = 0; h < 24; h++) for (const m of [0, 15, 30, 45]) { const t = X.etTime(h, m); ok(X.glossOf(t.parts.join(" ")), `no word-by-word for the time ${t.parts.join(" ")}`); }
+  ok(X.glossOf("ለአራት ሩብ ጉዳይ").join("|") === "for four|quarter|?short", "ለ- on a number: " + X.glossOf("ለአራት ሩብ ጉዳይ"));
+  for (let k = 0; k < 300; k++) { const x = X.bMakeVerbSentence(); if (!x || x.words.length < 2) continue; const g = X.glossOfWords(x.words);
+    ok(g && g.length === x.words.length, `no word-by-word for the made-up sentence ${x.words.map(w => w.am).join(" ")}`); }
+}
 
 // --- audio: a line with only a male-voice clip (a man's dialogue line) still gets a play button everywhere
 {

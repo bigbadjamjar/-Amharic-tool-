@@ -58,13 +58,13 @@ function rdStoryHTML(s){
   const all = RD.playing>=0, i = STORIES.indexOf(s), next = STORIES[i+1];
   let h = rdBack() + `<h2>${esc(s.title)}</h2><p class="rdam"><span class="am nosay">${esc(s.am)}</span>${sayBtn(s.am)} <span class="rom">${esc(s.rom||"")}</span></p>
     <p class="lead">After unit ${s.after}. ${esc(s.intro)}</p>
-    <div class="dbar"><button class="btn ${all?"":"primary"}" data-act="${all?"rd-stop":"rd-all"}">${all?"■ Stop":"▶ Read it to me"}</button><button class="link" data-act="rd-en">${RD.en?"Hide English":"Show English"}</button></div>
+    <div class="dbar"><button class="btn ${all?"":"primary"}" data-act="${all?"rd-stop":"rd-all"}">${all?"■ Stop":"▶ Read it to me"}</button><span class="dtog"><button class="link" data-act="rd-en">${RD.en?"Hide English":"Show English"}</button>${glossBtn()}</span></div>
     <p class="count rdhint">Tap any word to see what it means.</p>
     <div class="story norom-auto">`;
   s.lines.forEach((line, li) => {
     const ws = rdWords(line);
     h += `<div class="stl ${RD.playing===li?"now":""}"><div class="stam">${ws.map((w, j) => `${esc(w.pre)}<button class="stw" data-act="rd-w" data-v="${li}:${j}" aria-pressed="${RD.w===li+":"+j}">${esc(w.shown)}</button>${esc(w.post)}`).join(" ")}${canSay(line[0])?`<button class="say" data-act="rd-say" data-v="${li}" aria-label="Listen to this line" title="Listen">▶</button>`:""}</div>
-      <span class="rom">${esc(line[1])}</span>${RD.en?`<span class="en">${esc(line[2])}</span>`:""}`;
+      <span class="rom">${esc(line[1])}</span>${RD.en?`<span class="en">${esc(line[2])}</span>`:""}${glossHTML(line[0],line[1])}`;
     if(RD.w && +RD.w.split(":")[0]===li){
       const w = ws[+RD.w.split(":")[1]];
       if(w) h += `<div class="stword"><div class="stwhead"><span class="am">${esc(w.shown)}</span>${sayBtn(w.key)}<button class="stx" data-act="rd-w" data-v="" aria-label="Close">×</button></div><span class="rom">${esc(w.rom)}</span><span class="en">${esc(STWORDS[w.key] || "")}</span></div>`;

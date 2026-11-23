@@ -41,7 +41,7 @@ function ethNoteHTML(c){
     <h2 class="rdh"><span aria-hidden="true">${c.icon}</span> ${esc(c.title)}</h2><p class="lead">${esc(c.intro)}</p>`;
   if(c.facts) h += `<dl class="ethfacts">${c.facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`;
   h += `<div class="note rdnote">${c.p.map(p => `<p>${fmt(p)}</p>`).join("")}</div>
-    <h3>Useful phrases</h3>${wordList(c.phrases.map(x => [x[0], x[1], x[2]]))}`;
+    <div class="glbar"><h3>Useful phrases</h3>${glossBtn()}</div>${wordList(c.phrases.map(x => [x[0], x[1], x[2]]), true)}`;
   if(c.units.length) h += `<h3>Goes with</h3><div class="stack rdfill" style="--c:${Math.min(c.units.length,3)}">${c.units.map(n => `<button class="topic" data-act="lesson-go" data-v="${n}"><b><span class="lnum">${n}</span>${esc(LMAP[n].title)}</b><small>Open the unit</small></button>`).join("")}</div>`;
   h += `<div class="rdnext">${next ? `<button class="btn primary" data-act="eth-note" data-v="${next.id}" data-keep="1">Next: ${esc(next.title)} ›</button>` : `<button class="btn" data-act="eth-back">‹ All notes</button>`}</div>`;
   return h;

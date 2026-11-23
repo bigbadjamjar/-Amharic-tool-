@@ -205,7 +205,7 @@ const LASTL = Math.max(...LESSONS.map(l=>l.n)), LASTF = Math.max(...LESSONS.filt
 /* ---------- state ---------- */
 const ANS_HOW=[["tap","Tap a choice"],["type","Type it"],["mix","A mix"]];   // the "Answer by" setting on the Test tab
 const S = {bs:{how:"step",mode:"mixed",n:4,tenses:["past","pastNeg","pres","presNeg","cmd"],upto:0},bsOpen:false,mode:"course",lesson:null,lview:"notes",ftab:"chart",pick:"ለ",rtab:"pronouns",v:{view:"look",q:"",lesson:"all",sel:0,tense:"past",deck:"mean",clesson:"all",ctense:"any",card:null,flip:false},cat:ECATS[0],eview:"list",
-  fc:{key:"",order:[],i:0,flip:false},rom:true,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
+  fc:{key:"",order:[],i:0,flip:false},rom:true,gloss:false,quiz:null,best:{},miss:[],upto:null,day:"",num:{tab:"chart",n:"25",deck:"words"},
   find:{q:"",from:false},kb:{cons:null,native:false,hints:true},prac:{src:"letters",lesson:"all",q:null,typed:"",result:null,shown:false}};
 S.ans="tap";   // answer by tapping a choice, typing, or a mix (see "typed answers" below)
 S.ls=JSON.parse(JSON.stringify(LS_DEF));
@@ -218,6 +218,7 @@ function applyData(d){
   d=d&&typeof d==="object"?d:{};
   S.best=d.best&&typeof d.best==="object"?d.best:{};
   S.rom=d.rom!==false;
+  S.gloss=d.gloss===true;   // word by word (gloss.js)
   S.miss=Array.isArray(d.miss)?d.miss.filter(x=>x&&x.k&&x.q):[];
   S.upto=d.upto&&LMAP[+d.upto]?+d.upto:null;
   S.day=typeof d.day==="string"?d.day:"";
@@ -233,7 +234,7 @@ function applyData(d){
   S.schemePicked=schemeOk(d.scheme); S.scheme=S.schemePicked?d.scheme:schemeDevice.get();
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,goal:S.goal,games:S.gm,answer:S.ans,...(S.schemePicked?{scheme:S.scheme}:{})});
+const profileData=()=>({best:S.best,rom:S.rom,gloss:S.gloss,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,goal:S.goal,games:S.gm,answer:S.ans,...(S.schemePicked?{scheme:S.scheme}:{})});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -263,8 +264,9 @@ function tableHTML(t){
 function partsHTML(p){
   return `<div class="tbl">`+PL.map((l,i)=>`<div class="row" style="grid-template-columns:8.6rem 1fr"><span class="count">${l}</span><span class="form">${A(p.am[i],p.rom[i])}</span></div>`).join("")+`</div>`;
 }
-function wordList(words){
-  return `<div class="tbl canrec wl2">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span></div>`).join("")+`</div>`;
+// gl: these are sentences or phrases, so each gets its word-by-word line when that switch is on (gloss.js)
+function wordList(words,gl){
+  return `<div class="tbl canrec wl2">`+words.map(w=>`<div class="row vrow"><span class="form">${A(w[0],w[1])}</span><span class="en">${esc(w[2])}</span>${gl?glossHTML(w[0],w[1]):""}</div>`).join("")+`</div>`;
 }
 function flashHTML(words,key){
   const F=S.fc;
@@ -314,7 +316,7 @@ function renderLesson(l){
   }else if(S.lview==="words"){
     h+=wordList(l.vocab);
   }else if(S.lview==="sent"&&sentOf([l.n]).length){
-    h+=`<p class="lead">Short sentences made from the words and grammar up to this unit.</p>`+wordList(sentOf([l.n]).map(x=>[x.am,x.rom,x.en]));
+    h+=`<div class="glbar"><p class="lead">Short sentences made from the words and grammar up to this unit.</p>${glossBtn()}</div>`+wordList(sentOf([l.n]).map(x=>[x.am,x.rom,x.en]),true);
   }else if(S.lview==="dlg"&&DMAP[l.n]){
     h+=dialogueHTML(l);
   }else h+=flashHTML(l.vocab,"L"+l.n);
@@ -731,6 +733,7 @@ function bsHTML(page){
     (B.how==="step"?`<p class="count">Wrong choices</p>${mini("bs-mode",BS_MODES.map(x=>[x[0],x[1]]),B.mode)}<p class="count bhelp">${esc(m[2])}</p>
     <p class="count">Choices for each word</p>${mini("bs-n",[2,3,4,6].map(n=>[String(n),String(n)]),String(B.n))}`:"")+`
     <p class="count">Transcription</p>${mini("bs-rom",[["on","Show"],["off","Hide"]],S.rom?"on":"off")}<p class="count bhelp">${S.rom?"Each Amharic word also shows in English letters. Easier if you're still learning to read fidel.":"Amharic shows in fidel only. Harder: you read the letters yourself."} Same as the Transcription switch at the top.</p>
+    <p class="count">Word by word</p>${mini("bs-gloss",[["on","Show"],["off","Hide"]],S.gloss?"on":"off")}<p class="count bhelp">After each answer, the English meaning shows under each Amharic word, in Amharic word order, so you can see how the sentence is built.</p>
     <p class="count">Units</p><select id="bs-upto" class="sel" aria-label="Units"><option value="0">All units</option>${FULL.map(n=>`<option value="${n}" ${B.upto===n?"selected":""}>Units 1 to ${n}</option>`).join("")}</select>
     <p class="count">Tenses</p><div class="chips wrapchips">${TENSES.filter(t=>B_TENSES.includes(t[0])).map(t=>`<button class="chip" data-act="bs-tense" data-v="${t[0]}" aria-selected="${B.tenses.includes(t[0])}">${esc(t[1])}</button>`).join("")}</div>
     <p class="count bhelp">Tenses set which verb forms the made-up sentences use, and which tenses appear as wrong choices.</p></div>`;
@@ -811,6 +814,7 @@ function renderTest(){
     h+=`<p class="fb ${ok?"good":"bad"}">${ok&&Q.near?`Correct. Check the spelling: <b>${esc(q.answer)}</b>`:ok&&q.en&&Q.typed&&enNorm(Q.typed)!==enNorm(q.answer)?`Correct. In full: <b>${esc(q.answer)}</b>`:ok?"Correct":q.type==="slot"&&Q.slot&&!bsAll(q)?`Built, with ${Q.slot.errs.length} wrong ${Q.slot.errs.length===1?"pick":"picks"}. The sentence is:`:q.type==="order"||q.type==="slot"?"Not quite. The right order is:":q.type==="type"&&q.en?`Not quite. It is <b>${esc(q.answer)}</b>`:q.type==="type"?`Not quite. It is <span class="am">${esc(q.answer)}</span>`:"Not quite. The answer is highlighted in green."}</p>${q.type==="order"||q.type==="slot"?`<p class="ans"><span class="am">${esc(q.answer)}</span><span class="rom">${esc(q.rom)}</span></p>`:""}
 ${q.parts&&q.bigRom?`<p class="drans"><span class="am nosay norom-auto">${esc(q.parts.join(" "))}</span>${drSayBtn(q.parts)}${bigR?"":` <span class="rom">${esc(q.bigRom)}</span>`}</p>`:""}${q.ansParts?`<p class="drans">${drSayBtn(q.ansParts,"Hear the answer")}</p>`:""}
 ${q.en&&!ok&&Q.typed.trim()?`<button class="link" data-act="t-own">I was right: count it</button>`:""}
+${glossQHTML(q)}
         <button class="btn primary wide" data-act="next" style="margin-top:12px">${Q.i===QN-1?"See result":"Next question"}</button>`;
   }
   return h;
@@ -947,6 +951,7 @@ document.addEventListener("click",e=>{
   if(a==="dg-open"){S.mode="course";S.lesson=+v;S.lview="dlg";dgReset(+v,true);render();window.scrollTo(0,0);return;}
   if(a==="say-slow"){playAm(v,lsSlow());return;}
   if(a==="rom"){S.rom=!S.rom;save();}
+  else if(a==="gloss"){S.gloss=!S.gloss;save();}
   else if(a==="rate"){sayRate=SAY_RATES[(SAY_RATES.indexOf(sayRate)+1)%SAY_RATES.length];save();}
   else if(a==="fn"){S.mode=v;top=true;}
   else if(a==="mode"){S.mode=(v==="fidel"&&S.mode!=="fidel"&&S.mode!=="num"&&S.fnLast==="num")?"num":v;top=true; if(v==="find"){render();window.scrollTo(0,0);const i=$("#findq");if(i){i.focus();i.select();}return;} if(v==="me"){S.pf.ren=null;S.pf.del=false;S.pf.code="";S.pf.msg="";S.pf.inErr="";}}
@@ -1019,6 +1024,7 @@ document.addEventListener("click",e=>{
   else if(a==="bs-mode"){S.bs.mode=v;bsChanged();}
   else if(a==="bs-how"){S.bs.how=v==="all"?"all":"step"; if(Q&&Q.result===null){Q.slot=null;Q.built=[];} save();}
   else if(a==="bs-rom"){S.rom=v==="on";save();}
+  else if(a==="bs-gloss"){S.gloss=v==="on";save();}
   else if(a==="bs-n"){S.bs.n=+v;bsChanged();}
   else if(a==="bs-tense"){const T0=S.bs.tenses,k=T0.indexOf(v); if(k>=0){if(T0.length>1)T0.splice(k,1);} else T0.push(v); bsChanged();}
   else if(a==="ans"&&Q&&Q.picked===null){Q.picked=+v; const q=Q.qs[Q.i]; if(Q.picked===q.ans)Q.score++; else Q.misses.push({q,p:q.opts[Q.picked].l}); record(q,Q.picked===q.ans);}
