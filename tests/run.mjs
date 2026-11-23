@@ -11,7 +11,7 @@ const files = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
   .filter(f => f.startsWith("js/") && !/js\/(app|audio|profiles|offline|dialogue|recorder|progress|report)\.js$/.test(f));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") +
-  "\n;globalThis.X={romOf,enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,gToE,eToG,etTime,EV};", ctx);
+  "\n;globalThis.X={romOf,enForm,DIALOGUES,VLIST,VRAW,T,PARTS,LESSONS,SENT,vforms,TENSES,EXTRA,FID,toFidel,BVERBS,bMakeVerbSentence,bCourseSentence,bOptions,findSearch,findIndex,srsEmpty,srsAnswer,srsActivity,srsDue,srsStreak,srsForecast,srsMigrate,srsClean,srsIndex,srsKeyOf,srsCount,goalClean,goalTick,goalStreak,goalOk,gToE,eToG,etTime,EV};", ctx);
 const X = ctx.X;
 
 let fails = 0, passes = 0;
@@ -161,6 +161,24 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   const a = X.srsEmpty(); [D - 3, D - 2, D - 1, D, D - 10, D - 9].forEach(d => X.srsActivity(a, d));
   const k = X.srsStreak(a, D); ok(k.now === 4 && k.best === 4 && k.today === 1, "streak counts days in a row: " + JSON.stringify(k));
   ok(X.srsStreak(a, D + 1).now === 4 && X.srsStreak(a, D + 2).now === 0, "streak survives until the end of the next day");
+  // daily goal (goal.js)
+  { const g = X.goalClean({}); ok(g.n === 10 && g.rest === true, "a new profile gets a goal of 10 with rest days on");
+    ok(X.goalClean({ n: 7 }).n === 10 && X.goalClean({ n: 0 }).n === 0 && X.goalClean({ n: 30, rest: false }).rest === false, "goal settings are cleaned");
+    const act = {}; const ans = (d, n) => { for (let i = 0; i < n; i++) { act[d] = (act[d] || 0) + 1; X.goalTick(g, act, d); } };
+    ans(D - 5, 10); ans(D - 4, 12); ans(D - 3, 3); ans(D - 2, 10); ans(D - 1, 10);
+    ok(g.met[D - 5] && !g.met[D - 3], "days that reach the goal are marked");
+    let k = X.goalStreak(g, act, D); ok(k.now === 4 && k.rested && !k.reached && k.done === 0, "one short day is a rest day, and today doesn't break it: " + JSON.stringify(k));
+    act[D] = 9; ok(X.goalTick(g, act, D) === false, "not reached at 9 of 10");
+    act[D] = 10; ok(X.goalTick(g, act, D) === true && X.goalTick(g, act, D) === false, "reaching the goal is reported once");
+    k = X.goalStreak(g, act, D); ok(k.now === 5 && k.reached, "today adds to the streak once reached");
+    ok(X.goalStreak(g, act, D + 1).now === 5, "the streak waits until the end of the next day");
+    ok(X.goalStreak(g, act, D + 2).now === 0 && X.goalStreak(g, act, D + 2).best === 5, "two days off in a week end it, best is kept");
+    const g2 = X.goalClean({ met: g.met }), a2 = Object.assign({}, act); [D + 1, D + 2, D + 3, D + 5].forEach(d => { a2[d] = 10; X.goalTick(g2, a2, d); });
+    ok(X.goalStreak(g2, a2, D + 5).now === 9, "another day off a week later is fine: " + JSON.stringify(X.goalStreak(g2, a2, D + 5)));
+    const r = X.goalClean({ rest: false, met: g.met }); ok(X.goalStreak(r, act, D).now === 3, "without rest days a short day ends the streak");
+    g.n = 50; ok(X.goalStreak(g, act, D).now === 5, "raising the goal keeps days already reached");
+    const z = X.goalClean({ n: 0 }); ok(X.goalStreak(z, act, D).now === 6, "no goal: every day with an answer counts");
+    ok(X.goalStreak(X.goalClean({}), {}, D).now === 0 && X.goalStreak(X.goalClean({}), {}, D).best === 0, "nothing yet, no streak"); }
   const ix = X.srsIndex(), u1 = X.LESSONS.find(l => l.n === 1).vocab[0];
   ok(ix["w:" + u1[0]] && ix["w:" + u1[0]].unit === 1, "index knows unit 1's words");
   ok(X.srsKeyOf({ type: "mc", big: u1[2], opts: [{ l: u1[0] }], ans: 0 }) === "w:" + u1[0], "old saved mistakes are matched to their word");
@@ -206,10 +224,21 @@ for (const s of X.SENT) checkSlots(X.bCourseSentence(s), `course "${s.am}"`);
   for (const c of CULTURE) {
     ok(c.id && !ids.has(c.id + "-c") && c.title && c.intro && c.icon && c.p.length, `culture ${c.id}: needs id, title, intro, icon, text`);
     ids.add(c.id + "-c");
-    ok(c.units.length && c.units.every(n => lessonNums.has(n)), `culture ${c.id}: links to a unit that doesn't exist`);
+    ok(c.units.every(n => lessonNums.has(n)), `culture ${c.id}: links to a unit that doesn't exist`);
+    ok(!c.facts || c.facts.every(f => f.length === 2 && f[0] && f[1]), `culture ${c.id}: facts should be [label, value] pairs`);
     for (const p of c.p) for (const m of p.matchAll(/\{([^|}]+)\|([^}]*)\}/g)) ok(m[2].trim() && !/[A-Za-z]/.test(m[1]), `culture ${c.id}: example ${m[0]} needs fidel and a transcription`);
     for (const [am, rom, en] of c.phrases) ok(am && rom && en && !/[A-Za-z]/.test(am), `culture ${c.id}: bad phrase ${am}`);
   }
+}
+
+// --- the Ethiopia tab: every culture note is in exactly one group, and every group's notes exist
+{
+  const ec = vm.createContext({});
+  vm.runInContext(["data/culture.js", "ethiopia.js"].map(f => fs.readFileSync(path.join(root, "js", f), "utf8")).join("\n;\n") + ";globalThis.E={CULTURE,ETH_GROUPS};", ec);
+  const { CULTURE, ETH_GROUPS } = ec.E, all = ETH_GROUPS.flatMap(g => g.ids);
+  ok(all.length === new Set(all).size, "Ethiopia tab: a note is in two groups");
+  ok(all.every(id => CULTURE.some(c => c.id === id)), "Ethiopia tab: a group names a note that doesn't exist");
+  ok(CULTURE.every(c => all.includes(c.id)), "Ethiopia tab: a culture note isn't in any group, so it can't be opened");
 }
 
 // --- everyday drills: the Ethiopian calendar and clock

@@ -1,14 +1,13 @@
-/* ---------- reading stories and culture notes ----------
+/* ---------- reading stories ----------
    Stories (data/stories.js) live on the Test tab (section "Stories"), and are also linked from the end of
    the unit they go with. Tap any word to see what it means and how it sounds; play one line or the whole
    story; a short quiz at the end, whose best score is kept like any test's (S.best["st-" + id]).
-   Culture notes (data/culture.js) live on the Course page: short notes with useful phrases.
+   The culture notes live in the Ethiopia tab (ethiopia.js); the Course page and a unit's "Read more" link to them.
    The rest of the state lives in RD, not in S, and isn't saved. Uses app.js helpers (S, esc, fmt, mini,
    wordList, render, save, shuffle, LMAP) at call time. */
 const RD_DEF = () => ({view:null, id:null, from:null, w:null, en:false, ans:{}, ord:null, playing:-1, tok:0});
 let RD = RD_DEF();
 const STMAP = {}; STORIES.forEach(s => STMAP[s.id] = s);
-const CUMAP = {}; CULTURE.forEach(c => CUMAP[c.id] = c);
 const RD_PUNCT = /[።፣፤፥፦፧?!.,;:«»"“”]/g;
 const rdKey = w => w.replace(RD_PUNCT, "");
 // The words of a line, each with its own transcription and the punctuation that follows it.
@@ -16,7 +15,7 @@ function rdWords(line){
   const am = line[0].split(/\s+/).filter(Boolean), rom = line[1].replace(/[?!.,;:]/g, " ").split(/\s+/).filter(Boolean);
   return am.map((w, j) => ({key: rdKey(w), shown: w.replace(/^[«"“]+/, "").replace(/[።፣፤፥፦፧?!.,;:»"”]+$/, ""), pre: (w.match(/^[«"“]+/) || [""])[0], post: (w.match(/[።፣፤፥፦፧?!.,;:»"”]+$/) || [""])[0], rom: rom[j] || ""}));
 }
-// a story shows on the Test tab, a culture note on the Course page
+// a story shows on the Test tab
 const rdFocus = () => S.mode==="test" && !S.quiz && RD.view==="story";
 const rdHere = tok => tok===RD.tok && rdFocus();
 function rdStop(){ if(RD.playing>=0){ RD.tok++; stopAm(); RD.playing = -1; } }
@@ -26,12 +25,11 @@ function rdOpen(view, id, from){ rdStop(); const en = RD.en; RD = RD_DEF(); RD.e
 function rdShuffle(){ const s = STMAP[RD.id]; RD.ord = s ? s.qs.map(q => shuffle(q[1].map((_, j) => j))) : null; }
 const stBestId = s => "st-"+s.id;
 const stChip = s => { const b = S.best[stBestId(s)]; return b!=null ? `<span class="best"><strong>${b}/${s.qs.length}</strong>best</span>` : `<span class="best untried">not tried</span>`; };
-const rdUnits = us => us.length===1 ? `Unit ${us[0]}` : `Units ${us.slice(0,-1).join(", ")} and ${us[us.length-1]}`;
 
-/* Course page: the way in to the culture notes (the stories are on the Test tab) */
+/* Course page: a card for the Ethiopia tab (the stories are on the Test tab) */
 function rdCourseCards(){
   return `<div class="rdgo">
-    <button class="tcard cu" data-act="rd-list" data-v="culture"><span class="ticon" aria-hidden="true">☕</span><b>Culture notes</b><small>Greetings, the coffee ceremony, holidays, Ethiopian time and more.</small><span class="tn">${CULTURE.length} notes ›</span></button></div>`;
+    <button class="tcard cu" data-act="mode" data-v="eth"><span class="ticon" aria-hidden="true">🌍</span><b>Ethiopia</b><small>The country, its peoples, history, faith, food and music, with useful phrases.</small><span class="tn">${CULTURE.length} notes in the Ethiopia tab ›</span></button></div>`;
 }
 /* Test tab, section "Stories": every story, easiest first, with its best quiz score */
 function rdStoryList(){
@@ -41,29 +39,18 @@ function rdStoryList(){
 function rdUnitLinks(n){
   const st = STORIES.filter(s => s.after===n), cu = CULTURE.filter(c => c.units.includes(n));
   if(!st.length && !cu.length) return "";
-  return `<h3>Read more</h3><div class="stack rdfill rdmore" style="--n:${st.length+cu.length}">`+
+  return `<h3>Read more</h3><div class="stack rdfill rdmore" style="--c:${Math.min(st.length+cu.length,3)}">`+
     st.map(s => `<button class="topic" data-act="rd-story" data-v="${s.id}" data-from="unit"><b>📖 Story and quiz: ${esc(s.title)}</b><small>${esc(s.intro)} Tap any word for its meaning.</small></button>`).join("")+
-    cu.map(c => `<button class="topic" data-act="rd-note" data-v="${c.id}" data-from="unit"><b>${c.icon} Culture: ${esc(c.title)}</b><small>${esc(c.intro)}</small></button>`).join("")+`</div>`;
+    cu.map(c => `<button class="topic" data-act="eth-note" data-v="${c.id}"><b>${c.icon} Ethiopia: ${esc(c.title)}</b><small>${esc(c.intro)}</small></button>`).join("")+`</div>`;
 }
 
 function rdBack(){
-  const back = RD.from==="unit" && S.lesson ? `‹ Unit ${S.lesson}` : RD.view==="story" ? "‹ All stories" : RD.from==="list" ? "‹ All culture notes" : "‹ Course";
+  const back = RD.from==="unit" && S.lesson ? `‹ Unit ${S.lesson}` : RD.view==="story" ? "‹ All stories" : "‹ Course";
   return `<button class="back" data-act="rd-back">${back}</button>`;
 }
 function rdHTML(){
-  if(RD.view==="culture") return rdBack() + `<h2>Culture notes</h2><p class="lead">Short notes on everyday life in Ethiopia, each with a few useful phrases. Each one goes with a unit of the course.</p>
-    <div class="tgrid rdgrid">${CULTURE.map(c => `<button class="tcard" data-act="rd-note" data-v="${c.id}" data-from="list"><span class="ticon" aria-hidden="true">${c.icon}</span><b>${esc(c.title)}</b><small>${esc(c.intro)}</small><span class="tn">${rdUnits(c.units)} ›</span></button>`).join("")}</div>`;
-  if(RD.view==="note") return rdNoteHTML(CUMAP[RD.id]);
   if(RD.view==="story") return rdStoryHTML(STMAP[RD.id]);
   return "";
-}
-
-function rdNoteHTML(c){
-  if(!c) return "";
-  return rdBack() + `<h2 class="rdh"><span aria-hidden="true">${c.icon}</span> ${esc(c.title)}</h2><p class="lead">${esc(c.intro)}</p>
-    <div class="note rdnote">${c.p.map(p => `<p>${fmt(p)}</p>`).join("")}</div>
-    <h3>Useful phrases</h3>${wordList(c.phrases.map(x => [x[0], x[1], x[2]]))}
-    <h3>Goes with</h3><div class="stack rdfill" style="--n:${c.units.length}">${c.units.map(n => `<button class="topic" data-act="lesson-go" data-v="${n}"><b><span class="lnum">${n}</span>${esc(LMAP[n].title)}</b><small>Open the unit</small></button>`).join("")}</div>`;
 }
 
 function rdStoryHTML(s){
@@ -117,19 +104,13 @@ function rdPlayAll(from){
 // Clicks on data-act="rd-…". Returns true if it has rendered already.
 function rdAct(a, v, b){
   const from = b && b.dataset.from;
-  if(a==="rd-list"){ S.lesson = null; rdOpen(v, null, "course"); window.scrollTo(0,0); return false; }
   if(a==="rd-story"){   // a story opens on the Test tab, wherever it was chosen
     S.mode = "test"; S.quiz = null; S.tsec = "stories"; if(typeof gmStop==="function") gmStop();
     rdOpen("story", v, from==="unit" ? "unit" : "list"); window.scrollTo(0,0); return false;
   }
-  if(a==="rd-note"){
-    const back = RD.view===null ? (from || "course") : from;
-    rdOpen("note", v, back); window.scrollTo(0,0); return false;
-  }
   if(a==="rd-back"){
-    const f = RD.from, story = RD.view==="story";
-    if(story){ rdLeave(); if(f==="unit" && S.lesson){ S.mode = "course"; S.lview = "notes"; } }   // back to the unit, or to the list of stories
-    else if(f==="list") rdOpen("culture", null, "course"); else rdLeave();
+    const f = RD.from;
+    rdLeave(); if(f==="unit" && S.lesson){ S.mode = "course"; S.lview = "notes"; }   // back to the unit, or to the list of stories
     window.scrollTo(0,0); return false;
   }
   if(a==="rd-en"){ RD.en = !RD.en; return false; }

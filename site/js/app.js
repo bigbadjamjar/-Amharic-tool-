@@ -228,11 +228,12 @@ function applyData(d){
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
   S.srs=d.srs?srsClean(d.srs):srsMigrate(d);   // spaced repetition (srs.js); profiles from before it get a starting point
   S.gm=gmClean(d.games); gmStop();
+  S.goal=goalClean(d.goal);   // daily goal and streak (goal.js)
   // colour scheme (schemes.js): this profile's own choice, or else the one last picked on this device
   S.schemePicked=schemeOk(d.scheme); S.scheme=S.schemePicked?d.scheme:schemeDevice.get();
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,games:S.gm,answer:S.ans,...(S.schemePicked?{scheme:S.scheme}:{})});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,goal:S.goal,games:S.gm,answer:S.ans,...(S.schemePicked?{scheme:S.scheme}:{})});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -539,6 +540,7 @@ const qSent = (ns,kind) => ri(2)?qOrder(sentOf(ns),kind):qSentMean(sentOf(ns),ki
    and wrong answers also go on the mistakes list until answered right three times */
 function record(q,ok){
   const sk=srsKeyOf(q); if(sk) srsAnswer(S.srs,sk,ok); srsActivity(S.srs);
+  if(goalTick(S.goal,S.srs.act)&&S.quiz) S.quiz.goalHit=true;   // goal.js: reached today's goal with this answer
   const k=qKey(q), i=S.miss.findIndex(m=>m.k===k);
   if(!ok){ if(i>=0) S.miss[i].s=0; else {S.miss.unshift({k,q,s:0}); if(S.miss.length>150) S.miss.length=150;} }
   else if(i>=0){ if(++S.miss[i].s>=3) S.miss.splice(i,1); }
@@ -761,7 +763,7 @@ function renderTest(){
   const tp=topic(Q.id), QN=Q.n;
   if(Q.done){
     const msg=Q.score===QN?"Perfect score.":Q.score>=QN*.8?"Strong result.":Q.score>=QN*.5?"Good start. Review the ones below.":"Go back over the notes, then try again.";
-    let h=`<div class="score"><div class="count">${esc(tp.name)}</div><div class="n">${Q.score}/${QN}</div><p style="margin:6px auto">${msg}</p></div>`;
+    let h=`<div class="score"><div class="count">${esc(tp.name)}</div><div class="n">${Q.score}/${QN}</div><p style="margin:6px auto">${msg}</p>${goalAfter(S.goal,S.srs.act,Q.goalHit)}</div>`;
     if(Q.misses.length){h+=`<h3>To review</h3><div class="tbl">`;
       Q.misses.forEach(m=>{const q=m.q, am=!q.en&&(q.type!=="mc"||q.optAm), rom=q.type!=="mc"?q.rom:q.opts[q.ans].r;
         if(q.listen){ h+=`<div class="miss">🔊 <span class="am">${esc(q.listen)}</span>`+(q.heardRom?` <span class="rom">${esc(q.heardRom)}</span>`:"")+(q.heardEn?` · ${esc(q.heardEn)}`:"")+
@@ -812,7 +814,8 @@ ${q.en&&!ok&&Q.typed.trim()?`<button class="link" data-act="t-own">I was right: 
 const plural=(n,w)=>n+" "+(n===1?w:w==="story"?"stories":w+"s");
 function statLine(d){
   d=d||{}; const t=Object.keys(d.best||{}).length, m=(d.miss||[]).length, it=d.srs&&d.srs.it?Object.values(d.srs.it):[], ms=it.filter(r=>r[0]>=SRS_MASTER).length;
-  return t||m||it.length ? plural(t,"test")+" with scores"+(it.length?", "+it.length+" items met"+(ms?" ("+ms+" mastered)":""):"")+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
+  const k=goalStreak(goalClean(d.goal),d.srs&&d.srs.act||{}), sk=k.now?goalStreakText(k)+", ":"";
+  return t||m||it.length ? sk+plural(t,"test")+" with scores"+(it.length?", "+it.length+" items met"+(ms?" ("+ms+" mastered)":""):"")+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
 }
 function renderWho(){
   const L=PROF.list(), P=S.pf;
@@ -862,7 +865,7 @@ async function readIncoming(text){
 }
 
 /* ---------- render + events ---------- */
-const MODES=["course","fidel","ref","test","prog"];
+const MODES=["course","fidel","eth","ref","test","prog"];
 function render(){
   schemeApply(S.scheme);
   document.body.classList.toggle("norom",!S.rom);
@@ -871,11 +874,11 @@ function render(){
   document.body.classList.toggle("focus",!!(S.mode==="test"&&(S.quiz||G))||(S.mode==="fidel"&&S.ftab==="type")||(S.mode==="course"&&S.lesson&&S.lview==="dlg")||rdFocus());
   $("#romtoggle").setAttribute("aria-pressed",S.rom);
   MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",S.mode===m||(m==="fidel"&&S.mode==="num")));
-  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // the Fidel & numbers tab reopens whichever half you used last
+  if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // the ፊደል (Fidel) tab reopens whichever half you used last
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
   const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
-  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
+  $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="eth"?renderEth():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
   addSayButtons($("#app"));
   const ein=$("#tin.en"); if(ein&&!ein.readOnly&&document.activeElement!==ein) ein.focus({preventScroll:true});   // typed English answers: straight to the keyboard
@@ -911,6 +914,7 @@ document.addEventListener("change",e=>{
   else if(id==="ls-upto"){S.ls.upto=+val;save();render();}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
   else if(id==="wl-skip"){wlSkip.set(e.target.checked);}
+  else if(id==="goal-rest"){S.goal.rest=e.target.checked;save();render();}
   else if(id.startsWith("dr-")){drChange(id,val);render();}
   else if(id.startsWith("gm-")){gmChange(id,val);render();}
 });
@@ -920,6 +924,7 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
+  if(a==="goal-n"){S.goal.n=+v;goalTick(S.goal,S.srs.act);save();render();return;}   // goal.js
   if(a.startsWith("gm-")){ if(!gmAct(a,v)) render(); return; }   // games.js
   if(a.startsWith("dr-")){ if(!drAct(a,v)) render(); return; }   // drills.js
   if(a.startsWith("rec-")){recAct(a,v,b.dataset.g);return;}
@@ -928,6 +933,8 @@ document.addEventListener("click",e=>{
   if(a==="find-try"){S.find.q=v;const i=$("#findq");if(i)i.value=v;findRefresh();return;}
   if(a.startsWith("dg-")&&a!=="dg-open"){ if(!dgAct(a,v)) render(); return; }
   if(a.startsWith("rd-")){ if(!rdAct(a,v,b)) render(); return; }
+  if(a.startsWith("eth-")){ dgStop(); S.find.from=false; ethAct(a,v,b); return; }   // ethiopia.js
+  if(a==="mode"&&v==="eth") ethReset();   // the Ethiopia tab always opens on its list of notes
   if(a==="mode"||a==="lesson"||a==="lesson-go"||a==="dg-open"||a==="start"||a==="tsec"||a==="quit") rdLeave();
   if(a==="mode"||a==="lesson"||a==="lview"||a==="dg-open") dgStop();
   if(a==="mode"||a==="fn"||a==="lesson"||a==="rtab"||a==="ftab"||a==="dg-open") S.find.from=false;   // "‹ Back to search" lasts until you go elsewhere
