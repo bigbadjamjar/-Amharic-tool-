@@ -225,11 +225,12 @@ function applyData(d){
   S.bs=JSON.parse(BS_DEF); if(d.builder&&typeof d.builder==="object") Object.assign(S.bs,d.builder);
   S.srs=d.srs?srsClean(d.srs):srsMigrate(d);   // spaced repetition (srs.js); profiles from before it get a starting point
   S.gm=gmClean(d.games); gmStop();
+  S.goal=goalClean(d.goal);   // daily goal and streak (goal.js)
   // colour scheme (schemes.js): this profile's own choice, or else the one last picked on this device
   S.schemePicked=schemeOk(d.scheme); S.scheme=S.schemePicked?d.scheme:schemeDevice.get();
   S.quiz=null; S.lesson=null; S.fc.key="";
 }
-const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,games:S.gm,...(S.schemePicked?{scheme:S.scheme}:{})});
+const profileData=()=>({best:S.best,rom:S.rom,miss:S.miss,upto:S.upto,day:S.day,kbhints:S.kb.hints,rate:sayRate,builder:S.bs,listen:S.ls,srs:S.srs,goal:S.goal,games:S.gm,...(S.schemePicked?{scheme:S.scheme}:{})});
 const save=()=>{ if(!PROF.cur()) PROF.add("Learner"); PROF.save(profileData()); };
 const keep=()=>{ if(PROF.cur()) save(); };   // before switching profile: store the current one, if there is one
 applyData(PROF.load());
@@ -536,6 +537,7 @@ const qSent = (ns,kind) => ri(2)?qOrder(sentOf(ns),kind):qSentMean(sentOf(ns),ki
    and wrong answers also go on the mistakes list until answered right three times */
 function record(q,ok){
   const sk=srsKeyOf(q); if(sk) srsAnswer(S.srs,sk,ok); srsActivity(S.srs);
+  if(goalTick(S.goal,S.srs.act)&&S.quiz) S.quiz.goalHit=true;   // goal.js: reached today's goal with this answer
   const k=qKey(q), i=S.miss.findIndex(m=>m.k===k);
   if(!ok){ if(i>=0) S.miss[i].s=0; else {S.miss.unshift({k,q,s:0}); if(S.miss.length>150) S.miss.length=150;} }
   else if(i>=0){ if(++S.miss[i].s>=3) S.miss.splice(i,1); }
@@ -717,7 +719,7 @@ function renderTest(){
   const tp=topic(Q.id), QN=Q.n;
   if(Q.done){
     const msg=Q.score===QN?"Perfect score.":Q.score>=QN*.8?"Strong result.":Q.score>=QN*.5?"Good start. Review the ones below.":"Go back over the notes, then try again.";
-    let h=`<div class="score"><div class="count">${esc(tp.name)}</div><div class="n">${Q.score}/${QN}</div><p style="margin:6px auto">${msg}</p></div>`;
+    let h=`<div class="score"><div class="count">${esc(tp.name)}</div><div class="n">${Q.score}/${QN}</div><p style="margin:6px auto">${msg}</p>${goalAfter(S.goal,S.srs.act,Q.goalHit)}</div>`;
     if(Q.misses.length){h+=`<h3>To review</h3><div class="tbl">`;
       Q.misses.forEach(m=>{const q=m.q, am=q.type!=="mc"||q.optAm, rom=q.type!=="mc"?q.rom:q.opts[q.ans].r;
         if(q.listen){ h+=`<div class="miss">🔊 <span class="am">${esc(q.listen)}</span>`+(q.heardRom?` <span class="rom">${esc(q.heardRom)}</span>`:"")+(q.heardEn?` · ${esc(q.heardEn)}`:"")+
@@ -767,7 +769,8 @@ ${q.parts&&q.bigRom?`<p class="drans"><span class="am nosay norom-auto">${esc(q.
 const plural=(n,w)=>n+" "+w+(n===1?"":"s");
 function statLine(d){
   d=d||{}; const t=Object.keys(d.best||{}).length, m=(d.miss||[]).length, it=d.srs&&d.srs.it?Object.values(d.srs.it):[], ms=it.filter(r=>r[0]>=SRS_MASTER).length;
-  return t||m||it.length ? plural(t,"test")+" with scores"+(it.length?", "+it.length+" items met"+(ms?" ("+ms+" mastered)":""):"")+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
+  const k=goalStreak(goalClean(d.goal),d.srs&&d.srs.act||{}), sk=k.now?goalStreakText(k)+", ":"";
+  return t||m||it.length ? sk+plural(t,"test")+" with scores"+(it.length?", "+it.length+" items met"+(ms?" ("+ms+" mastered)":""):"")+(m?", "+plural(m,"mistake")+" to review":"") : "No scores yet";
 }
 function renderWho(){
   const L=PROF.list(), P=S.pf;
@@ -863,6 +866,7 @@ document.addEventListener("change",e=>{
   else if(id==="ls-upto"){S.ls.upto=+val;save();render();}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
   else if(id==="wl-skip"){wlSkip.set(e.target.checked);}
+  else if(id==="goal-rest"){S.goal.rest=e.target.checked;save();render();}
   else if(id.startsWith("dr-")){drChange(id,val);render();}
   else if(id.startsWith("gm-")){gmChange(id,val);render();}
 });
@@ -872,6 +876,7 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
   const a=b.dataset.act, v=b.dataset.v, Q=S.quiz, F=S.fc, t=typing(); let top=false;
   if(a==="say"){playAm(v);return;}
+  if(a==="goal-n"){S.goal.n=+v;goalTick(S.goal,S.srs.act);save();render();return;}   // goal.js
   if(a.startsWith("gm-")){ if(!gmAct(a,v)) render(); return; }   // games.js
   if(a.startsWith("dr-")){ if(!drAct(a,v)) render(); return; }   // drills.js
   if(a.startsWith("rec-")){recAct(a,v,b.dataset.g);return;}

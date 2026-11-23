@@ -32,6 +32,7 @@ function renderWelcome(){
       <p class="wlhi"><span class="am">ሰላም!</span> <span class="rom">selam</span></p>
       <h2>Learn everyday Amharic, one small step at a time</h2>
       <p class="lead">A free practice app for reading, hearing and speaking Amharic, the main language of Ethiopia. It works on your phone or computer, needs no account, and keeps your progress on your own device.</p>
+      ${back && PROF.cur() && typeof goalWelcome === "function" ? goalWelcome(S.goal, S.srs.act, PROF.cur().name) : ""}
       <button class="btn primary wide wlgo" data-act="wl-start">${back ? "Continue learning" : "Start learning"}</button>
       <label class="wlskip"><input type="checkbox" id="wl-skip" ${wlSkip.get() ? "checked" : ""}> Don't show this page when the app opens</label>
       <button class="link wlcol" data-act="scheme-jump">🎨 Change the colours</button>
