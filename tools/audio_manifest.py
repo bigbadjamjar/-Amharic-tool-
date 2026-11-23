@@ -4,12 +4,19 @@
 Run it after adding or removing clips (the deploy workflow also runs it):
     python3 tools/audio_manifest.py
 """
+import hashlib
 import json
 from audio_common import AUDIO, existing_clips
 
 
+def versioned(clips: dict) -> dict:
+    """Add a short fingerprint of each file ("clips/ሀ.mp3?3f9a1c"), so when a clip is replaced
+    phones and installed apps fetch the new sound instead of playing their saved old copy."""
+    return {k: v + "?" + hashlib.md5((AUDIO / v).read_bytes()).hexdigest()[:6] for k, v in clips.items()}
+
+
 def write_manifest() -> int:
-    clips, male = existing_clips(), existing_clips(male=True)
+    clips, male = versioned(existing_clips()), versioned(existing_clips(male=True))
     dump = lambda d: json.dumps(d, ensure_ascii=False, indent=0, sort_keys=True)
     AUDIO.mkdir(parents=True, exist_ok=True)
     (AUDIO / "manifest.js").write_text(

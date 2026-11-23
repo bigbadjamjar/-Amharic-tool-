@@ -258,6 +258,15 @@ ok(!/[ሀ-፼]/.test(X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመ�
   ok(A.clipFor("ሰላም", "m") === "clips/m/ሰላም.mp3" && A.clipFor("ሰላም") === "clips/ሰላም.mp3", "each voice prefers its own clip");
   ok(!A.canSay("ውሃ"), "no clip: no button");
 }
+// --- audio: a replaced clip gets a new address, so a phone's saved old copy is not played
+{
+  const actx = vm.createContext({ window: {} });
+  vm.runInContext(fs.readFileSync(path.join(root, "js/audio.js"), "utf8") + "\n;globalThis.A={clipURL};", actx);
+  ok(actx.A.clipURL("clips/ሀ.mp3?3f9a1c") === "audio/clips/" + encodeURIComponent("ሀ") + ".mp3?v=3f9a1c", "clipURL adds ?v=: " + actx.A.clipURL("clips/ሀ.mp3?3f9a1c"));
+  ok(actx.A.clipURL("clips/m/ሰላም.mp3") === "audio/clips/m/" + encodeURIComponent("ሰላም") + ".mp3", "clipURL without a fingerprint");
+  const man = fs.readFileSync(path.join(root, "audio/manifest.js"), "utf8");
+  ok(/"ሀ": "clips\/ሀ\.mp3\?[0-9a-f]{6}"/.test(man), "manifest clips carry a fingerprint (run tools/audio_manifest.py)");
+}
 
 console.log(`${passes} checks passed, ${fails} failed (${X.VLIST.length} verbs, ${X.LESSONS.length} lessons, ${X.SENT.length} sentences)`);
 process.exit(fails ? 1 : 0);

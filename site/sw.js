@@ -88,7 +88,11 @@ async function clip(req){
   if (!r) {
     try {
       r = await fetch(req.url);   // the whole file, without the Range header
-      if (r.ok) await cache.put(req.url, r.clone());
+      if (r.ok) {
+        await cache.put(req.url, r.clone());
+        // Drop saved copies of the same clip from before it was replaced (same file, different ?v=).
+        for (const old of await cache.keys(req.url, {ignoreSearch: true})) if (old.url !== req.url) cache.delete(old);
+      }
     } catch (e) { return new Response("", {status: 504}); }
   }
   return piece(req, r);
