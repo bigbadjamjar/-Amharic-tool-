@@ -330,7 +330,7 @@ ok(!/[ሀ-፼]/.test(X.romOf("ደህና ነኝ፣ እግዚአብሔር ይመ�
   const cctx = vm.createContext({});
   vm.runInContext(fs.readFileSync(path.join(root, "js/cloud.js"), "utf8") + "\n;globalThis.C={cloudMerge,cloudOn,clHasProgress};", cctx);
   const { cloudMerge, cloudOn, clHasProgress } = cctx.C;
-  ok(!cloudOn(), "cloud.js ships switched off until FIREBASE_CONFIG is set");
+  ok(!cloudOn(), "cloudOn is false outside a browser");
   const phone = { rom: false, rate: 0.75, best: { u1: 8, u2: 5 }, miss: [{ k: "a", q: {} }],
     srs: { v: 1, it: { "w:ሰላም": [3, 120, 5, 0, 110], "w:ውሃ": [1, 101, 1, 1, 100] }, act: { 100: 4, 110: 6 } },
     goal: { n: 10, rest: true, met: { 100: 1 } }, games: { src: "words", best: { m: 30 } } };

@@ -28,7 +28,7 @@ const browser = await chromium.launch();
 async function device(on = true){
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: process.env.SHOTS ? 2 : 1 });
   await ctx.addInitScript(() => { try { localStorage.setItem("amharic-cloud-emu", "1"); localStorage.setItem("amharic-welcome", "1"); } catch (e) {} });
-  if (on) await ctx.route("**/js/cloud.js", async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace("const FIREBASE_CONFIG = null;", CONFIG) }); });
+  await ctx.route("**/js/cloud.js", async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace(/const FIREBASE_CONFIG = (null|\{[\s\S]*?\});/, on ? CONFIG : "const FIREBASE_CONFIG = null;") }); });
   const page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error" || process.env.DEBUG) console.log("console: " + m.text()); });
   page.on("pageerror", e => { bad++; console.log("PAGE ERROR " + e.message); });

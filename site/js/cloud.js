@@ -17,10 +17,17 @@
    Keeping two devices in step: progress is combined, never thrown away. Best scores keep the higher score,
    each spaced repetition word keeps whichever device saw it most recently, answers per day keep the bigger count,
    and days the goal was reached are kept from both. Settings and the mistakes list come from whichever side changed last. */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC_--u6wwwBoA7ZR1l2mNLtAIT-Zf0e6Hg",
+  authDomain: "amharicapp-e94fd.firebaseapp.com",
+  projectId: "amharicapp-e94fd",
+  storageBucket: "amharicapp-e94fd.firebasestorage.app",
+  messagingSenderId: "105865511929",
+  appId: "1:105865511929:web:7dc503b55699082645b328"
+};   // (measurementId left out: no Google Analytics)
 
 const CL_V = 1;
-const cloudOn = () => !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+const cloudOn = () => typeof window !== "undefined" && !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
 const clHasProgress = d => !!d && (Object.keys(d.best || {}).length > 0 || Object.keys((d.srs && d.srs.it) || {}).length > 0 || (d.miss || []).length > 0);
 
 /* Combine two copies of one profile's data. a and b are the saved data, at and bt when each last changed (ms).
