@@ -258,3 +258,30 @@ Object.assign(PARTS,{
     rom:["sebabbere","yisebabbir","yisebabbiral","yisebabir","sebabir","sebabro","sebabrwal","sebabari","mesebaber"]}
 });
 
+/* ---------- units 22–27 ---------- */
+Object.assign(T,{
+  biS:{title:"ቢሰብር bisebr, if he breaks",ex:"ብ + short present",full:true,
+    am:["ብሰብር","ብትሰብር","ብትሰብሪ","ቢሰብር","ብትሰብር","ብንሰብር","ብትሰብሩ","ቢሰብሩ"],
+    rom:["bisebr","bitsebr","bitsebri","bisebr","bitsebr","binsebr","bitsebru","bisebru"],
+    en:["if I break","if you (m) break","if you (f) break","if he breaks","if she breaks","if we break","if you (pl) break","if they break"]},
+  indS:{title:"እንዲሰብር indisebr, (for him) to break",ex:"እንድ + short present",full:true,
+    am:["እንድሰብር","እንድትሰብር","እንድትሰብሪ","እንዲሰብር","እንድትሰብር","እንድንሰብር","እንድትሰብሩ","እንዲሰብሩ"],
+    rom:["indisebr","inditsebr","inditsebri","indisebr","inditsebr","indinsebr","inditsebru","indisebru"],
+    en:["(for) me to break","(for) you (m) to break","(for) you (f) to break","(for) him to break","(for) her to break","(for) us to break","(for) you (pl) to break","(for) them to break"]},
+  prog:{title:"እየሰበረ ነው iyesebbere new, he is breaking",ex:"እየ + past + ነው",full:true,
+    am:["እየሰበርኩ ነው","እየሰበርክ ነው","እየሰበርሽ ነው","እየሰበረ ነው","እየሰበረች ነው","እየሰበርን ነው","እየሰበራችሁ ነው","እየሰበሩ ነው"],
+    rom:["iyesebberku new","iyesebberk new","iyesebbersh new","iyesebbere new","iyesebberech new","iyesebbern new","iyesebberachihu new","iyesebberu new"],
+    en:["I am breaking","you (m) are breaking","you (f) are breaking","he is breaking","she is breaking","we are breaking","you (pl) are breaking","they are breaking"]},
+  habit:{title:"ይሰብር ነበር yisebr nebber, he used to break",ex:"short present + ነበር",full:true,
+    am:["እሰብር ነበር","ትሰብር ነበር","ትሰብሪ ነበር","ይሰብር ነበር","ትሰብር ነበር","እንሰብር ነበር","ትሰብሩ ነበር","ይሰብሩ ነበር"],
+    rom:["isebr nebber","tisebr nebber","tisebri nebber","yisebr nebber","tisebr nebber","innisebr nebber","tisebru nebber","yisebru nebber"],
+    en:["I used to break","you (m) used to break","you (f) used to break","he used to break","she used to break","we used to break","you (pl) used to break","they used to break"]},
+  endaImp:{title:"እንደሚሰብር indemmisebr, that he breaks",ex:"እንደ + present, after say, tell, hear, know",full:true,
+    am:["እንደምሰብር","እንደምትሰብር","እንደምትሰብሪ","እንደሚሰብር","እንደምትሰብር","እንደምንሰብር","እንደምትሰብሩ","እንደሚሰብሩ"],
+    rom:["indemmisebr","indemmitsebr","indemmitsebri","indemmisebr","indemmitsebr","indemminsebr","indemmitsebru","indemmisebru"],
+    en:["that I break","that you (m) break","that you (f) break","that he breaks","that she breaks","that we break","that you (pl) break","that they break"]},
+  seem:{title:"ይመስለኛል yimeslegnal, I think",ex:"መሰለ “seem” with object endings",full:true,
+    am:["ይመስለኛል","ይመስልሃል","ይመስልሻል","ይመስለዋል","ይመስላታል","ይመስለናል","ይመስላችኋል","ይመስላቸዋል"],
+    rom:["yimeslegnal","yimeslihal","yimeslishal","yimeslewal","yimeslatal","yimeslenal","yimeslachihwal","yimeslachewal"],
+    en:["I think","you (m) think","you (f) think","he thinks","she thinks","we think","you (pl) think","they think"]}
+});

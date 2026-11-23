@@ -16,7 +16,7 @@ site/
   index.html          page shell; loads the scripts below in order
   css/style.css
   js/data/            all the content — edit these to change what the app teaches
-    course.js         the units (notes, vocabulary)
+    course.js         the units (notes, vocabulary) and LEVELS, the Beginner / Intermediate / Advanced split
     sentences.js      practice sentences
     dialogues.js      one short conversation per unit (two speakers, a woman and a man)
     tables.js         conjugation and grammar tables shown in lessons
