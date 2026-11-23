@@ -56,7 +56,8 @@ const CULTURE = [
  "p":[
   "Ethiopians usually count the hours of the day from sunrise, not from midnight. Around 6 in the morning is 12 o'clock, so 7 a.m. is 1 o'clock, {አንድ ሰዓት|and se'at}, and midday is 6 o'clock, {ስድስት ሰዓት|siddist se'at}.",
   "The night is counted the same way from sunset: 7 p.m. is 1 o'clock in the evening and midnight is 6. So close to the equator, day and night are about the same length all year, so it works well.",
-  "To turn Ethiopian time into the clock you know, add or take away six hours. When you make plans, check which clock someone means: Ethiopian time, or {በፈረንጅ|beferenj} “foreign” time."],
+  "To turn Ethiopian time into the clock you know, take 6 off the Western time (or add 6, it comes to the same on a 12-hour clock): 9 a.m. is 3 o'clock, 2 p.m. is 8 o'clock, 8 p.m. is 2 o'clock. A watch looks the same; you just read the hour from the opposite side of the face.",
+  "Phones, flights and offices may use the Western clock, so when you make plans, check which clock someone means: {በኢትዮጵያ ሰዓት?|be'ityop'ya se'at?} “by Ethiopian time?” or {በፈረንጅ ሰዓት?|beferenj se'at?} “by Western (foreign) time?”"],
  "phrases":[
   ["ስንት ሰዓት ነው?","sint se'at new?","what time is it?"],
   ["ከጠዋቱ ሦስት ሰዓት","ket'ewatu sost se'at","3 o'clock in the morning (9 a.m.)"],
@@ -65,9 +66,10 @@ const CULTURE = [
 
 {"id":"calendar","units":[14],"icon":"📅","title":"The Ethiopian calendar","intro":"Thirteen months, and a New Year in September.",
  "p":[
-  "Ethiopia has its own calendar, seven or eight years behind the one used in Europe: from September 2026 to September 2027, it is the year 2019 in Ethiopia.",
+  "Ethiopia has its own calendar, seven or eight years behind the one used in Europe: 8 behind until New Year in September, then 7. From September 2026 to September 2027, it is the year 2019 in Ethiopia. Write {ዓ.ም.|amete mihret} after an Ethiopian year.",
   "There are thirteen months: twelve of exactly 30 days, and a short thirteenth month, {ጳጉሜ|p'agumé}, of five days, or six in a leap year. That's where the old tourist slogan “thirteen months of sunshine” comes from.",
-  "New Year's Day, {እንቁጣጣሽ|inqut'at'ash}, is 11 September (12 September in some years), at the end of the long rainy season, when yellow {አደይ አበባ|adey abeba} flowers cover the hills. Children go from door to door singing, and give drawings of flowers."],
+  "New Year's Day, {እንቁጣጣሽ|inqut'at'ash}, is 11 September (12 September in some years), at the end of the long rainy season, when yellow {አደይ አበባ|adey abeba} flowers cover the hills. Children go from door to door singing, and give drawings of flowers.",
+  "To give a date, say the month, then the day: {ኅዳር አሥራ ሦስት|hidar asra sost} “Hidar 13”."],
  "phrases":[
   ["መልካም አዲስ ዓመት","melkam addis amet","happy new year"],
   ["መስከረም","meskerem","Meskerem, the first month"],
@@ -90,7 +92,8 @@ const CULTURE = [
  "p":[
   "Addis Ababa's {መርካቶ|merkato} is one of the biggest open-air markets in Africa: a maze of streets where you can buy anything from spices to sofas. In markets and small shops, prices are often open to discussion, though supermarkets and many shops have fixed prices.",
   "Bargaining is friendly, not a fight. Greet the seller first and ask the price. If it seems high, smile, say it's expensive and ask them to come down. Name a price you are happy with and meet somewhere in the middle. Buying several things from the same person helps.",
-  "Money is the {ብር|birr}, which is divided into 100 {ሳንቲም|santim}."],
+  "Money is the {ብር|birr}, which is divided into 100 {ሳንቲም|santim}. Say the number, then {ብር|birr}: {ሃምሳ ብር|hamsa birr} 50 birr. For birr and santim, join the santim on with {ከ-|ke-}: {አሥር ብር ከሃምሳ ሳንቲም|assir birr kehamsa santim} 10.50 birr. Santim are rare in shops now, but you will see them on bills.",
+  "Ask {ስንት ነው?|sint new?} “how much is it?” The answer is usually just the price and {ነው|new} “it is”: {ቡና ሠላሳ ብር ነው|buna selasa birr new} “coffee is 30 birr”."],
  "phrases":[
   ["ስንት ነው?","sint new?","how much is it?"],
   ["ዋጋው ስንት ነው?","wagaw sint new?","what's the price?"],

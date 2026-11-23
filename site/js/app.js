@@ -693,7 +693,7 @@ const TSECS = [
   ["sent","🧩","Sentences","Build Amharic sentences word by word, or pick what a sentence means.",()=>3,()=>bsIntro()+tStack(["build-course","build-verbs","sent-mean"])+bsHTML(true)],
   ["dlg","💬","Dialogues","Hear one side of a short conversation and answer as the other person.",()=>DIALOGUES.length,()=>noH3(dgMenu())],
   ["general","📋","General practice","Pronouns, verbs, verb forms, extra words, and everything mixed.",()=>5,()=>tStack(["pronouns","verbs","verbs-type","extra","mixed"])],
-  ["everyday","🕒","Everyday Amharic","Telling the time the Ethiopian way, prices in birr, dates and the Ethiopian calendar.",()=>Object.keys(DR_TESTS).length,()=>drMenu()],
+  ["everyday","🕒","Everyday Amharic","Tests on telling the time the Ethiopian way, prices in birr, and dates in the Ethiopian calendar.",()=>Object.keys(DR_TESTS).length,()=>drMenu()],
   ["games","🎲","Games","Matching pairs, a 60-second speed round and fidel bingo.",()=>3,()=>gmMenu(),"game"]
 ];
 const tItem=id=>{const t=topic(id);return `<button class="topic" data-act="start" data-v="${id}"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small>${bestChip(id)}</button>`;};
@@ -937,7 +937,6 @@ document.addEventListener("change",e=>{
   else if(id==="pf-infile"&&e.target.files[0]){const f=e.target.files[0]; f.text().then(readIncoming,()=>{S.pf.inErr="Couldn't read that file.";render();});}
   else if(id==="ls-upto"){S.ls.upto=+val;save();render();}
   else if(id==="bs-upto"){S.bs.upto=+val;bsChanged();render();}
-  else if(id==="wl-skip"){wlSkip.set(e.target.checked);}
   else if(id==="goal-rest"){S.goal.rest=e.target.checked;save();render();}
   else if(id.startsWith("dr-")){drChange(id,val);render();}
   else if(id.startsWith("gm-")){gmChange(id,val);render();}

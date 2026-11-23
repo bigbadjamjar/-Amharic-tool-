@@ -1,14 +1,12 @@
 /* ---------- welcome page ----------
    A front page for someone opening the app for the first time (or sent a link by a friend):
    what the app is, who it's for, what's inside, how to start, and an honest note about the content.
-   Shown each time the app opens, unless "Don't show this page when the app opens" is ticked on this
-   device. Also any time from the app name in the header, the "About this app" links, or the address
+   Shown each time the app opens, and any time from the app name in the header, the "About this app" links, or the address
    ending #welcome, which is handy for sharing. */
 const WL_KEY = "amharic-welcome";        // set once someone has tapped past the welcome page on this device
-const WL_SKIP = "amharic-welcome-skip";  // set when they ticked "don't show this page when the app opens"
 const wlStore = {get(){ try { return localStorage.getItem(WL_KEY); } catch (e) { return null; } }, set(){ try { localStorage.setItem(WL_KEY, "1"); } catch (e) {} }};
-const wlSkip = {get(){ try { return localStorage.getItem(WL_SKIP) === "1"; } catch (e) { return false; } },
-  set(on){ try { on ? localStorage.setItem(WL_SKIP, "1") : localStorage.removeItem(WL_SKIP); } catch (e) {} }};
+// The old "Don't show this page when the app opens" tick box is gone; forget it if it was ever ticked.
+try { localStorage.removeItem("amharic-welcome-skip"); } catch (e) {}
 const wlAsked = () => typeof location !== "undefined" && /^#welcome$/i.test(location.hash);
 
 function wlCounts(){
@@ -34,7 +32,6 @@ function renderWelcome(){
       <p class="lead">A free practice app for reading, hearing and speaking Amharic, the main language of Ethiopia. It works on your phone or computer, needs no account, and keeps your progress on your own device.</p>
       ${back && PROF.cur() && typeof goalWelcome === "function" ? goalWelcome(S.goal, S.srs.act, PROF.cur().name) : ""}
       <button class="btn primary wide wlgo" data-act="wl-start">${back ? "Continue learning" : "Start learning"}</button>
-      <label class="wlskip"><input type="checkbox" id="wl-skip" ${wlSkip.get() ? "checked" : ""}> Don't show this page when the app opens</label>
       <button class="link wlcol" data-act="scheme-jump">🎨 Change the colours</button>
     </section>
 
@@ -85,6 +82,6 @@ function wlStart(){
   const n = PROF.list().length;
   return n === 0 || n > 1 ? "who" : "course";
 }
-const wlFirst = () => wlAsked() || !wlSkip.get();
+const wlFirst = () => true;   // the app always opens on this page
 // shown centred at the bottom of every page except the welcome page itself
 const wlLink = () => `<footer class="wlfoot"><button class="link" data-act="mode" data-v="welcome">About this app</button>${typeof repOpen==="function"?`<span aria-hidden="true">·</span><button class="link" data-rep="open">Report a problem</button>`:""}</footer>`;
