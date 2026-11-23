@@ -5,9 +5,27 @@
    lines: [Amharic, transcription, English, note?]. The transcription has one word for each Amharic word
    (same order), so tapping a word can show its own transcription. A note marks a line a native speaker
    should look at, and says why. None of these has been checked yet; tools/native-check.mjs lists them.
-   qs: [question, [three answers], index of the right one].
+   qs: the quiz at the end, four questions: [question, [three answers], index of the right one].
+   The answers are shown in a new order each time.
    The audio run reads every Amharic string in this file, so each line and each word can get a clip. */
 const STORIES = [
+{"id":"friends","after":2,"title":"New friends","am":"አዲስ ጓደኛ","rom":"addis gwadegna","intro":"Sara and Tom meet for the first time.",
+ "lines":[
+  ["ሳራ፦ ሰላም! ስሜ ሳራ ነው። ስምህ ማን ነው?","sara: selam! simé sara new. simih man new?","Sara: Hello! My name is Sara. What's your name?"],
+  ["ቶም፦ ስሜ ቶም ነው።","tom: simé tom new.","Tom: My name is Tom."],
+  ["ሳራ፦ ከየት ነህ?","sara: keyet neh?","Sara: Where are you from?"],
+  ["ቶም፦ ከእንግሊዝ ነኝ። አንቺስ?","tom: ke'inglíz negn. anchis?","Tom: I'm from England. And you?"],
+  ["ሳራ፦ እኔ ኢትዮጵያዊት ነኝ። ከአዲስ አበባ ነኝ።","sara: iné ityop'iyawit negn. ke'addis abeba negn.","Sara: I'm Ethiopian. I'm from Addis Ababa."],
+  ["ቶም፦ ተማሪ ነሽ?","tom: temari nesh?","Tom: Are you a student?"],
+  ["ሳራ፦ አይ፣ ተማሪ አይደለሁም። ነርስ ነኝ።","sara: ay, temari aydellehum. ners negn.","Sara: No, I'm not a student. I'm a nurse."],
+  ["ቶም፦ እኔ አስተማሪ ነኝ።","tom: iné astemari negn.","Tom: I'm a teacher."],
+  ["ሳራ፦ ጥሩ ነው!","sara: t'iru new!","Sara: That's good!"]],
+ "qs":[
+  ["Where is Tom from?",["America","England","Ethiopia"],1],
+  ["What is Sara's job?",["She's a student","She's a teacher","She's a nurse"],2],
+  ["Which city is Sara from?",["Addis Ababa","Hawassa","Gondar"],0],
+  ["What does Tom do?",["He's a driver","He's a teacher","He's a doctor"],1]]},
+
 {"id":"almaz","after":3,"title":"Meet Almaz","am":"አልማዝ","rom":"almaz","intro":"Almaz shows us her family.",
  "lines":[
   ["ሰላም! ስሜ አልማዝ ነው።","selam! simé almaz new.","Hello! My name is Almaz."],
@@ -22,7 +40,8 @@ const STORIES = [
  "qs":[
   ["What does Almaz do?",["She's a student","She's a teacher","She's a doctor"],0],
   ["Who is a driver?",["Her elder brother","Her father","Her grandmother"],0],
-  ["What is the dog called?",["Bobby","Almaz","He has no name"],0]]},
+  ["What is the dog called?",["Bobby","Almaz","He has no name"],0],
+  ["What is Almaz's grandmother like?",["Tall","Kind","Young"],1]]},
 
 {"id":"dawit","after":4,"title":"Who has more?","am":"ዳዊትና ሳሙኤል","rom":"dawitinna samu'él","intro":"Two friends: one has a lot of things, the other has a lot of time.",
  "lines":[
@@ -39,7 +58,42 @@ const STORIES = [
  "qs":[
   ["How many children does Dawit have?",["Four","Two","Three"],0],
   ["What doesn't Dawit have?",["Time","Money","A car"],0],
-  ["What animals does Samuel have?",["A cat and a dog","Two dogs","None"],0]]},
+  ["What animals does Samuel have?",["A cat and a dog","Two dogs","None"],0],
+  ["Who has a lot of time?",["Dawit","Samuel","Both of them"],1]]},
+
+{"id":"phone","after":5,"title":"On the phone","am":"በስልክ","rom":"besilk","intro":"Dawit rings Sara with some good news.",
+ "lines":[
+  ["ሳራ፦ ሄሎ?","sara: hélo?","Sara: Hello?"],
+  ["ዳዊት፦ ሄሎ ሳራ! እኔ ዳዊት ነኝ። እንደምን ነሽ?","dawit: hélo sara! iné dawit negn. indemin nesh?","Dawit: Hello Sara! It's me, Dawit. How are you?"],
+  ["ሳራ፦ ደህና ነኝ፣ እግዚአብሔር ይመስገን። አንተስ?","sara: dehna negn, igzi'abhér yimesgen. antes?","Sara: I'm well, thank God. And you?"],
+  ["ዳዊት፦ ደህና ነኝ። ዛሬ ቤት ነሽ?","dawit: dehna negn. zaré bét nesh?","Dawit: I'm well. Are you at home today?"],
+  ["ሳራ፦ አዎ፣ ቤት ነኝ።","sara: awo, bét negn.","Sara: Yes, I'm at home."],
+  ["ዳዊት፦ ሁለት ቲኬት አለኝ።","dawit: hulet tikét allegn.","Dawit: I have two tickets."],
+  ["ሳራ፦ የምን ቲኬት?","sara: yemin tikét?","Sara: Tickets for what?"],
+  ["ዳዊት፦ የእግር ኳስ! ኢትዮጵያ እና ኬንያ።","dawit: ye'igir kwas! ityop'iya inna kénya.","Dawit: Football! Ethiopia and Kenya."],
+  ["ሳራ፦ በጣም ጥሩ! ቻው!","sara: bet'am t'iru! chaw!","Sara: Great! Bye!"]],
+ "qs":[
+  ["Who rang?",["Tom","Samuel","Dawit"],2],
+  ["How many tickets does Dawit have?",["Two","One","Three"],0],
+  ["What are the tickets for?",["A film","Football","A train"],1],
+  ["Who is playing?",["Ethiopia and Kenya","Ethiopia and England","Kenya and America"],0]]},
+
+{"id":"town","after":6,"title":"My town","am":"ከተማዬ","rom":"ketemayé","intro":"Yohannes shows us round his small town.",
+ "lines":[
+  ["ስሜ ዮሐንስ ነው።","simé yohannis new.","My name is Yohannes."],
+  ["ከተማዬ ትንሽ ነው።","ketemayé tinnish new.","My town is small.","ከተማ can be treated as “he” or “she”; check ነው here (or ናት)."],
+  ["ከተማው ውስጥ ገበያ አለ።","ketemaw wist' gebeya alle.","In the town there is a market."],
+  ["ቤተ ክርስቲያን እና መስጊድ አሉ።","béte kristiyan inna mesgid allu.","There is a church and a mosque."],
+  ["ትምህርት ቤቱ ከቤተ ክርስቲያኑ አጠገብ ነው።","timihirt bétu kebéte kristiyanu at'egeb new.","The school is next to the church."],
+  ["ፖስታ ቤቱ ከባንኩ ፊት ለፊት ነው።","posta bétu kebanku fit lefit new.","The post office is opposite the bank."],
+  ["ሆስፒታል ግን የለም።","hospital gin yellem.","But there is no hospital."],
+  ["ሆስፒታሉ ሩቅ ነው፤ ትልቁ ከተማ ውስጥ ነው።","hospitalu ruq new; tilliqu ketema wist' new.","The hospital is far away; it is in the big city."],
+  ["ቤቴ ገበያው አጠገብ ነው። ሁልጊዜ ጫጫታ አለ!","bété gebeyaw at'egeb new. hulgizé ch'ach'ata alle!","My house is next to the market. There's always noise!"]],
+ "qs":[
+  ["What is next to the church?",["The bank","The school","The market"],1],
+  ["What is opposite the bank?",["The post office","The mosque","The hospital"],0],
+  ["What doesn't the town have?",["A market","A mosque","A hospital"],2],
+  ["Why is Yohannes's house noisy?",["It's next to the market","It's next to the school","It's in the big city"],0]]},
 
 {"id":"coffee","after":7,"title":"At Grandmother's","am":"አያቴ ቤት","rom":"ayaté bét","intro":"Coffee and lunch at grandmother's house.",
  "lines":[
@@ -55,7 +109,24 @@ const STORIES = [
  "qs":[
   ["How does grandmother drink her coffee?",["Without sugar","With sugar","With milk"],0],
   ["What does the younger sister want?",["Milk","Coffee","Tea"],0],
-  ["What do they eat for lunch?",["Injera with shiro","Bread","Chicken stew"],0]]},
+  ["What do they eat for lunch?",["Injera with shiro","Bread","Chicken stew"],0],
+  ["What is in the house?",["A coffee pot","A television","A dog"],0]]},
+
+{"id":"week","after":8,"title":"Hanna's week","am":"የሐና ሳምንት","rom":"yehanna samint","intro":"What Hanna does every day, in the present tense.",
+ "lines":[
+  ["ሐና አስተማሪ ናት።","hanna astemari nat.","Hanna is a teacher."],
+  ["ከሰኞ እስከ ዓርብ ትምህርት ቤት ትሠራለች።","kesegno iske arb timihirt bét tiserallech.","From Monday to Friday she works at a school."],
+  ["ልጆችን እንግሊዝኛ ታስተምራለች።","lijochin inglizigna tastemirallech.","She teaches children English."],
+  ["ማታ ቤት ታነባለች።","mata bét tanebballech.","In the evening she reads at home."],
+  ["ቅዳሜ ወደ ገበያ ትሄዳለች።","qidamé wede gebeya tihédallech.","On Saturday she goes to the market."],
+  ["እሑድ አትሠራም፤ ቤት ትተኛለች!","ihud atiseram; bét titegnallech!","On Sunday she doesn't work; she sleeps at home!"],
+  ["ነገ ሰኞ ነው።","nege segno new.","Tomorrow is Monday."],
+  ["ሐና ዛሬ ማታ ቶሎ ትተኛለች።","hanna zaré mata tolo titegnallech.","Tonight Hanna is going to bed early.","ቶሎ for “early” (to bed): check, or ቀድማ?"]],
+ "qs":[
+  ["What does Hanna teach?",["Amharic","English","Music"],1],
+  ["When does she go to the market?",["On Saturday","On Sunday","On Monday"],0],
+  ["What does she do on Sunday?",["She works","She goes to the market","She sleeps at home"],2],
+  ["What does she do in the evenings?",["She reads at home","She watches films","She goes to school"],0]]},
 
 {"id":"yesterday","after":9,"title":"A long day","am":"ረጅም ቀን","rom":"rejjim qen","intro":"Someone tells us about yesterday.",
  "lines":[
@@ -70,7 +141,25 @@ const STORIES = [
  "qs":[
   ["Who rang in the afternoon?",["Their mother","A friend","Their boss"],0],
   ["What did they buy?",["Bread and milk","Coffee and sugar","Bananas"],0],
-  ["Why didn't they finish the film?",["They fell asleep","The phone rang","They went out"],0]]},
+  ["Why didn't they finish the film?",["They fell asleep","The phone rang","They went out"],0],
+  ["Where did they fall asleep?",["In bed","At work","On the sofa"],2]]},
+
+{"id":"market","after":11,"title":"Bargaining","am":"ገበያ ላይ","rom":"gebeya lay","intro":"Samuel buys tomatoes and onions, and asks for a better price.",
+ "lines":[
+  ["ዛሬ ቅዳሜ ነው፤ ብዙ ሰዎች ገበያ ላይ አሉ።","zaré qidamé new; bizu sewoch gebeya lay allu.","Today is Saturday; there are lots of people at the market."],
+  ["ሳሙኤል ቲማቲም እና ሽንኩርት ይፈልጋል።","samu'él timatim inna shinkurt yifeligal.","Samuel wants tomatoes and onions."],
+  ["ሳሙኤል፦ አንድ ኪሎ ቲማቲም ስንት ነው?","samu'él: and kilo timatim sint new?","Samuel: How much is a kilo of tomatoes?"],
+  ["ነጋዴዋ፦ ሠላሳ ብር።","negadéwa: selasa birr.","The trader: Thirty birr."],
+  ["ሳሙኤል፦ በጣም ውድ ነው! ቀንሱልኝ።","samu'él: bet'am wid new! qenisullign.","Samuel: That's very expensive! Bring it down for me."],
+  ["ነጋዴዋ፦ እሺ፣ ሃያ አምስት ብር።","negadéwa: ishi, haya amist birr.","The trader: OK, twenty-five birr."],
+  ["ሳሙኤል ሁለት ኪሎ ቲማቲም እና አንድ ኪሎ ሽንኩርት ገዛ።","samu'él hulet kilo timatim inna and kilo shinkurt gezza.","Samuel bought two kilos of tomatoes and a kilo of onions."],
+  ["ሰባ ብር ከፈለ።","seba birr kefele.","He paid seventy birr."],
+  ["ከዚያ ሙዝ ፈለገ፤ ግን ሙዝ አልነበረም።","keziya muz felege; gin muz alnebberem.","Then he looked for bananas, but there weren't any."]],
+ "qs":[
+  ["How much was a kilo of tomatoes at first?",["Twenty birr","Thirty birr","Fifty birr"],1],
+  ["What was the price after Samuel asked?",["Twenty-five birr","Thirty birr","Seventy birr"],0],
+  ["How much did he pay in all?",["Fifty birr","Twenty-five birr","Seventy birr"],2],
+  ["What couldn't he buy?",["Onions","Bananas","Eggs"],1]]},
 
 {"id":"station","after":12,"title":"The train station","am":"ባቡር ጣቢያ","rom":"babur t'abiya","intro":"Tom is looking for the train station.",
  "lines":[
@@ -87,7 +176,25 @@ const STORIES = [
  "qs":[
   ["Where is the station?",["Next to the bank","Opposite the church","Far away"],0],
   ["How did Tom get there?",["On foot","By taxi","By bus"],0],
-  ["When is the next train?",["Tomorrow","In an hour","Tonight"],0]]},
+  ["When is the next train?",["Tomorrow","In an hour","Tonight"],0],
+  ["What did Tom buy?",["A ticket","Bread","A phone"],0]]},
+
+{"id":"doctor","after":13,"title":"At the doctor's","am":"ሐኪም ቤት","rom":"hakim bét","intro":"Dawit doesn't feel well, and the doctor asks what he ate.",
+ "lines":[
+  ["ዛሬ ጠዋት ዳዊት ታመመ።","zaré t'ewat dawit tamemme.","This morning Dawit fell ill."],
+  ["ራሱን ያመዋል፤ ሆዱንም ያመዋል።","rasun yamewal; hodunim yamewal.","His head hurts, and his stomach hurts too."],
+  ["ሚስቱ፦ ወደ ሐኪም ሂድ!","mistu: wede hakim hid!","His wife: Go to the doctor!"],
+  ["ሐኪሙ፦ ምን ሆንክ?","hakimu: min honk?","The doctor: What's the matter?"],
+  ["ዳዊት፦ ደክሞኛል፤ ራሴን ያመኛል።","dawit: dekmognal; rasén yamegnal.","Dawit: I'm tired; my head hurts."],
+  ["ሐኪሙ፦ ትናንት ምን በላህ?","hakimu: tinant min belah?","The doctor: What did you eat yesterday?"],
+  ["ዳዊት፦ ብዙ ጥሬ ሥጋ በላሁ!","dawit: bizu t'iré siga bellahu!","Dawit: I ate a lot of raw meat!"],
+  ["ሐኪሙ መድኃኒት ሰጠው።","hakimu medhanit set'ew.","The doctor gave him medicine."],
+  ["ከሁለት ቀን በኋላ ዳዊት ዳነ።","kehulet qen behwala dawit dane.","Two days later Dawit got better."]],
+ "qs":[
+  ["What hurt?",["His tooth","His head and his stomach","His leg"],1],
+  ["Who told him to go to the doctor?",["His wife","His friend","His mother"],0],
+  ["What did he eat yesterday?",["Shiro","Nothing","A lot of raw meat"],2],
+  ["When did he get better?",["The same day","Two days later","A week later"],1]]},
 
 {"id":"meskel","after":14,"title":"Plans for Meskel","am":"የመስቀል ዕቅድ","rom":"yemeskel iqid","intro":"Sara and Yonas make plans for the Meskel festival.",
  "lines":[
@@ -104,7 +211,8 @@ const STORIES = [
  "qs":[
   ["What does Sara want to see?",["The Demera bonfire","A film","A wedding"],0],
   ["Where will they meet?",["Next to the church","At the station","At Sara's house"],0],
-  ["What is Sara's mother making?",["Chicken stew","Shiro","Coffee"],0]]},
+  ["What is Sara's mother making?",["Chicken stew","Shiro","Coffee"],0],
+  ["Why might Yonas not come?",["He's ill","He has to work in the morning","He doesn't like chicken"],1]]},
 
 {"id":"keys","after":16,"title":"Where are my keys?","am":"ቁልፌ የት ነው?","rom":"qulfé yet new?","intro":"A morning that goes wrong, told with the “and then” verb forms from unit 16.",
  "lines":[
@@ -119,7 +227,42 @@ const STORIES = [
  "qs":[
   ["Where did they look first?",["The bedroom","The kitchen","Their bag"],0],
   ["Where was the key?",["In their pocket","On the table","In the bag"],0],
-  ["Did they catch the bus?",["Yes","No","They walked"],0]]},
+  ["Did they catch the bus?",["Yes","No","They walked"],0],
+  ["Where did they look after the bedroom?",["The garden","The car","The kitchen"],2]]},
+
+{"id":"birthday","after":17,"title":"The birthday present","am":"የልደት ስጦታ","rom":"yelidet sit'ota","intro":"Two brothers choose a present for their mother, with the object endings from unit 17.",
+ "lines":[
+  ["ዓርብ የእናቴ ልደት ነበር።","arb ye'innaté lidet nebber.","On Friday it was my mother's birthday."],
+  ["ሐሙስ ወንድሜን ደወልኩለት።","hamus wendimén dewwelkullet.","On Thursday I rang my brother."],
+  ["እኔ፦ ለእናታችን ምን እንግዛላት?","iné: le'innatachin min innigizalat?","Me: What shall we buy for our mother?"],
+  ["ወንድሜ፦ ሱቁ ውስጥ ቆንጆ ቀሚስ አየሁ። ፎቶ እልክልሃለሁ።","wendimé: suqu wist' qonjo qemis ayyehu. foto ilkilihallehu.","My brother: I saw a lovely dress in the shop. I'll send you a photo."],
+  ["ፎቶውን ላከልኝ። ቀሚሱ ሰማያዊ ነው።","fotown lakellign. qemisu semayawi new.","He sent me the photo. The dress is blue."],
+  ["እኔ፦ በጣም ቆንጆ ነው! ግዛው።","iné: bet'am qonjo new! gizaw.","Me: It's really lovely! Buy it."],
+  ["ማታ ወንድሜ ቀሚሱን አመጣ።","mata wendimé qemisun amet'a.","In the evening my brother brought the dress."],
+  ["ዓርብ ጠዋት ስጦታውን ለእናታችን ሰጠናት።","arb t'ewat sit'otawn le'innatachin set'enat.","On Friday morning we gave our mother the present."],
+  ["እናታችን፦ አመሰግናለሁ! በጣም እወዳችኋለሁ!","innatachin: amesegnallehu! bet'am iwedachihwallehu!","Our mother: Thank you! I love you both very much!"]],
+ "qs":[
+  ["Whose birthday was it?",["Their grandmother's","Their brother's","Their mother's"],2],
+  ["What did the brother send?",["A photo","A message","The dress"],0],
+  ["What colour is the dress?",["Red","Blue","White"],1],
+  ["What did their mother say?",["Thank you, I love you","It's too expensive","I don't like blue"],0]]},
+
+{"id":"rain","after":18,"title":"If it rains","am":"ዝናብ ከዘነበ","rom":"zinab kezennebe","intro":"A trip to the lake, with “when”, “if” and “because” from unit 18.",
+ "lines":[
+  ["ዛሬ ቅዳሜ ነው። ከጓደኞቼ ጋር ወደ ሐይቅ መሄድ እፈልጋለሁ።","zaré qidamé new. kegwadegnoché gar wede hayq mehéd ifeligallehu.","Today is Saturday. I want to go to the lake with my friends."],
+  ["ግን ሰማዩ ጥቁር ነው።","gin semayu t'iqur new.","But the sky is black."],
+  ["እናቴ፦ ዝናብ ከዘነበ አትሂድ!","innaté: zinab kezennebe atihid!","My mother: If it rains, don't go!"],
+  ["እኔ፦ ለምን?","iné: lemin?","Me: Why?"],
+  ["እናቴ፦ ዝናብ ሲዘንብ መንገዱ ጭቃ ይሆናል።","innaté: zinab sizennib mengedu ch'iqa yihonal.","My mother: When it rains, the road turns to mud."],
+  ["ከሰዓት በኋላ ዝናብ ዘነበ።","kese'at behwala zinab zennebe.","In the afternoon it rained."],
+  ["ጓደኛዬ ደወለልኝ።","gwadegnayé dewwelellign.","My friend rang me."],
+  ["ጓደኛዬ፦ ዝናብ ስለዘነበ ወደ ሐይቁ አንሄድም። ፀሐይ ከወጣች ነገ እንሂድ።","gwadegnayé: zinab silezennebe wede hayqu anhédim. ts'ehay kewet'ach nege innihid.","My friend: Because it's raining, we won't go to the lake. If the sun comes out, let's go tomorrow."],
+  ["ስለዚህ ቤት ውስጥ ፊልም አየሁ፤ ቡና ጠጣሁ።","silezzih bét wist' film ayyehu; bunna t'et'ahu.","So I watched a film at home and drank coffee."]],
+ "qs":[
+  ["Where did they want to go?",["To the market","To the lake","To the cinema"],1],
+  ["What did Mum say?",["Don't go if it rains","Take a coat","Go now"],0],
+  ["Why didn't they go?",["The car broke down","It was raining","Nobody rang"],1],
+  ["When will they try again?",["Tomorrow, if it's sunny","Next week","Never"],0]]},
 
 {"id":"wedding","after":19,"title":"Who's who at the wedding","am":"ሠርጉ ላይ","rom":"sergu lay","intro":"Pointing people out at a wedding, with the “the one who…” forms from unit 19.",
  "lines":[
@@ -135,7 +278,8 @@ const STORIES = [
  "qs":[
   ["What colour is the bride's dress?",["White","Red","Blue"],0],
   ["Who is wearing glasses?",["Her father","The groom","Her mother"],0],
-  ["What did the storyteller buy?",["A coffee pot too","A dress","Shoes"],0]]},
+  ["What did the storyteller buy?",["A coffee pot too","A dress","Shoes"],0],
+  ["What colour is the groom's coat?",["White","Black","Blue"],1]]},
 
 {"id":"car","after":21,"title":"The car broke down","am":"መኪናው ተበላሸ","rom":"mekinaw tebelashe","intro":"A trip to Hawassa doesn't go to plan.",
  "lines":[
@@ -151,7 +295,8 @@ const STORIES = [
  "qs":[
   ["What happened on the way?",["The car broke down","They got lost","It rained"],0],
   ["Who made coffee?",["The mechanic's wife","The father","The driver"],0],
-  ["How long did the repair take?",["An hour","All day","A week"],0]]}
+  ["How long did the repair take?",["An hour","All day","A week"],0],
+  ["Where were they going?",["Hawassa","Addis Ababa","Gondar"],0]]}
 ];
 
 /* Every word in the stories, as it appears (endings and all): what it means here.
@@ -196,5 +341,26 @@ const STWORDS = {
 "መኪናችን":"our car","መኪናውን":"the car (-ን marks the object)","መንገዱ":"the road","ዳር":"edge, side","አቆመው":"he stopped it","ቆሞ":"stopped and…",
 "ረዳን":"he helped us","ጋራዥ":"garage","ወሰደን":"he took us","ጋራዡ":"the garage","ጎበዝ":"clever, good at things","ሚስቱ":"his wife",
 "አፈላችልን":"she made (boiled) for us","ከአንድ":"from one (ከ- “from”; ከአንድ ሰዓት በኋላ “after an hour”)","ሰዓት":"hour","ተሠራ":"it was made, it was mended",
-"ደረስን":"we arrived"
+"ደረስን":"we arrived",
+"ስምህ":"your name (to a man)","ከየት":"from where? (ከ- “from” + የት “where”)","ነህ":"you are (to a man)","ከእንግሊዝ":"from England (ከ- “from”)",
+"አንቺስ":"and you? what about you? (to a woman)","ኢትዮጵያዊት":"Ethiopian (a woman)","ከአዲስ":"from Addis (ከ- “from”; ከአዲስ አበባ “from Addis Ababa”)","አበባ":"flower (in አዲስ አበባ “Addis Ababa”, “new flower”)",
+"ነሽ":"you are (to a woman)","አይደለሁም":"I am not","ነርስ":"nurse","ጥሩ":"good",
+"ሄሎ":"hello (on the phone)","እንደምን":"how? (in እንደምን ነሽ? “how are you?”)","ደህና":"well, fine","እግዚአብሔር":"God","ይመስገን":"be praised (እግዚአብሔር ይመስገን “thank God”)",
+"አንተስ":"and you? what about you? (to a man)","ዛሬ":"today","አዎ":"yes","አለኝ":"I have","የምን":"of what? for what?","የእግር":"of the foot (የእግር ኳስ “football”)","ኳስ":"ball",
+"ኢትዮጵያ":"Ethiopia","ኬንያ":"Kenya","በጣም":"very","ቻው":"bye (informal)",
+"ዮሐንስ":"Yohannes (a man's name: John)","ከተማዬ":"my town","ከተማው":"the town","ክርስቲያን":"Christian (ቤተ ክርስቲያን “church”)","መስጊድ":"mosque","ትምህርት":"lesson, learning (ትምህርት ቤት “school”)",
+"ከቤተ":"from, at (ከ- + ቤተ, in ከቤተ ክርስቲያኑ አጠገብ “next to the church”)","ፖስታ":"post (ፖስታ ቤት “post office”)","ከባንኩ":"the bank (ከ- … ፊት ለፊት “opposite”)","ፊት":"face, front (ፊት ለፊት “opposite”)","ለፊት":"to the face (ፊት ለፊት “opposite”)",
+"ሆስፒታል":"hospital","ሆስፒታሉ":"the hospital","ትልቁ":"the big (one)","ከተማ":"town, city","ገበያው":"the market","ሁልጊዜ":"always","ጫጫታ":"noise",
+"ሐና":"Hanna (a woman's name)","ከሰኞ":"from Monday (ከ- “from”)","እስከ":"until, as far as","ዓርብ":"Friday","ልጆችን":"children (-ን marks the object)","እንግሊዝኛ":"English (the language)",
+"ታስተምራለች":"she teaches","ታነባለች":"she reads","ትሄዳለች":"she goes","እሑድ":"Sunday","አትሠራም":"she doesn't work","ትተኛለች":"she sleeps, she goes to bed","ሰኞ":"Monday",
+"ቲማቲም":"tomatoes","ሽንኩርት":"onions","ኪሎ":"kilo","ስንት":"how much? how many?","ነጋዴዋ":"the trader (a woman)","ሠላሳ":"thirty","ብር":"birr (Ethiopian money)","ውድ":"expensive",
+"ቀንሱልኝ":"bring the price down for me (polite)","ሃያ":"twenty","አምስት":"five","ሰባ":"seventy","ከፈለ":"he paid","ሙዝ":"bananas","ፈለገ":"he looked for, he wanted","አልነበረም":"there wasn't, it wasn't",
+"ታመመ":"he fell ill","ራሱን":"his head (-ን: the head is what hurts)","ያመዋል":"it hurts him","ሆዱንም":"his stomach too (-ም “too”)","ሐኪሙ":"the doctor","ምን":"what?","ሆንክ":"you became, happened to you (ምን ሆንክ? “what's wrong?”, to a man)",
+"ደክሞኛል":"I'm tired","ራሴን":"my head (-ን: the head is what hurts)","ያመኛል":"it hurts me","በላህ":"you ate (to a man)","ጥሬ":"raw","ሥጋ":"meat","መድኃኒት":"medicine","ሰጠው":"he gave him","ከሁለት":"from two (ከሁለት ቀን በኋላ “two days later”)","ዳነ":"he got better",
+"የእናቴ":"my mother's (የ- “of”)","ልደት":"birthday, birth","ሐሙስ":"Thursday","ወንድሜን":"my brother (-ን marks the object)","ደወልኩለት":"I rang him","ለእናታችን":"for our mother (ለ- “for”)","እንግዛላት":"shall we buy for her? let's buy for her",
+"ሱቁ":"the shop","ፎቶ":"photo","እልክልሃለሁ":"I'll send (it) to you (to a man)","ፎቶውን":"the photo (-ን marks the object)","ላከልኝ":"he sent (it) to me","ቀሚሱ":"the dress","ግዛው":"buy it! (to a man)","ቀሚሱን":"the dress (-ን marks the object)","አመጣ":"he brought",
+"ስጦታውን":"the present (-ን marks the object)","ሰጠናት":"we gave her","እናታችን":"our mother","አመሰግናለሁ":"thank you","እወዳችኋለሁ":"I love you (to several people)",
+"ከጓደኞቼ":"with my friends (ከ… ጋር “with”)","ጋር":"with (ከ… ጋር)","ሐይቅ":"lake","መሄድ":"to go","ሰማዩ":"the sky","ዝናብ":"rain","ከዘነበ":"if it rains (ከ- “if”)","አትሂድ":"don't go! (to a man)","ለምን":"why?",
+"ሲዘንብ":"when it rains (ሲ- “when”)","ጭቃ":"mud","ይሆናል":"it becomes, it will be","ዘነበ":"it rained","ጓደኛዬ":"my friend","ደወለልኝ":"he rang me","ስለዘነበ":"because it's raining, because it rained (ስለ- “because”)",
+"ሐይቁ":"the lake","አንሄድም":"we won't go, we don't go","ፀሐይ":"sun","ከወጣች":"if it comes out (ፀሐይ “sun” is “she”)","ስለዚህ":"so, because of this"
 };

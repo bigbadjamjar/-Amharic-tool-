@@ -150,6 +150,9 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 /* typing */
 .tin{width:100%;font-family:var(--f-fidel);font-size:1.6rem;padding:6px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);text-align:center;min-height:50px}
 .tin.ok{border-color:var(--good);background:var(--good-bg)} .tin.no{border-color:var(--bad);background:var(--bad-bg)}
+.tin.en{font-family:var(--f-body);font-size:1.2rem}   /* typed English answers (Test tab, "Answer by: Type it") */
+.ansbar{margin:10px 0 4px;justify-content:flex-start}
+.ansbar .mini{flex:1 1 auto;grid-auto-columns:1fr}
 .q.slim{padding:10px 14px;margin:8px 0}
 .q.slim .big{font-size:1.25rem;margin-top:2px}
 .kbd .tin{min-height:44px;font-size:1.5rem;padding:4px 10px;margin-bottom:6px}
@@ -716,9 +719,14 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .tbl.wl2 .row:last-child:nth-child(odd){grid-column:1 / -1;border-right:0}
 }
 /* reading stories and culture notes (js/reader.js) */
-.rdgo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.rdgo{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
 .rdgo .tcard{min-height:0}
-.rdgo .tcard:nth-child(2) .ticon{background:color-mix(in srgb,var(--sun) 55%,var(--surface))}
+.rdgo .tcard.cu .ticon{background:color-mix(in srgb,var(--sun) 55%,var(--surface))}
+.sthead{margin:18px 0 8px;align-items:center}
+.sthead h3{margin:0}
+.sthead .best{flex:none;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.sthead .best strong{font-size:1rem;color:var(--accent);margin-right:4px}
+.sthead .best.untried{background:var(--sun);color:var(--sun-ink);font-weight:600;border-radius:999px;padding:3px 9px;white-space:nowrap}
 .rdh span{margin-right:4px}
 .rdam{margin:2px 0 0}
 .rdam .am{font-size:1.25rem;color:var(--accent);font-weight:700}
