@@ -29,7 +29,18 @@ function fitName(el){
   if(!el) return; el.style.fontSize="";
   for(let f=0.8; f>=0.6 && el.scrollWidth>el.clientWidth+1; f-=0.05) el.style.fontSize=f.toFixed(2)+"rem";
 }
-addEventListener("resize",()=>fitName(document.querySelector("#whobtn .nm")));
+/* If the top bar's buttons don't fit beside the app name (a narrow window, a zoomed page, a long name),
+   the profile button shows only the initial, as on a phone; if that still isn't enough, the
+   Transcription switch shows its short label "abc". Measured, so it works whatever the fonts and zoom. */
+function fitHead(){
+  const h=document.querySelector(".head"), wb=document.getElementById("whobtn"), cl=document.body.classList;
+  if(!h||!wb) return;
+  cl.remove("whotight","romtight"); fitName(wb.querySelector(".nm"));
+  const over=()=>{ const r=h.getBoundingClientRect(), edge=Math.min(r.right-parseFloat(getComputedStyle(h).paddingRight), document.documentElement.clientWidth);
+    return wb.getBoundingClientRect().right>edge+0.5 || wb.querySelector(".nm").scrollWidth>wb.querySelector(".nm").clientWidth+1; };
+  if(over()){ cl.add("whotight"); if(over()) cl.add("romtight"); }
+}
+addEventListener("resize",fitHead);
 function enCell(v,t,i){
   const e=enForm(v,t,i);
   return `<span class="en">${esc(e.text)}${e.tag?` <span class="ptag">${e.tag}</span>`:""}</span>`;
@@ -889,7 +900,7 @@ function render(){
   const on=S.mode in TABOF?TABOF[S.mode]:S.mode; MODES.forEach(m=>$("#tab-"+m).setAttribute("aria-selected",on===m));
   if(S.mode==="fidel"||S.mode==="num") S.fnLast=S.mode;   // Learn › Fidel reopens whichever half you used last
   const rb=$("#ratebtn"); rb.textContent=sayRate+"×"; rb.setAttribute("aria-label","Audio speed "+sayRate+" times. Tap to change."); rb.classList.toggle("slow",sayRate<1);
-  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitName(wb.querySelector(".nm")); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
+  const cur=PROF.cur(), wb=$("#whobtn"); wb.innerHTML=`<span class="av">${cur?esc((cur.name.trim()[0]||"?").toUpperCase()):"?"}</span><span class="nm">${esc(cur?cur.name:"Profiles")}</span>`; fitHead(); wb.title=cur?`${cur.name}: profiles and backup`:"Profiles and backup"; $("#whobtn").setAttribute("aria-pressed",S.mode==="me"||S.mode==="who");
   $("#findbtn").setAttribute("aria-pressed",S.mode==="find");
   $("#app").innerHTML = (S.find.from&&S.mode!=="find"?`<button class="back findback" data-act="find-back">‹ Back to search</button>`:"")+(S.mode==="welcome"?renderWelcome():S.mode==="who"?renderWho():S.mode==="me"?renderMe():S.mode==="find"?renderFind():S.mode==="course"?renderCourse():S.mode==="fidel"?renderFidel():S.mode==="eth"?renderEth():S.mode==="ref"?renderRef():S.mode==="num"?renderNum():S.mode==="prog"?renderProgress():renderTest())+(S.mode==="welcome"?"":wlLink());
   autoRom($("#app"));
