@@ -8,7 +8,7 @@ name: Make audio clips
 # Dialogue lines, reading stories and culture notes come with the course words.
 # Clips it made before are remade if their text in the app has changed (e.g. punctuation fixed).
 # Clips you added yourself are never replaced.
-# "verb tables" makes every form in Tables › Verbs (each tense, each person) for the course verbs.
+# "verb tables" makes every form in Tables › Verbs (each tense, each person) for all 342 verbs (course verbs first).
 on:
   workflow_dispatch:
     inputs:

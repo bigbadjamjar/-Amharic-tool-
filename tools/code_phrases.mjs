@@ -32,9 +32,9 @@ for (const r of X.NRULES) for (const p of r.p) for (const m of p.matchAll(/\{([^
 const verbs = new Set();
 for (const v of X.VLIST) { const f = X.vforms(v); if (f.vn) verbs.add(f.vn.am); if (f.part) verbs.add(f.part.am); }
 
-// Every form in the verb tables. Only the verbs taught in the course (units 1-30) get clips for now;
-// set ALL_VERBS to true to give all the other verbs in the Verbs list clips too (about 17,000 more).
-const ALL_VERBS = false;
+// Every form in the verb tables, for all the verbs (Rob chose all 342, Nov 2026). Course verbs come first,
+// so a run that stops part way covers them. Set ALL_VERBS to false for only the course verbs.
+const ALL_VERBS = true;
 const conj = new Set();
 const inCourse = v => v.lesson < 99;
 const order = X.VLIST.filter(v => ALL_VERBS || inCourse(v)).sort((a, b) => (inCourse(a) ? a.lesson : 999) - (inCourse(b) ? b.lesson : 999));

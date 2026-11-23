@@ -213,7 +213,7 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0, help="stop after this many clips")
     ap.add_argument("--course-only", action="store_true", help="only the course words, notes and sentences, the reading stories and the culture notes")
     ap.add_argument("--fidel", action="store_true", help="only the letters of the Fidel chart")
-    ap.add_argument("--verbs", action="store_true", help="only the verb tables: every tense and person of each course verb")
+    ap.add_argument("--verbs", action="store_true", help="only the verb tables: every tense and person of each verb")
     ap.add_argument("--workers", type=int, default=4, help="clips made at the same time (default 4)")
     a = ap.parse_args()
 
