@@ -380,6 +380,12 @@ body.welcoming .offtip{display:none}
 .wlsteps li::before{content:counter(wl);position:absolute;left:12px;top:11px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.9rem}
 .wlhonest p{margin:8px 0}
 .wllink{text-align:center;margin-top:22px}
+/* "Support this app" (js/support.js) */
+.supcard{text-align:center;margin-top:18px}
+.supcard p{margin:0 0 10px;font-size:.94rem}
+.suppbtn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--accent);border-color:var(--accent);padding:10px 18px}
+.suppbtn:hover,.suppbtn:focus-visible{background:var(--tint)}
+.wlfoot a.link{display:inline-block}
 .wlfoot{display:flex;justify-content:center;margin:32px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:.9rem;color:var(--muted)}
 /* search (js/find.js) */
 .findq{width:100%;font-size:1.05rem;padding:12px 14px;margin:10px 0 8px}

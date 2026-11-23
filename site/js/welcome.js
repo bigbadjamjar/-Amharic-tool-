@@ -70,6 +70,8 @@ function renderWelcome(){
       <p><b>Private.</b> Nothing is sent anywhere. Use Profiles to back up your progress or move it to another device.</p>
     </div>
 
+    ${typeof supportCard === "function" ? supportCard() : ""}
+
     <button class="btn primary wide wlgo" data-act="wl-start" style="margin-top:22px">${back ? "Continue learning" : "Start learning"}</button>
     <p class="count wllink">You can open this page again by tapping the app name at the top.</p>
     <p class="count wllink wlcopy">© 2026 Robert Sadler. All rights reserved.</p>`;
@@ -84,4 +86,4 @@ function wlStart(){
 }
 const wlFirst = () => true;   // the app always opens on this page
 // shown centred at the bottom of every page except the welcome page itself
-const wlLink = () => `<footer class="wlfoot"><button class="link" data-act="mode" data-v="welcome">About this app</button>${typeof repOpen==="function"?`<span aria-hidden="true">·</span><button class="link" data-rep="open">Report a problem</button>`:""}</footer>`;
+const wlLink = () => `<footer class="wlfoot"><button class="link" data-act="mode" data-v="welcome">About this app</button>${typeof repOpen==="function"?`<span aria-hidden="true">·</span><button class="link" data-rep="open">Report a problem</button>`:""}${typeof supportFoot==="function"?supportFoot():""}</footer>`;
