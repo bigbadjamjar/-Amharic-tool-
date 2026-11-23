@@ -3,6 +3,7 @@
 //   numbers: every number word from 0 to 100, the hundreds and thousands, ሺ on its own,
 //            and the examples on the Numbers page (so "Try any" can say any number in pieces)
 //   verbs:   each verb's "-ing" noun and "doer" word, shown under the verb in Verbs
+//   conj:    every form in the verb tables (each tense, each person), course verbs first in unit order
 // Used by make_audio.py:  node tools/code_phrases.mjs
 import fs from "node:fs";
 import vm from "node:vm";
@@ -18,7 +19,7 @@ const app = fs.readFileSync(path.join(root, "js/app.js"), "utf8");
 const nums = app.slice(app.indexOf("/* ---------- numbers"), app.indexOf("const NTESTS"));
 const ctx = vm.createContext({ console });
 vm.runInContext(files.map(f => fs.readFileSync(path.join(root, f), "utf8")).join("\n;\n") + "\n;" + nums +
-  "\n;globalThis.X={VLIST,vforms,numWord,NRULES};", ctx);
+  "\n;globalThis.X={VLIST,vforms,numWord,NRULES,TENSES};", ctx);
 const X = ctx.X;
 
 const numbers = new Set(["ሺ", "መቶ", "አሥር ሺ"]);
@@ -31,4 +32,13 @@ for (const r of X.NRULES) for (const p of r.p) for (const m of p.matchAll(/\{([^
 const verbs = new Set();
 for (const v of X.VLIST) { const f = X.vforms(v); if (f.vn) verbs.add(f.vn.am); if (f.part) verbs.add(f.part.am); }
 
-console.log(JSON.stringify({ numbers: [...numbers], verbs: [...verbs] }));
+// Every form in the verb tables, for all the verbs (Rob chose all 342, Nov 2026). Course verbs come first,
+// so a run that stops part way covers them. Set ALL_VERBS to false for only the course verbs.
+const ALL_VERBS = true;
+const conj = new Set();
+const inCourse = v => v.lesson < 99;
+const order = X.VLIST.filter(v => ALL_VERBS || inCourse(v)).sort((a, b) => (inCourse(a) ? a.lesson : 999) - (inCourse(b) ? b.lesson : 999));
+for (const v of order) { const f = X.vforms(v);
+  for (const t of X.TENSES) for (const x of f[t[0]] || []) if (x && x.am && !/[-…_]/.test(x.am)) conj.add(x.am); }
+
+console.log(JSON.stringify({ numbers: [...numbers], verbs: [...verbs], conj: [...conj] }));
