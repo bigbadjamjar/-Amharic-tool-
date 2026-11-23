@@ -72,10 +72,14 @@ async function emailSignIn(page, create){
 // --- device A: Rob and Sara; make an account; both go up
 const A = await device();
 await withProfiles(A.page, [["Rob", { rom: false, best: { u1: 8, u2: 5 }, srs: { v: 1, it: { "w:ሰላም": [3, 99999, 5, 0, 20000] }, act: { 20000: 6 } } }], ["Sara", { best: { u4: 7 } }]]);
-ok(!(await A.page.evaluate(() => performance.getEntriesByType("resource").some(e => /firebase/.test(e.name)))), "signed out: Firebase not loaded at start");
+ok(!(await A.page.evaluate(() => performance.getEntriesByType("resource").some(e => /firebase/.test(e.name)))), "signed out: Firebase not loaded until Profiles is opened");
 await profilesPage(A.page);
 ok(await A.page.locator("#account").count(), "account section shows when switched on");
 await shot(A.page, "1-signed-out");
+await A.page.waitForFunction(() => typeof CL !== "undefined" && !!CL.fb);
+ok(true, "opening Profiles while signed out loads Firebase ahead of a tap on Sign in with Google");
+// (the Google window itself can't be tested here: it needs apis.google.com, which this test machine can't reach)
+await A.page.waitForSelector("[data-act=cl-form][data-v=email]");
 await emailSignIn(A.page, true);
 await A.page.waitForSelector("text=Rob and Sara's progress is now saved to your account");
 await shot(A.page, "3-signed-in");
