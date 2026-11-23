@@ -30,7 +30,7 @@ const offInstalled = () => matchMedia("(display-mode: standalone)").matches || n
 const offIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const offAndroid = () => /Android/i.test(navigator.userAgent);
 // Women's voice clips, plus men's voice clips (dialogues) when the app has them.
-const offClipURLs = () => [...new Set([...Object.values(AUDIO_FILES), ...Object.values(window.AUDIO_MALE || {})])].map(c => new URL("audio/" + c.split("/").map(encodeURIComponent).join("/"), location.href).href);
+const offClipURLs = () => [...new Set([...Object.values(AUDIO_FILES), ...Object.values(window.AUDIO_MALE || {})])].map(c => new URL(clipURL(c), location.href).href);
 const offMB = n => Math.max(1, Math.round(n * 12.5 / 1024));   // clips average about 12.5 KB
 const offStore = {get(){ try { return localStorage.getItem(OFF_TIP_KEY); } catch (e) { return "x"; } }, set(){ try { localStorage.setItem(OFF_TIP_KEY, "1"); } catch (e) {} }};
 function offRefresh(){ if (typeof render === "function" && typeof S !== "undefined" && S.mode === "me") render(); }

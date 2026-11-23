@@ -18,6 +18,9 @@ if(typeof speechSynthesis!=="undefined"){ findVoice(); speechSynthesis.addEventL
 // Either voice will do when the preferred one has no clip: a man's dialogue line only has a male clip,
 // and it should still play (with a button) in search results, flash cards and tests.
 const clipFor = (am, voice) => { const k = sayKey(am); return voice==="m" ? (AUDIO_MALE[k] || AUDIO_FILES[k]) : (AUDIO_FILES[k] || AUDIO_MALE[k]); };
+// "clips/ሀ.mp3?3f9a1c" -> "audio/clips/%E1%88%80.mp3?v=3f9a1c". The ?v= part changes when a clip is replaced,
+// so a saved old copy (see sw.js) is never played instead of the new one.
+const clipURL = c => { const [p, v] = String(c).split("?"); return "audio/" + p.split("/").map(encodeURIComponent).join("/") + (v ? "?v=" + v : ""); };
 const canSay = am => !!(clipFor(am) || amVoice);
 let nowPlaying = null;
 // Playback speed, set from the header (1, 0.75 or 0.5). Saved clips keep their pitch when slowed.
@@ -31,7 +34,7 @@ function playAm(am, rate, voice, done){
   if(typeof speechSynthesis!=="undefined") speechSynthesis.cancel();
   let fin = done ? ()=>{ const f=fin; fin=null; if(f) done(); } : null;
   if(clip){
-    const a = nowPlaying = new Audio("audio/"+clip.split("/").map(encodeURIComponent).join("/"));
+    const a = nowPlaying = new Audio(clipURL(clip));
     a.preservesPitch = a.mozPreservesPitch = a.webkitPreservesPitch = true;
     a.defaultPlaybackRate = a.playbackRate = rate;
     if(fin){ a.onended = ()=>fin&&fin(); a.onerror = ()=>fin&&fin(); }
