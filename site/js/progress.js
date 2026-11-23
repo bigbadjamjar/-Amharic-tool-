@@ -22,14 +22,15 @@ function pgBar(c){
     `<i class="m" style="width:${w(c.mastered)}"></i><i class="k" style="width:${w(c.known)}"></i><i class="l" style="width:${w(c.learning)}"></i></div>`;
 }
 const pgKey = `<div class="pgkey"><span><i class="m"></i>Mastered</span><span><i class="k"></i>Known</span><span><i class="l"></i>Learning</span><span><i></i>Not started</span></div>`;
-function pgCalendar(st, today){
+function pgCalendar(st, today, g){
   // the last five weeks, Sunday to Saturday, ending with this week
   const end = today + (6 - pgDate(today).getDay()), start = end - 34;
   let h = `<div class="pgcal">`+PG_DAYS.map(d=>`<b>${d[0]}</b>`).join("");
   for(let d=start; d<=end; d++){
     const n = st.act[d]||0, lvl = d>today ? "f" : !n ? "0" : n<10 ? "1" : n<30 ? "2" : "3";
     const label = pgDate(d).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
-    h += `<span class="c${lvl}${d===today?" now":""}" title="${esc(label)}: ${d>today?"":plural(n,"answer")}"></span>`;
+    const met = d<=today && n>0 && goalOk(g, st.act, d);   // goal.js: a dot on days the goal was reached
+    h += `<span class="c${lvl}${d===today?" now":""}${met?" g":""}" title="${esc(label)}: ${d>today?"":plural(n,"answer")+(met?", goal reached":"")}"></span>`;
   }
   return h+`</div>`;
 }
@@ -40,21 +41,22 @@ function pgForecast(st, today){
 // "12 known, 30 learning": short, so it fits beside the name on a phone
 const pgSum = (c, short) => { const k=c.mastered+c.known; return k||!c.learning ? `${k} known`+(c.learning&&!short?`, ${c.learning} learning`:short&&c.learning?` · ${c.learning} learning`:"") : `${c.learning} learning`; };
 function renderProgress(){
-  const st = S.srs, d0 = dayNum(), sk = srsStreak(st, d0), due = srsDue(st, d0).length;
+  const st = S.srs, d0 = dayNum(), sk = goalStreak(S.goal, st.act, d0), due = srsDue(st, d0).length;
   const groups = pgGroups(), seen = Object.keys(st.it).length;
   const mastered = groups.reduce((a,g)=>a+srsCount(st,g[1]).mastered,0);
   let h = `<h2>Progress</h2><p class="lead">${seen?`You've met ${plural(seen,"item")} so far. Each one comes back for review just before you're likely to forget it.`:"Answer a few questions and your progress shows up here."}</p>
    <div class="pgtiles">
     <div><strong>${sk.now}</strong><small>day streak${sk.best>sk.now?` · best ${sk.best}`:""}</small></div>
-    <div><strong>${sk.today}</strong><small>answered today</small></div>
+    <div><strong>${sk.done}</strong><small>answered today</small></div>
     <div><strong>${due}</strong><small>due for review</small></div>
     <div><strong>${mastered}</strong><small>mastered</small></div>
    </div>
+   ${goalCard(S.goal, st.act)}
    <div class="stack" style="margin-top:12px">`+
    (due?`<button class="btn primary wide" data-act="start" data-v="due">Review ${plural(due,"item")} now</button>`:"")+
    `<button class="btn${due?"":" primary"} wide" data-act="start" data-v="daily">${S.day===today()?"Another session":"Start today's session"}</button></div>
    <div class="pgpair"><div>
-   <h3>Days you practised <small>· last five weeks</small></h3><div class="pgcard">${pgCalendar(st, d0)}<p class="count">${sk.today?"You've practised today.":sk.now?"Practise today to keep your streak going.":"Practise on any day to start a streak."} Darker squares mean more questions answered.</p></div></div><div>
+   <h3>Days you practised <small>· last five weeks</small></h3><div class="pgcard">${pgCalendar(st, d0, S.goal)}<p class="count">Darker squares mean more questions answered.${S.goal.n?" A dot marks a day you reached your goal.":""}</p></div></div><div>
    <h3>Reviews due <small>· next 7 days</small></h3><div class="pgcard"><p class="pgintro">Words, sentences and letters you've already met come back for a quick check just before you're likely to forget them. Each bar is how many come back that day. ${due?`Today's ${plural(due,"review")} ${due===1?"is":"are"} ready now.`:""}</p>${seen?pgForecast(st, d0):`<p class="count">Nothing yet. Answer some questions and your reviews appear here.</p>`}</div></div></div>
    <h3>What you know</h3>${pgKey}<div class="pglist">`;
   groups.forEach(([name, keys])=>{ if(!keys.length) return; const c=srsCount(st,keys);

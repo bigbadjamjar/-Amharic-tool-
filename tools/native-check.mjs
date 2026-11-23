@@ -46,7 +46,7 @@ md += `\n## Culture notes\n\nThe Amharic examples and phrases in the culture not
 for (const c of CULTURE) {
   const ex = c.p.flatMap(p => [...p.matchAll(/\{([^|}]+)\|([^}]*)\}/g)].map(m => [m[1], m[2], "(in the text)"]));
   const rows = ex.concat(c.phrases); cn += rows.length;
-  md += `\n### ${c.title}\n\n| Amharic | Transcription | English | OK? / correction |\n|---|---|---|---|\n${rows.map(r => `| ${r[0]} | ${r[1]} | ${r[2]} |  |`).join("\n")}\n`;
+  md += `\n### ${c.title}\n\n| Amharic | Transcription | English | OK? / correction |\n|---|---|---|---|\n${rows.map(r => `| ${r[0]} | ${r[1]} | ${r[2]}${r[3] ? ` **(${r[3]})**` : ""} |  |`).join("\n")}\n`;
 }
 // Everyday drills (data/everyday.js): the words, and the patterns the app builds times, prices and dates from.
 {
