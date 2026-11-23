@@ -47,9 +47,9 @@ firestore.rules       the database rules to paste into the Firebase console
 
 ## Accounts (optional)
 
-Nobody needs an account. Someone who signs in on the Profiles page links one profile on that device to their
-account; its progress is copied to Firebase (Cloud Firestore, `users/<account id>`) and kept in step with their
-other devices. Progress from two devices is combined rather than overwritten: best scores keep the higher one,
+Nobody needs an account. Someone who signs in on the Profiles page copies every profile on that device to their
+account (Cloud Firestore, `users/<account id>`), and they are kept in step with their other devices: profiles with
+the same name are combined, new ones appear everywhere, and deleting one deletes it everywhere. Progress from two devices is combined rather than overwritten: best scores keep the higher one,
 each practised word keeps the most recent result, and settings come from whichever device changed last.
 Everything still works offline; changes are sent when the connection comes back.
 

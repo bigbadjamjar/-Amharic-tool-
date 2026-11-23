@@ -856,7 +856,7 @@ function renderMe(){
   h+=`</div>`;
   if(cur){
     if(P.ren!==null) h+=`<div class="ntry pfrow" style="margin-top:10px"><input id="pf-ren" type="text" maxlength="${NAME_MAX}" autocomplete="off" value="${esc(P.ren)}"><button class="btn primary" data-act="pf-ren-ok">Save</button><button class="btn" data-act="pf-ren-x">Cancel</button></div>`;
-    else if(P.del) h+=`<div class="note warn"><p>Delete ${esc(cur.name)} and all their progress from this device? This can't be undone, so download a backup first if you might want it.</p><div class="pfrow" style="margin-top:8px"><button class="btn danger" data-act="pf-del-ok">Delete</button><button class="btn" data-act="pf-del-x">Cancel</button></div></div>`;
+    else if(P.del) h+=`<div class="note warn"><p>Delete ${esc(cur.name)} and all their progress from this device${cloudOn()&&cloudSignedIn()?" and from your account":""}? This can't be undone, so download a backup first if you might want it.</p><div class="pfrow" style="margin-top:8px"><button class="btn danger" data-act="pf-del-ok">Delete</button><button class="btn" data-act="pf-del-x">Cancel</button></div></div>`;
     else h+=`<div class="bar" style="justify-content:flex-start;gap:16px"><button class="link" data-act="pf-ren">Rename ${esc(cur.name)}</button><button class="link" data-act="pf-del">Delete ${esc(cur.name)}</button></div>`;
   }
   h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
@@ -975,9 +975,9 @@ document.addEventListener("click",e=>{
   else if(a==="scheme"){S.scheme=v; S.schemePicked=true; schemeDevice.set(v); if(PROF.cur()) save();}
   else if(a==="scheme-jump"){const el=$("#colours"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return;}
   else if(a==="pf-use"){useProfile(v); if(S.mode==="who")S.mode="course"; top=S.mode!=="me";}
-  else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}
+  else if(a==="pf-add"){const n=S.pf.add.trim(); if(!n){const i=$("#pf-add"); if(i)i.focus(); return;} keep(); PROF.add(n); applyData({}); cloudTouch(); S.pf.add=""; if(S.mode==="who")S.mode="course"; top=true;}
   else if(a==="pf-ren"){S.pf.ren=PROF.cur().name;S.pf.del=false;}
-  else if(a==="pf-ren-ok"){PROF.rename(PROF.cur().id,S.pf.ren||"");S.pf.ren=null;}
+  else if(a==="pf-ren-ok"){PROF.rename(PROF.cur().id,S.pf.ren||"");S.pf.ren=null;cloudTouch();}
   else if(a==="pf-ren-x"){S.pf.ren=null;}
   else if(a==="pf-del"){S.pf.del=true;S.pf.ren=null;}
   else if(a==="pf-del-x"){S.pf.del=false;}
@@ -990,8 +990,8 @@ document.addEventListener("click",e=>{
     if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(c).then(()=>done(true),()=>done(false)); else done(false); return;}
   else if(a==="pf-in-read"){readIncoming(S.pf.inText); return;}
   else if(a==="pf-in-x"){S.pf.incoming=null;}
-  else if(a==="pf-in-replace"){const b=S.pf.incoming, p=PROF.byName(b.name); if(p){PROF.save(b.data,p.id); PROF.use(p.id); applyData(b.data);} S.pf.incoming=null; S.pf.msg=""; S.mode="course"; top=true;}
-  else if(a==="pf-in-new"){const b=S.pf.incoming; keep(); PROF.add(b.name,b.data); applyData(b.data); S.pf.incoming=null; S.mode="course"; top=true;}
+  else if(a==="pf-in-replace"){const b=S.pf.incoming, p=PROF.byName(b.name); if(p){PROF.save(b.data,p.id); PROF.use(p.id); applyData(b.data); cloudTouch();} S.pf.incoming=null; S.pf.msg=""; S.mode="course"; top=true;}
+  else if(a==="pf-in-new"){const b=S.pf.incoming; keep(); PROF.add(b.name,b.data); applyData(b.data); cloudTouch(); S.pf.incoming=null; S.mode="course"; top=true;}
   else if(a==="lesson"){S.lesson=v?+v:null;S.lview="notes";top=true;}
   else if(a==="lesson-go"){S.mode="course";S.lesson=+v;S.lview="notes";top=true;}
   else if(a==="lview"){S.lview=v;}
