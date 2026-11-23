@@ -326,6 +326,7 @@ function cloudAct(a, v){
   if (a === "cl-out") { clSignOut(); return true; }
   if (a === "cl-sync") { CL.msg = ""; keep(); clSync(true).then(() => { if (!CL.err && !CL.offline) CL.msg = "Synced."; clRender(); }); return true; }
   if (a === "cl-merge" || a === "cl-new") { clChoose(a === "cl-new" ? "new" : "merge"); return true; }
+  if (a === "cl-jump") { const el = document.getElementById("account"); if (el) window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - (document.querySelector("header") || {offsetHeight: 0}).offsetHeight - 12, behavior: "smooth"}); return true; }
   if (a === "cl-link") { if (CL.user) clAuthChanged(CL.user); return true; }
   if (a === "cl-del") { CL.del = true; return false; }
   if (a === "cl-del-x") { CL.del = false; return false; }

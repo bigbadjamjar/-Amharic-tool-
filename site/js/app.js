@@ -705,7 +705,7 @@ function testMenu(){
     return h+`<div class="tsechead"><h2>${sec[2]}</h2><p class="lead">${esc(sec[3])}</p></div>`+(["stories","games","listen"].includes(sec[0])?"":ansBar())+sec[5]()+
       `<button class="back" data-act="tsec" data-v="all">‹ All kinds of test</button>`;
   }
-  h+=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept on this device.</p>${ansBar()}${dailyCard()}
+  h+=`<h2>Test yourself</h2><p class="lead">Each test has ${QN} questions. Your best score is kept${cloudOn()?"":" on this device"}.</p>${ansBar()}${dailyCard()}
    <div class="stack duo" style="margin-top:10px"><button class="topic" data-act="start" data-v="miss" ${S.miss.length?"":"disabled"}><b>My mistakes</b><small>${S.miss.length?"Each one stays until you get it right three times":"Nothing to review. Wrong answers from any test are kept here."}</small><span class="best"><strong>${S.miss.length}</strong>to review</span></button>${dueButton()}</div>
    <h3>Choose a kind of test</h3>
    <div class="tgrid">${TSECS.map(([id,icon,name,desc,n,,unit])=>`<button class="tcard" data-act="tsec" data-v="${id}"><span class="ticon" aria-hidden="true">${icon}</span><b>${name}</b><small>${esc(desc)}</small><span class="tn">${plural(n(),unit||"test")} ›</span></button>`).join("")}</div>`;
@@ -850,7 +850,7 @@ function renderWho(){
 }
 function renderMe(){
   const P=S.pf, cur=PROF.cur(), L=PROF.list();
-  let h=`<h2>Profiles</h2><p class="lead">Each person has their own scores, mistakes and settings on this device. ${L.length>1?" Tap a name to switch.":""}</p><div class="stack" style="margin-top:14px">`;
+  let h=`<h2>Profiles</h2><p class="lead">Each person has their own scores, mistakes and settings on this device.${L.length>1?" Tap a name to switch.":""}${cloudOn()?` To use your progress on another phone or computer, <button class="link" data-act="cl-jump">sign in</button> or make a backup.`:""}</p><div class="stack" style="margin-top:14px">`;
   L.forEach(p=>{ const on=cur&&p.id===cur.id;
     h+=`<button class="topic${on?" on":""}" data-act="pf-use" data-v="${p.id}"><b>${esc(p.name)}</b><small>${esc(statLine(PROF.load(p.id)))}</small><span class="best">${on?"<strong>✓</strong>using now":"switch"}</span></button>`; });
   h+=`</div>`;
@@ -862,7 +862,7 @@ function renderMe(){
   h+=`<h3>Add someone</h3><div class="ntry pfrow"><input id="pf-add" type="text" maxlength="${NAME_MAX}" autocomplete="off" placeholder="Name (up to ${NAME_MAX} letters)" value="${esc(P.add)}"><button class="btn primary" data-act="pf-add">Add</button></div>`;
   h+=cloudHTML();   // optional account (cloud.js); empty until Firebase is set up
   if(cur){
-    h+=`<h3>Back up or move to another device</h3><div class="note"><p>Save ${esc(cur.name)}'s progress as a file or a code. On the other phone or computer, open this app, go to Profiles and restore it.</p>
+    h+=`<h3>Back up or move to another device</h3><div class="note"><p>${cloudOn()?"No account? ":""}Save ${esc(cur.name)}'s progress as a file or a code. On the other phone or computer, open this app, go to Profiles and restore it.</p>
       <div class="pfrow" style="margin-top:10px"><button class="btn" data-act="pf-file">Download backup file</button><button class="btn" data-act="pf-code">Show backup code</button></div>`;
     if(P.code) h+=`<textarea id="pf-codebox" class="codebox" readonly rows="4">${esc(P.code)}</textarea><div class="pfrow"><button class="btn primary" data-act="pf-copy">Copy code</button></div>`;
     if(P.msg) h+=`<p class="count" role="status">${esc(P.msg)}</p>`;

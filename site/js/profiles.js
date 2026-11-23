@@ -2,7 +2,7 @@
 const NAME_MAX=10;
 /* Profiles: each person on this device gets their own saved progress and settings,
    and a profile can be saved as a backup (file or code) and loaded on another device.
-   Everything stays in this browser's localStorage; nothing is sent anywhere.
+   Everything is kept in this browser's localStorage. Only someone who signs in has one profile copied to their account (see cloud.js).
 
    Storage layout
      amharic-profiles      {list:[{id,name}], cur:id}
