@@ -305,6 +305,34 @@ button,.chip,.keys button,.forms button{touch-action:manipulation}
 .pgkey{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--muted)}
 .pgkey span{display:inline-flex;align-items:center;gap:5px}
 .pgkey i{width:12px;height:12px;border-radius:3px;background:var(--line);display:inline-block}
+/* daily goal and streak (js/goal.js) */
+.pggoal{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.ggtop{display:flex;align-items:center;gap:14px}
+.ggring{position:relative;flex:none;width:76px;height:76px}
+.ggring .gnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.ggring .gnum b{font-size:1.35rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.ggring .gnum small{font-size:.7rem;color:var(--muted)}
+.gring{display:block}
+.gring circle{fill:none;stroke-width:3.6}
+.gring .t{stroke:color-mix(in srgb,var(--line) 70%,var(--surface))}
+.gring .f{stroke:var(--accent);stroke-linecap:round;transition:stroke-dasharray .4s ease}
+.gring.full .f{stroke:var(--good)}
+.ggtext b{font-size:1.02rem}
+.ggtext p{margin:3px 0 0;font-size:.92rem;color:var(--muted)}
+.ggpick{display:flex;flex-direction:column;gap:6px}
+.ggpick .count{font-size:.8rem}
+.ggpick .chips{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:0;overflow:visible}
+.ggpick .chip{padding:7px 0;text-align:center;font-variant-numeric:tabular-nums}
+.ggrest{display:flex;gap:8px;align-items:flex-start;font-size:.88rem;color:var(--muted)}
+.ggrest input{margin-top:3px;accent-color:var(--accent)}
+.pgcal .g{position:relative}
+.pgcal .g::after{content:"";position:absolute;left:50%;top:50%;width:30%;height:30%;transform:translate(-50%,-50%);border-radius:50%;background:var(--surface)}
+.ggdone{margin:8px auto 0;font-weight:600;color:var(--good)}
+.ggafter{margin:6px auto 0}
+.wlgoal{display:flex;align-items:center;gap:10px;margin:0 auto 12px;padding:8px 14px 8px 8px;border-radius:999px;background:var(--surface);border:1px solid var(--line);text-align:left;width:max-content;max-width:100%}
+.wlgoal b{display:block;font-size:.95rem}
+.wlgoal small{display:block;font-size:.82rem;color:var(--muted)}
+.wlgoal .gring circle{stroke-width:4.4}
 /* narrow phones: each tab only as wide as its word needs, so long names (Numbers, Progress) don't touch their neighbours */
 /* welcome page (js/welcome.js) */
 body.welcoming .offtip{display:none}
@@ -542,6 +570,10 @@ input.sel{border:1.5px solid var(--line);border-radius:10px;min-height:42px}
   .pgpair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
   .pgpair>div{display:flex;flex-direction:column}
   .pgpair .pgcard{flex:1}
+  .pggoal{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:center}
+  .ggpick{grid-column:2;grid-row:1}
+  .ggrest{grid-column:2}
+  .ggtop{grid-row:1/span 2}
   .wlfeats{grid-template-columns:repeat(3,minmax(0,1fr))}
   .grid2{grid-template-columns:repeat(4,minmax(0,1fr))}
   .vgrid{max-height:300px}
